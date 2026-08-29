@@ -1,6 +1,8 @@
 # Riftwalker: Paradox Protocol
 
-**Course Context:** Computer Graphics 423 (CG423)
+> 📄 **Instructor & Evaluator Project Summary:** See [PROJECT_BRIEF.md](PROJECT_BRIEF.md) for a concise, all-in-one technical brief designed for course evaluators and lab instructors.
+
+**Course Context:** Computer Graphics 423 (CSE423 / CG423)
 
 **Project Goal:** A polished PyOpenGL/GLUT sci-fi first/third-person combat game demonstrating computer graphics techniques (hierarchical modeling, procedural generation, camera systems, lighting, particles, raycasting, and Chrono Slow time dilation).
 
