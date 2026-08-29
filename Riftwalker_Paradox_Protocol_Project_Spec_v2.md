@@ -1,14 +1,75 @@
-# Riftwalker: Paradox Protocol
+# 1. Project Summary# Riftwalker: Paradox Protocol — CG423 Master Project Specification
 
-**Project Type:** Computer Graphics / OpenGL Course Project  
-**Course Context:** CG423  
-**Project Goal:** Build a manageable but visually impressive sci-fi third-person/first-person OpenGL game that demonstrates computer-graphics techniques more strongly than complex game-engine infrastructure.
+**Document status:** Updated after reviewing the semester OpenGL templates and Assignment 3  
+**Purpose:** Single source of truth for students, teammates, and AI assistants  
+**Course:** Computer Graphics 423 (CG423)  
+**Target:** A polished PyOpenGL/GLUT graphics-focused game that is substantially larger than Assignment 3 while remaining manageable for a 4-person student team.
 
-> **Important:** This document is the project's single source of truth. Any developer or AI assistant joining the project should read this file first. When the supplied course OpenGL starter/template is provided later, this document should be updated only where the starter project's actual constraints or APIs require changes.
+> **IMPORTANT:** The official course starter/OpenGL code supplied by the course is authoritative. This specification describes the target project architecture and feature scope. After the team finalizes the starter framework, the project must be mapped onto its actual functions/files rather than unnecessarily replacing them.
 
 ---
 
-## 1. Project Summary
+## 0. Why This Project Is Larger Than Assignment 3
+
+The supplied Assignment 3 is already a useful foundation. It demonstrates a working 3D game loop with PyOpenGL/GLUT, primitive-based player/enemy rendering, keyboard and mouse callbacks, first-person/third-person camera state, bullets, enemy movement, collisions, life, score, restart/game-over state, and frame-based animation. The Assignment 3 code uses primitive composition for the astronaut and enemy, updates bullets/enemies in an idle callback, and switches camera behavior through `first_person` state. 
+
+The final Riftwalker project should **reuse that mental model** but expand it substantially in graphics depth and game-system breadth.
+
+The intended final project is roughly **3–4× the feature breadth of Assignment 3**, but not 3–4× the code complexity in every subsystem.
+
+### Assignment 3 baseline
+
+Existing baseline concepts we can build on:
+
+- PyOpenGL `GL`, `GLUT`, and `GLU`
+- `gluPerspective()` + `gluLookAt()` camera setup
+- `glPushMatrix()` / `glPopMatrix()` hierarchical primitive composition
+- cubes, cylinders, spheres
+- keyboard input
+- special-key input
+- mouse input
+- animation through time / `dt`
+- player state
+- enemy list
+- bullet list
+- enemy pursuit
+- bullet/enemy collision
+- player/enemy collision
+- first-person camera flag
+- life
+- score
+- missed bullets
+- restart/game-over state
+
+The course examples also establish the simpler 2D/interactive callback style: OpenGL projection setup, display callbacks, idle animation, keyboard listeners, special-key listeners, and mouse listeners.
+
+### Final-project expansion
+
+Riftwalker adds:
+
+1. **Two complete arenas**
+2. **Rift Beacon teleportation between arenas**
+3. **Blink teleport for combat**
+4. **Procedural astronaut with hierarchy**
+5. **Reusable procedural alien generator**
+6. **Two distinct enemy behaviors**
+7. **One multi-phase boss**
+8. **First-person and third-person cameras**
+9. **Chrono Slow**
+10. **Lighting system / scene lighting variation**
+11. **Particle/effect system**
+12. **Modular procedural environment construction**
+13. **Improved collision and ray-based aiming**
+14. **HUD with multiple live game values**
+15. **Score/rank and complete-game flow**
+16. **Optional restrained gravity-zone showcase**
+17. **A polished teleport visual transition**
+
+This is intentionally much more than Assignment 3 while remaining centered on CG techniques rather than a giant game engine.
+
+---
+
+
 
 ### 1.1 High Concept
 
@@ -815,101 +876,88 @@ No upgrade tree or persistent currency is required.
 
 # 21. Directory Structure
 
-Use a directory structure that is understandable to both humans and AI assistants.
-
-Recommended baseline:
+The directory is intentionally organized so a teammate or AI can immediately see **who owns what**. `M1`–`M4` are team ownership labels, not programming-language requirements.
 
 ```text
-riftwalker-paradox-protocol/
+riftwalker_paradox_protocol/
 │
 ├── README.md
 ├── PROJECT_SPEC.md
 ├── CHANGELOG.md
 ├── TODO.md
-├── requirements.txt                 # Only if required by the supplied starter framework
+├── requirements.txt
 │
 ├── src/
-│   ├── main.py
+│   ├── main.py                         # M4 — integration entry point
 │   │
-│   ├── core/
-│   │   ├── app.py
-│   │   ├── input_manager.py
-│   │   ├── game_time.py
-│   │   ├── math3d.py
-│   │   └── constants.py
-│   │
-│   ├── camera/
-│   │   ├── camera.py
-│   │   ├── first_person_camera.py
-│   │   └── third_person_camera.py
-│   │
-│   ├── player/
+│   ├── M1_player_camera/
 │   │   ├── player.py
-│   │   ├── player_movement.py
 │   │   ├── astronaut_rig.py
+│   │   ├── player_movement.py
+│   │   ├── first_person_camera.py
+│   │   ├── third_person_camera.py
 │   │   ├── player_weapon.py
-│   │   ├── blink_teleport.py
-│   │   └── chrono_slow.py
+│   │   └── blink_teleport.py
 │   │
-│   ├── enemies/
+│   ├── M2_enemies_combat/
 │   │   ├── enemy_base.py
-│   │   ├── melee_alien.py
-│   │   ├── ranged_alien.py
 │   │   ├── alien_generator.py
-│   │   └── rift_guardian_boss.py
+│   │   ├── melee_rift_stalker.py
+│   │   ├── ranged_rift_spitter.py
+│   │   ├── rift_guardian_boss.py
+│   │   ├── weapon_system.py
+│   │   ├── raycast.py
+│   │   └── collision.py
 │   │
-│   ├── world/
+│   ├── M3_world_teleport/
 │   │   ├── world.py
 │   │   ├── arena_base.py
 │   │   ├── arena_01_kepler_relay.py
 │   │   ├── arena_02_sundered_rift.py
 │   │   ├── environment_generator.py
-│   │   ├── gravity_zone.py
-│   │   └── rift_beacon.py
+│   │   ├── rift_beacon.py
+│   │   └── gravity_zone.py
 │   │
-│   ├── combat/
-│   │   ├── weapon_system.py
-│   │   ├── raycast.py
-│   │   ├── projectile.py
-│   │   └── collision.py
-│   │
-│   ├── rendering/
+│   ├── M4_rendering_gameplay/
 │   │   ├── renderer.py
+│   │   ├── primitives.py
 │   │   ├── lighting.py
 │   │   ├── materials.py
 │   │   ├── particles.py
-│   │   ├── primitives.py
-│   │   └── effects.py
-│   │
-│   ├── ui/
+│   │   ├── effects.py
+│   │   ├── chrono_slow.py
 │   │   ├── hud.py
 │   │   ├── crosshair.py
-│   │   └── score_display.py
+│   │   ├── scoring.py
+│   │   ├── game_state.py
+│   │   └── level_manager.py
 │   │
-│   └── gameplay/
-│       ├── game_state.py
-│       ├── scoring.py
-│       └── level_manager.py
+│   └── shared/
+│       ├── constants.py
+│       ├── math3d.py
+│       ├── input_manager.py
+│       └── game_time.py
 │
 ├── scenes/
 │   ├── arena_01_kepler_relay/
 │   │   ├── scene_notes.md
 │   │   ├── layout_notes.md
-│   │   └── spawn_points.md
+│   │   ├── spawn_points.md
+│   │   └── object_list.md
 │   │
 │   └── arena_02_sundered_rift/
 │       ├── scene_notes.md
 │       ├── layout_notes.md
-│       └── spawn_points.md
+│       ├── spawn_points.md
+│       └── object_list.md
 │
 ├── assets/
 │   ├── concept_art/
 │   │   ├── characters/
 │   │   ├── environments/
 │   │   ├── enemies/
+│   │   ├── teleport/
 │   │   └── effects/
-│   │
-│   ├── textures/
 │   ├── reference_images/
 │   └── generated_images/
 │
@@ -918,7 +966,8 @@ riftwalker-paradox-protocol/
 │   ├── controls.md
 │   ├── architecture.md
 │   ├── team_tasks.md
-│   └── implementation_notes.md
+│   ├── implementation_notes.md
+│   └── integration_audit.md
 │
 ├── tests/
 │   ├── test_math3d.py
@@ -930,9 +979,16 @@ riftwalker-paradox-protocol/
     └── final/
 ```
 
-> **Starter-code integration rule:** When the CG423 OpenGL file is supplied, first inspect its existing file names and architecture. Do not blindly rename or rewrite the starter project. This directory proposal is a target architecture, not a requirement to fight the starter template.
+### Ownership rule
 
----
+- **M1** owns player/camera work.
+- **M2** owns aliens/combat.
+- **M3** owns arenas/world/teleportation.
+- **M4** owns rendering, Chrono Slow, HUD, score, and final integration.
+- `shared/` is common infrastructure; changes there must be communicated to everyone.
+- `main.py` should stay small and mostly wire systems together.
+
+If the official starter code is monolithic, do **not** force an immediate split into dozens of files. The team may initially keep a smaller number of files while preserving the M1/M2/M3/M4 ownership boundaries in comments and documentation. Refactoring into the target tree can happen after the game works.
 
 # 22. Naming Convention
 
@@ -1109,6 +1165,65 @@ Use this base context with scene prompts:
 
 ---
 
+# 24A. Scene/Asset Creation Workflow for AI-Generated References
+
+When a new scene or major game element needs visual design, use this procedure.
+
+### A. Create the prompt in `docs/` first
+
+Before generating the image, write a small note containing:
+
+```text
+Asset/Scene Name:
+Purpose:
+Arena:
+Approximate dimensions:
+Main primitives:
+Color/material direction:
+Lighting:
+Gameplay requirements:
+Things that must NOT be included:
+```
+
+### B. Generate one concept image
+
+Store the approved image in:
+
+```text
+assets/generated_images/
+```
+
+Use a clear filename such as:
+
+```text
+arena_01_kepler_relay_concept_v01.png
+rift_beacon_concept_v02.png
+rift_guardian_concept_v01.png
+```
+
+### C. Convert the image into implementation notes
+
+The image is not the implementation.
+
+The team should extract:
+- primitive shapes
+- approximate dimensions
+- object positions
+- repeated structures
+- lighting locations
+- particle locations
+- gameplay blockers/spawn points
+
+and record these in the corresponding scene folder.
+
+### D. Build from primitives
+
+The final OpenGL scene should remain compatible with the course's primitive/hierarchical modeling style.
+
+### E. Never let generated art silently expand scope
+
+If the generated concept contains dozens of details, choose only the details that matter visually and can be built reliably.
+
 # 25. Character / Object Reference Prompts
 
 ## 25.1 Astronaut Prompt
@@ -1190,6 +1305,165 @@ Defeat required enemies and activate the Rift Beacon.
 ```
 
 ---
+
+# 27A. Four-Member Work Breakdown
+
+Use these labels everywhere in the repository so ownership is obvious.
+
+## M1 — Player & Camera
+
+**Primary responsibility:** astronaut, movement, camera, weapon presentation, Blink.
+
+### Folder
+`src/M1_player_camera/`
+
+### Main deliverables
+- `player.py`
+- `astronaut_rig.py`
+- `player_movement.py`
+- `first_person_camera.py`
+- `third_person_camera.py`
+- `player_weapon.py`
+- `blink_teleport.py`
+
+### Graphics focus
+- hierarchical modeling
+- local transformations
+- camera/view transformation
+- first-person viewmodel
+- procedural astronaut proportions
+- simple animation
+
+### Dependencies
+M1 consumes:
+- shared math/input/time
+- M2 combat hit results
+- M3 world collision/teleport destination information
+- M4 effects/HUD hooks
+
+---
+
+## M2 — Enemies & Combat
+
+**Primary responsibility:** alien visuals, AI, combat, enemy/boss behavior.
+
+### Folder
+`src/M2_enemies_combat/`
+
+### Main deliverables
+- `alien_generator.py`
+- `enemy_base.py`
+- `melee_rift_stalker.py`
+- `ranged_rift_spitter.py`
+- `rift_guardian_boss.py`
+- `weapon_system.py`
+- `raycast.py`
+- `collision.py`
+
+### Graphics focus
+- procedural alien geometry
+- articulated limbs
+- repeated transformed components
+- projectile trajectories
+- boss visual hierarchy
+- hit/death effects hooks
+
+### Dependencies
+M2 consumes:
+- M1 aim/player state
+- M3 arena/spawn data
+- M4 Chrono time scale/effects hooks
+
+---
+
+## M3 — World, Arenas & Teleportation
+
+**Primary responsibility:** two arenas, environment construction, Rift Beacons, arena-to-arena teleport.
+
+### Folder
+`src/M3_world_teleport/`
+
+### Main deliverables
+- `world.py`
+- `arena_base.py`
+- `arena_01_kepler_relay.py`
+- `arena_02_sundered_rift.py`
+- `environment_generator.py`
+- `rift_beacon.py`
+- `gravity_zone.py` (optional stretch)
+
+### Graphics focus
+- modular environment construction
+- spatial layout
+- transformation-heavy scene composition
+- Rift Beacon geometry/animation
+- arena-specific lighting hooks
+- scene transition effects
+
+### Dependencies
+M3 consumes:
+- M1 player position/orientation
+- M2 enemy spawn/combat state
+- M4 rendering/effects
+
+---
+
+## M4 — Rendering, Chrono, HUD & Integration
+
+**Primary responsibility:** graphics polish and the glue that turns the separate systems into one playable project.
+
+### Folder
+`src/M4_rendering_gameplay/`
+
+### Main deliverables
+- `renderer.py`
+- `primitives.py`
+- `lighting.py`
+- `materials.py`
+- `particles.py`
+- `effects.py`
+- `chrono_slow.py`
+- `hud.py`
+- `crosshair.py`
+- `scoring.py`
+- `game_state.py`
+- `level_manager.py`
+
+### Graphics focus
+- lighting
+- materials
+- particles
+- teleport visual effects
+- Chrono Slow visual effects
+- HUD composition
+- camera overlays
+- final presentation polish
+
+### Integration responsibility
+
+M4 coordinates:
+- game start/restart
+- level transition
+- game-over/win state
+- final HUD
+- score/rank
+- rendering order
+- shared timing rules
+
+---
+
+## Shared-code rule
+
+Nobody should modify `src/shared/` casually.
+
+For a shared change:
+
+```text
+1. Explain the reason.
+2. Identify affected modules.
+3. Make the smallest compatible change.
+4. Test M1 + M2 + M3 + M4 together.
+```
 
 # 28. Development Phases
 
@@ -1582,6 +1856,268 @@ Do not spend large amounts of time building advanced optimization systems unless
 
 ---
 
+# 35A. Exact Making Procedure
+
+This is the recommended order for building the project. Do not build everything simultaneously.
+
+## Step 1 — Freeze the starter baseline
+
+Run the supplied OpenGL starter and Assignment 3.
+
+Record:
+- window size
+- callbacks
+- camera implementation
+- primitive helpers
+- current global state
+- time/update mechanism
+- limitations imposed by the course
+
+Create `docs/integration_audit.md`.
+
+**Do not add game features yet.**
+
+---
+
+## Step 2 — Create the project skeleton
+
+Create:
+
+```text
+src/M1_player_camera/
+src/M2_enemies_combat/
+src/M3_world_teleport/
+src/M4_rendering_gameplay/
+src/shared/
+scenes/
+assets/
+docs/
+tests/
+```
+
+Copy only the minimum starter code needed to launch the project.
+
+---
+
+## Step 3 — Build a graphics sandbox
+
+Before building the final arenas, create a temporary test scene containing:
+
+- floor
+- cubes
+- cylinders
+- spheres
+- astronaut
+- one alien
+- one light
+- camera
+- HUD text
+
+This becomes the team's graphics debugging environment.
+
+---
+
+## Step 4 — Build the astronaut first
+
+M1 creates:
+
+1. torso
+2. helmet
+3. visor
+4. arms
+5. legs
+6. backpack
+7. weapon
+8. basic idle/walk pose
+
+Each body part uses nested matrix transforms.
+
+Success condition:
+
+> The astronaut can be rendered correctly from multiple camera angles without matrix-state corruption.
+
+---
+
+## Step 5 — Build both cameras
+
+Implement third-person first.
+
+Then add first-person.
+
+The two cameras should use a common player orientation/aim concept.
+
+Success condition:
+
+> Pressing the view toggle changes camera mode without breaking player direction or weapon aiming.
+
+---
+
+## Step 6 — Build Arena 1
+
+Use simple procedural modules first.
+
+Do not decorate heavily.
+
+Build:
+- floor
+- walls
+- two or three rooms
+- corridor
+- player spawn
+- enemy spawn points
+- Rift Beacon
+
+Success condition:
+
+> Player can move through the arena and return to the beacon.
+
+---
+
+## Step 7 — Build combat
+
+M2 adds:
+
+- melee enemy
+- ranged enemy
+- weapon
+- raycast/hit detection
+- enemy HP
+- player HP
+- death
+
+Success condition:
+
+> A complete fight is playable inside Arena 1.
+
+---
+
+## Step 8 — Build Arena 2
+
+Reuse world-building utilities from M3.
+
+Give Arena 2:
+- distinct geometry
+- distinct lighting
+- larger combat area
+- boss platform
+- destination beacon
+
+Success condition:
+
+> Arena 1 and Arena 2 can exist as separate scene states and render correctly.
+
+---
+
+## Step 9 — Add Rift Beacon teleportation
+
+Add:
+
+- activation range
+- linked destination
+- player position transfer
+- orientation transfer
+- transition lockout
+- particles
+- flash/distortion
+
+Success condition:
+
+> Player can visibly teleport from Arena 1 to Arena 2 and arrive correctly.
+
+---
+
+## Step 10 — Add Blink
+
+Blink is a short-distance combat teleport and should remain separate from the arena teleport.
+
+Success condition:
+
+> Player can use Blink without breaking collisions, camera, or arena boundaries.
+
+---
+
+## Step 11 — Add Chrono Slow
+
+Start with the logic only:
+
+```text
+player_dt = dt
+enemy_dt = dt * CHRONO_SLOW_FACTOR
+```
+
+Then add:
+- charge
+- activation key
+- duration/drain
+- recharge
+- projectiles
+- visual effect
+
+Success condition:
+
+> Player remains responsive while enemies visibly slow.
+
+---
+
+## Step 12 — Add the procedural alien generator
+
+M2 builds one generator with adjustable parameters.
+
+Then create:
+- Rift Stalker
+- Rift Spitter
+- Rift Guardian
+
+Success condition:
+
+> The three enemy designs visibly derive from a shared procedural strategy.
+
+---
+
+## Step 13 — Add lighting and particles
+
+M4 now makes the scenes look finished.
+
+Prioritize:
+1. Rift Beacon
+2. weapon fire
+3. enemy death
+4. Blink
+5. Chrono Slow
+6. boss defeat
+
+---
+
+## Step 14 — Add boss encounter
+
+Keep boss logic simple.
+
+Two phases are enough.
+
+Success condition:
+
+> Player can defeat the boss and reach a clear victory state.
+
+---
+
+## Step 15 — Add HUD, score and rank
+
+Only after gameplay is stable.
+
+---
+
+## Step 16 — Polish
+
+Use remaining time for:
+- lighting balance
+- particle timing
+- camera feel
+- animation timing
+- visual consistency
+- bug fixes
+
+Do not add a new major mechanic during the last polish stage.
+
 # 36. Future OpenGL Starter File Integration
 
 When the supplied CG423 OpenGL file arrives, the next task is **not** to start coding gameplay immediately.
@@ -1698,6 +2234,26 @@ When giving this document to another AI assistant, the following compact context
 > We are building a CG423 Computer Graphics OpenGL project called **Riftwalker: Paradox Protocol**. It is a manageable sci-fi combat game targeting approximately 60% graphics and 40% gameplay. The player is an astronaut who can move, shoot, Blink, use Chrono Slow, and switch between first-person and third-person cameras. The game has exactly two baseline arenas: **Kepler Relay** and **Sundered Rift**. Rift Beacons teleport the player between the two arenas. Chrono Slow is the simplified time-manipulation feature; there is no world rewind. There are two normal enemies (melee and ranged) and one boss (Rift Guardian). The graphics priorities are procedural/hierarchical astronaut modeling, procedural alien generation, lighting, particles, camera transformations, and simple collision/raycasting. Avoid scope creep such as 6-DOF flight, multiple gravity systems, IK, upgrade trees, multiple bosses, or full temporal simulation. The supplied CG423 OpenGL starter code is authoritative and must be integrated rather than unnecessarily replaced.
 
 ---
+
+# 39A. Final Feature Matrix
+
+| Area | Assignment 3 Baseline | Riftwalker Final |
+|---|---|---|
+| Player | Primitive astronaut | Detailed hierarchical astronaut + animation |
+| Camera | Basic first/third-person state | Dedicated first/third-person systems |
+| Enemy | One simple pursuer | Procedural melee + ranged + boss |
+| Combat | Bullet movement/collision | Raycast weapon + enemy/projectile combat |
+| World | Flat square arena + walls | Two distinct modular arenas |
+| Teleportation | None | Blink + Rift Beacon arena teleport |
+| Time | Frame-based update | Chrono Slow with independent enemy time scale |
+| Graphics | Primitive composition | Procedural models + lighting + particles + effects |
+| HUD | Life/score/missed bullets | HP + Chrono + score + objective/state + crosshair |
+| Game flow | Restart/game over | Arena 1 → teleport → Arena 2 → boss → victory/rank |
+| Scene variety | One arena | Two visually different arenas |
+| Boss | None | One final multi-phase boss |
+| Presentation | Functional | Designed visual identity + VFX polish |
+
+This is the intended reason the final project qualifies as a substantial expansion rather than a small modification of Assignment 3.
 
 # 40. Final Principle
 
