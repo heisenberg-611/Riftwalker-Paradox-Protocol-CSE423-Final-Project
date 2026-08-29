@@ -89,51 +89,45 @@ The project should look technically ambitious while keeping gameplay architectur
 
 ---
 
-## 2. Final Scope — Locked Baseline
+## 2. FINAL SCOPE LOCK
 
-### 2.1 Keep These Features
+> **IMPORTANT ARCHITECTURE RULE:** Do not redesign the project around stretch features. Core systems must work using the simpler baseline architecture first. Any AI assistant working on this repository must treat `PROJECT_SPEC.md` as the authoritative scope document and must not introduce removed features unless explicitly requested.
 
-| Feature | Priority | Notes |
-|---|---:|---|
-| Procedural astronaut model | Critical | Hierarchical transformations |
-| Procedural alien model | Critical | Reusable procedural creature generator |
-| First-person camera | High | Precision combat mode |
-| Third-person camera | High | Default exploration/combat view |
-| Two arenas | Critical | Main game spaces |
-| Rift teleportation | Critical | Teleport between linked arena beacons |
-| Chrono Slow | High | Simple time manipulation mechanic |
-| Basic shooting | Critical | Hitscan weapon |
-| Basic collision | Critical | Player/world + projectile/enemy interactions |
-| Two enemy types | High | Melee + ranged |
-| One boss | High | Final encounter |
-| Lighting | Critical | Main graphics demonstration |
-| Particle effects | High | Rift, weapon, jet/energy, death effects |
-| Hierarchical animation | High | Astronaut and selected enemy articulation |
-| Gravity system | Medium | Keep mostly conventional; one controlled special gravity section at most |
-| HUD | Medium | HP, Chrono Charge, score, crosshair |
-| Score/rank | Medium | Simple scoring only |
+### 2.1 Scope Categorization
 
-### 2.2 Explicitly Cut From the Baseline
+#### REQUIRED (Core Baseline Scope):
+* **2 Arenas:** Arena 1 (*Kepler Relay*) and Arena 2 (*Sundered Rift*).
+* **Linked Rift Beacon Teleportation:** Spatial teleportation between the two arenas via linked beacons (Arena 1 Beacon A $\leftrightarrow$ Arena 2 Beacon B).
+* **Dual Camera System:** Dedicated First-Person and Third-Person camera modes with synchronized aiming.
+* **Procedural Astronaut Model:** Multi-joint hierarchical modeling with nested transformation matrices.
+* **Procedural Alien Models:** Reusable multi-legged/segmented procedural alien generator.
+* **Hierarchical Modeling & Animation:** Walking animations, articulated limbs, weapon aiming.
+* **Lighting System:** Directional sunlight (`GL_LIGHT0`) and dynamic localized point lights (`GL_LIGHT1` on beacons).
+* **Particle Effects:** Teleport vortex swirl, hit sparks, thruster plumes, and death effects.
+* **Shooting & Combat:** Hitscan primary weapon with raycast hit detection and projectile system.
+* **Collision Detection:** Reusable geometric tests defined in `src/shared/collision.py` (sphere-sphere, ray-box, bounds clamping).
+* **2 Enemy Types:** Melee Rift Stalker (rusher) + Ranged Rift Spitter (projectile shooter).
+* **1 Boss Encounter:** Multi-phase Rift Guardian with rotating orbital shields and radial attacks.
+* **Chrono Slow with Charge Bar:** 5-second 30% enemy time dilation powered by a combat-filled Chrono Charge bar (available only at 100%, resets to 0%).
+* **2D HUD:** 2D orthographic overlay displaying Health, Chrono Charge/countdown bar, Score, Objective prompts, and Crosshair.
+* **Score & Rank:** Kill scores, multipliers, combo timer, and rank assessment.
+* **Basic Level Progression:** Start Menu $\rightarrow$ Arena 1 $\rightarrow$ Beacon Teleport $\rightarrow$ Arena 2 $\rightarrow$ Boss Fight $\rightarrow$ Victory / Game Over $\rightarrow$ Restart.
 
-Do **not** implement these unless the project is already fully complete:
+#### OPTIONAL / STRETCH (Only After MVP Completion):
+* **Blink Teleport:** Short-range combat dash/teleport. Must NOT be required for the core project, demo, or grading.
+* **One Special Gravity/Wall-Walking Section:** Single predefined low-gravity / jump-pad zone. Core movement remains standard vertical gravity.
+* **Additional Visual Polish:** Extra post-processing screen filters, audio effects, destructible debris.
 
-- Full 6-DOF zero-G flight
-- Full-world rewind
-- Temporal Echo simulation of the whole world
-- Four separate environments
-- Multiple complex gravity directions
-- Two-bone IK
-- Persistent upgrade economy
-- Skill tree
-- Rift currency system
-- Multiple bosses
-- Complex save-state restoration
-- Large-scale LOD framework
-- Advanced physics engine
-- Online/multiplayer systems
-- Procedural infinite levels
-
-These features are outside the core CG423 objective and can destabilize the schedule.
+#### REMOVED / DO NOT IMPLEMENT:
+* **Full-World Rewind:** No historical state recording buffers or world reversal.
+* **Temporal Echo/Past/Future Level System:** No past/future time-clone mechanics.
+* **Full 6-DOF Zero-G Flight:** No arbitrary free-floating 6-axis flight mechanics.
+* **Arbitrary Gravity Everywhere:** Camera, movement, and collision architecture must NOT depend on arbitrary-gravity support.
+* **Inverse Kinematics (IK):** Use forward hierarchical trigonometric joint posing instead.
+* **Upgrade Economy / Persistent Currency:** No skill trees, shop systems, or persistent currency.
+* **Multiple Bosses:** Scope is strictly locked to exactly one boss (Rift Guardian).
+* **Complex Temporal Simulation:** Simple delta-time scaling only.
+* **Physically Simulated Wormholes / Real-Time Portals:** Teleportation is a clean transform/scene transition, not optical portal physics.
 
 ---
 
@@ -249,56 +243,49 @@ The beacon links back to Arena 1 for the teleportation demonstration and provide
 
 ---
 
-# 5. Teleportation System
+# 5. Rift Beacon Teleportation System — REQUIRED
 
-Teleportation is a major feature and should remain simple internally.
+Spatial teleportation between the two arenas is a **mandatory core feature** of the game and demo.
 
-## 5.1 Design
+## 5.1 Design & Linked Beacon Pair
 
-A **Rift Beacon** is a spatial anchor with a linked destination beacon.
+The game defines one bidirectional linked beacon pair:
+$$\text{Arena 1: Kepler Relay Beacon A} \longleftrightarrow \text{Arena 2: Sundered Rift Beacon B}$$
 
 ```text
-Rift Beacon A
-      │
-      │ spatial link
-      ▼
-Rift Beacon B
+Kepler Relay (Arena 1)                          Sundered Rift (Arena 2)
+  [Beacon A Platform]                             [Beacon B Platform]
+          │                                               │
+          └─── Spatial Arena State Transition (Key 'F') ──┘
 ```
 
-Stepping into / activating Beacon A moves the player to Beacon B.
+Interacting with / activating Beacon A seamlessly transports the player to Beacon B in Arena 2 (and vice-versa for the return trip).
 
-## 5.2 Teleport Sequence
+## 5.2 Teleport Sequence & Execution Pipeline
 
-1. Player enters activation radius.
-2. Beacon starts visual charge.
-3. Short control lockout.
-4. Screen flash / distortion.
-5. Player position and orientation are changed.
-6. Destination arena becomes active.
-7. Player appears at the destination beacon.
-8. Rift particles continue briefly.
+The teleport sequence is executed as a clean scene/arena state transition:
+1. **Trigger Detection:** Player enters the beacon activation radius ($R \le 3.5$) and presses interact (`F`).
+2. **Visual Charge:** Beacon rotating torus rings accelerate with intensified cyan point-light emission.
+3. **Control Lockout:** Brief input control lockout (approx. 1.8 seconds) to prevent input glitches.
+4. **Visual Transition:** Cyan screen flash overlay quad (`GL_BLEND`) and radial vortex particle emitter burst.
+5. **Coordinate & State Reset:** Active arena swaps, player coordinates and camera orientation are safely reset to the destination beacon platform spawn offset.
+6. **Arrival:** Destination arena geometry renders active, and lingering particle dissipation effects conclude the transition.
 
-## 5.3 Teleport Data Model
-
-Conceptually:
+## 5.3 Data Model & Constraints
 
 ```python
-RiftBeacon:
-    id
-    position
-    rotation
-    linked_beacon_id
-    activation_radius
-    active
+class RiftBeacon:
+    beacon_id: str             # e.g., "BEACON_KEPLER_MAIN"
+    position: Vector3          # 3D world coordinate
+    linked_arena_id: str       # e.g., "ARENA_02_SUNDERED_RIFT"
+    activation_radius: float   # 3.5 units
+    is_active: bool            # True
 ```
 
-The implementation may differ after the course OpenGL starter code is supplied.
-
-## 5.4 Important Constraint
-
-Teleportation should **not** require simulated wormhole physics.
-
-The visual effect creates the illusion; internally it is a controlled transform/state transition.
+### Critical Scope Constraints:
+* **No Wormhole Physics / Non-Euclidean Portals:** We are **NOT** implementing physically simulated wormholes, stencils, render-to-texture portals, or optical warping.
+* **State Transition:** The visual particles and screen flash create the sci-fi illusion, while internally it is an atomic, predictable transform/state transition.
+* **Mandatory Status:** Rift Beacon teleportation remains mandatory and grading-critical even if optional features (like Blink) are omitted.
 
 ---
 
@@ -506,67 +493,67 @@ This keeps the camera, astronaut and weapon coherent.
 
 # 10. Aiming and Weapons
 
-## 10.1 Primary Weapon
+## 10.1 Weapon Architecture & Responsibility Split
 
-Use one basic energy pistol/rifle.
+To ensure clean modularity between graphics presentation and combat math:
 
-### Shooting
+* **M1 (Player & Camera) Responsibility:**
+  * Astronaut weapon 3D mesh attached to the character's right hand.
+  * First-person weapon viewmodel positioning and recoil animation presentation.
+  * Camera forward aiming vector calculation.
+* **M2 (Enemies & Combat) Responsibility:**
+  * Weapon gameplay logic, firing rates, and cooldown timers.
+  * Raycast hit detection against enemy bounding volumes.
+  * Damage application, projectile pooling, and combat state changes.
 
-Use a hitscan ray.
+## 10.2 Shooting & Aim Abstraction
+
+Shooting is implemented as an accurate 3D hitscan ray from the camera viewpoint:
 
 ```text
-Aim Origin + Aim Direction
-            ↓
-       Ray Intersection
-            ↓
-         Hit Enemy
+Aim Origin + Aim Direction (from M1 Camera)
+                 ↓
+      Raycast Intersection (M2 Math)
+                 ↓
+   Enemy Hit Detection & Damage Applied
+                 ↓
+  Hitmarker / Spark Feedback (M4 Renderer)
 ```
 
-No need for a large arsenal.
-
-## 10.2 Aim Abstraction
-
-Both camera modes should expose a common aim interface.
-
-Conceptually:
+Both first-person and third-person camera modes expose a unified aim vector:
 
 ```python
-AimResult:
-    origin
-    direction
-    hit
-    hit_position
-    target
+class AimResult:
+    origin: Vector3
+    direction: Vector3
+    hit_enemy: Optional[EnemyBase]
+    hit_point: Vector3
+    distance: float
 ```
-
-This prevents weapon logic from depending on a specific camera mode.
 
 ---
 
-# 11. Blink Teleport
+# 11. Blink Teleport — OPTIONAL / STRETCH
 
-Separate this from the large Rift Beacon teleport system.
+> **SCOPE CLARIFICATION:** Blink is an **OPTIONAL / STRETCH** feature. It is **NOT** required for the core project baseline, final demo, or grading-critical delivery. **Rift Beacon teleportation (Section 5) remains mandatory even if Blink is never implemented.**
 
-## 11.1 Blink
+## 11.1 Blink Behavior (If Implemented)
 
-Short-range directional teleport for combat.
-
-Concept:
+Short-range evasive directional combat dash:
 
 ```text
-P_new = P + normalize(aim_direction) * blink_range
+P_new = P + normalize(forward_aim_direction) * BLINK_DISTANCE
 ```
 
-Apply collision checks before accepting the new position.
+* **Constraints:** Must use `src/shared/collision.py` to clamp within arena boundaries and prevent clipping into obstacles.
+* **Cooldown & Cost:** Cooldown timer (e.g. 3.0s) and energy cost.
 
 ## 11.2 Visual Effect
 
-- ghost silhouette at source
-- bright particle burst
-- destination particle burst
-- short screen flash
-
-Blink shares no complicated physics with the Rift Beacon system.
+- Temporary ghost silhouette at origin.
+- Quick spark / vortex particle burst.
+- Subtle FOV kick or brief screen flash.
+- No physics simulation or portal rendering required.
 
 ---
 
@@ -804,27 +791,29 @@ Particles should use simple billboarded quads, sprites, points, or other mechani
 
 ---
 
-# 18. Collision
+# 18. Collision System & Shared Utilities
 
-Keep collision primitive and understandable.
+Collision is kept strictly primitive, robust, and geometrically well-defined.
 
-## Player
+## 18.1 Architecture: Centralized in `src/shared/collision.py`
 
-Approximate with a capsule/cylinder or bounding volume.
+To prevent fragmented or incompatible collision implementations across the team:
 
-## Enemies
+* **Shared Module (`src/shared/collision.py`):** Contains pure **geometric intersection tests** (sphere-sphere, sphere-AABB, ray-sphere, ray-AABB, point containment, and arena boundary clamping).
+* **Gameplay Modules Own the Collision Consequences:**
+  * **M1 (Player):** Calls shared boundary/obstacle clamping after movement and Blink. Decides player health reduction on damage.
+  * **M2 (Combat):** Calls shared ray-sphere / ray-AABB tests for hitscan shots, and sphere-sphere tests for projectiles. Decides enemy damage, knockback, and death.
+  * **M3 (World):** Provides arena extents and obstacle bounds to the shared checkers. Handles beacon radius containment triggers.
 
-Approximate with spheres/capsules.
+## 18.2 Bounding Volume Representations
 
-## Weapon
+* **Player:** Bounding sphere of radius $R = 1.0$ (centered at player chest/waist).
+* **Melee Alien (Rift Stalker):** Bounding sphere of radius $R = 1.2$.
+* **Ranged Alien (Rift Spitter):** Bounding sphere of radius $R = 1.4$.
+* **Boss (Rift Guardian):** Bounding sphere of radius $R = 3.0$ with rotating shield sub-bounds.
+* **Arena Boundaries:** Clamped horizontal extents ($[-X_{\text{bound}}, +X_{\text{bound}}], [-Z_{\text{bound}}, +Z_{\text{bound}}]$) at floor level $Y = 0$.
 
-Use ray intersection.
-
-## Teleport
-
-Before teleporting the player, verify destination is valid and not inside blocked geometry when practical.
-
-Do not implement a general physics engine.
+> **Constraint:** Do not implement a continuous physics simulation engine. Simple geometric intersection tests are authoritative and sufficient.
 
 ---
 
@@ -903,52 +892,52 @@ riftwalker_paradox_protocol/
 │   ├── main.py                         # M4 — integration entry point
 │   │
 │   ├── M1_player_camera/
-│   │   ├── player.py
-│   │   ├── astronaut_rig.py
-│   │   ├── player_movement.py
-│   │   ├── first_person_camera.py
-│   │   ├── third_person_camera.py
-│   │   ├── player_weapon.py
-│   │   └── blink_teleport.py
+│   │   ├── player.py                   # M1 — player entity coordinator
+│   │   ├── astronaut_rig.py            # M1 — hierarchical articulated rig
+│   │   ├── player_movement.py          # M1 — WASD movement kinematics
+│   │   ├── first_person_camera.py      # M1 — 1st-person FPS camera
+│   │   ├── third_person_camera.py      # M1 — 3rd-person follow camera
+│   │   ├── player_weapon.py            # M1 — weapon 3D mesh & viewmodel presentation
+│   │   └── blink_teleport.py           # M1 — (optional stretch) combat dash
 │   │
 │   ├── M2_enemies_combat/
-│   │   ├── enemy_base.py
-│   │   ├── alien_generator.py
-│   │   ├── melee_rift_stalker.py
-│   │   ├── ranged_rift_spitter.py
-│   │   ├── rift_guardian_boss.py
-│   │   ├── weapon_system.py
-│   │   ├── raycast.py
-│   │   └── collision.py
+│   │   ├── enemy_base.py               # M2 — abstract enemy base
+│   │   ├── alien_generator.py          # M2 — procedural alien generator
+│   │   ├── melee_rift_stalker.py       # M2 — melee rusher AI
+│   │   ├── ranged_rift_spitter.py      # M2 — ranged spitter AI
+│   │   ├── rift_guardian_boss.py       # M2 — final boss encounter
+│   │   ├── weapon_system.py            # M2 — weapon firing logic & projectiles
+│   │   └── raycast.py                  # M2 — raycast hit detection & damage
 │   │
 │   ├── M3_world_teleport/
-│   │   ├── world.py
-│   │   ├── arena_base.py
-│   │   ├── arena_01_kepler_relay.py
-│   │   ├── arena_02_sundered_rift.py
-│   │   ├── environment_generator.py
-│   │   ├── rift_beacon.py
-│   │   └── gravity_zone.py
+│   │   ├── world.py                    # M3 — arena container & state transitions
+│   │   ├── arena_base.py               # M3 — abstract arena class
+│   │   ├── arena_01_kepler_relay.py    # M3 — Arena 1 Kepler Relay geometry
+│   │   ├── arena_02_sundered_rift.py   # M3 — Arena 2 Sundered Rift geometry
+│   │   ├── environment_generator.py    # M3 — procedural obstacles/crates/pillars
+│   │   ├── rift_beacon.py              # M3 — interactive Rift Beacon platform
+│   │   └── gravity_zone.py             # M3 — (optional stretch) special gravity zone
 │   │
 │   ├── M4_rendering_gameplay/
-│   │   ├── renderer.py
-│   │   ├── primitives.py
-│   │   ├── lighting.py
-│   │   ├── materials.py
-│   │   ├── particles.py
-│   │   ├── effects.py
-│   │   ├── chrono_slow.py
-│   │   ├── hud.py
-│   │   ├── crosshair.py
-│   │   ├── scoring.py
-│   │   ├── game_state.py
-│   │   └── level_manager.py
+│   │   ├── renderer.py                 # M4 — master 3D/2D render pipeline
+│   │   ├── primitives.py               # M4 — procedural geometry helpers
+│   │   ├── lighting.py                 # M4 — directional sunlight & point lights
+│   │   ├── materials.py                # M4 — material optical properties
+│   │   ├── particles.py                # M4 — vortex, sparks, thruster particles
+│   │   ├── effects.py                  # M4 — screen flash & color filters
+│   │   ├── chrono_slow.py              # M4 — Chrono Slow manager & countdown
+│   │   ├── hud.py                      # M4 — 2D HUD (Health, Chrono bar, Score)
+│   │   ├── crosshair.py                # M4 — dynamic crosshair & hitmarkers
+│   │   ├── scoring.py                  # M4 — score tracking & multipliers
+│   │   ├── game_state.py               # M4 — game state machine
+│   │   └── level_manager.py            # M4 — wave spawner & progression
 │   │
 │   └── shared/
-│       ├── constants.py
-│       ├── math3d.py
-│       ├── input_manager.py
-│       └── game_time.py
+│       ├── constants.py                # Global constants, IDs, speeds, keys
+│       ├── math3d.py                   # Vector3, Matrix4, linear algebra
+│       ├── collision.py                # Shared geometric collision & raycast utilities
+│       ├── input_manager.py            # Centralized keyboard & mouse input state
+│       └── game_time.py                # Real-time dt vs. Chrono Slow scaled dt
 │
 ├── scenes/
 │   ├── arena_01_kepler_relay/
@@ -1324,152 +1313,149 @@ Use these labels everywhere in the repository so ownership is obvious.
 
 ## M1 — Player & Camera
 
-**Primary responsibility:** astronaut, movement, camera, weapon presentation, Blink.
+**Primary responsibility:** astronaut model, movement kinematics, camera systems, weapon visual presentation, and optional Blink.
 
 ### Folder
 `src/M1_player_camera/`
 
 ### Main deliverables
-- `player.py`
-- `astronaut_rig.py`
-- `player_movement.py`
-- `first_person_camera.py`
-- `third_person_camera.py`
-- `player_weapon.py`
-- `blink_teleport.py`
+- `player.py` — player entity coordinator and health state
+- `astronaut_rig.py` — procedural hierarchical articulated mesh
+- `player_movement.py` — WASD movement kinematics and velocity damping
+- `first_person_camera.py` — 1st-person FPS camera with viewmodel offset
+- `third_person_camera.py` — 3rd-person follow/orbit camera
+- `player_weapon.py` — **Weapon Visual Presentation** (astronaut weapon 3D mesh & 1st-person viewmodel presentation)
+- `blink_teleport.py` — *(Optional Stretch)* short-range combat dash
 
 ### Graphics focus
-- hierarchical modeling
-- local transformations
-- camera/view transformation
-- first-person viewmodel
+- hierarchical modeling & matrix stacks (`glPushMatrix`/`glPopMatrix`)
+- local transformations & articulated walking animation
+- camera/view transformations (`gluLookAt`, `gluPerspective`)
+- first-person viewmodel presentation
 - procedural astronaut proportions
-- simple animation
 
 ### Dependencies
 M1 consumes:
-- shared math/input/time
+- `src/shared/math3d.py`, `src/shared/collision.py`, `src/shared/input_manager.py`
 - M2 combat hit results
-- M3 world collision/teleport destination information
-- M4 effects/HUD hooks
+- M3 world collision / beacon destination info
+- M4 effects & HUD hooks
 
 ---
 
 ## M2 — Enemies & Combat
 
-**Primary responsibility:** alien visuals, AI, combat, enemy/boss behavior.
+**Primary responsibility:** alien generator, enemy AI, combat gameplay logic, raycasting, hitboxes, projectiles, and boss encounter.
 
 ### Folder
 `src/M2_enemies_combat/`
 
 ### Main deliverables
-- `alien_generator.py`
-- `enemy_base.py`
-- `melee_rift_stalker.py`
-- `ranged_rift_spitter.py`
-- `rift_guardian_boss.py`
-- `weapon_system.py`
-- `raycast.py`
-- `collision.py`
+- `alien_generator.py` — procedural articulated alien generator
+- `enemy_base.py` — abstract base enemy class
+- `melee_rift_stalker.py` — fast melee rusher AI
+- `ranged_rift_spitter.py` — long-range projectile spitter AI
+- `rift_guardian_boss.py` — multi-stage boss with rotating orbital shields
+- `weapon_system.py` — **Weapon Gameplay Logic** (firing rate, damage, cooldowns, projectile pooling)
+- `raycast.py` — precision hitscan raycasting & hitbox intersection math
 
 ### Graphics focus
-- procedural alien geometry
-- articulated limbs
-- repeated transformed components
-- projectile trajectories
-- boss visual hierarchy
+- procedural alien geometry (segmented carapaces, multi-jointed spider legs)
+- articulated limb animations
+- projectile trajectories and muzzle points
+- boss visual hierarchy & rotating shields
 - hit/death effects hooks
 
 ### Dependencies
 M2 consumes:
-- M1 aim/player state
-- M3 arena/spawn data
-- M4 Chrono time scale/effects hooks
+- `src/shared/collision.py` for geometric tests
+- M1 aim vector / player position
+- M3 arena bounds & spawn points
+- M4 Chrono Slow time scale (`0.30`) & particle hooks
 
 ---
 
 ## M3 — World, Arenas & Teleportation
 
-**Primary responsibility:** two arenas, environment construction, Rift Beacons, arena-to-arena teleport.
+**Primary responsibility:** two arenas, environment props, Rift Beacons, and arena-to-arena teleportation state transitions.
 
 ### Folder
 `src/M3_world_teleport/`
 
 ### Main deliverables
-- `world.py`
-- `arena_base.py`
-- `arena_01_kepler_relay.py`
-- `arena_02_sundered_rift.py`
-- `environment_generator.py`
-- `rift_beacon.py`
-- `gravity_zone.py` (optional stretch)
+- `world.py` — world manager & arena state switcher
+- `arena_base.py` — abstract arena container
+- `arena_01_kepler_relay.py` — industrial relay station geometry
+- `arena_02_sundered_rift.py` — floating asteroid void geometry
+- `environment_generator.py` — modular pillars, crates, crystal spires
+- `rift_beacon.py` — **Rift Beacon Model & Trigger** (spinning torus rings & glow)
+- `gravity_zone.py` — *(Optional Stretch)* special low-gravity jump pad
 
 ### Graphics focus
 - modular environment construction
-- spatial layout
-- transformation-heavy scene composition
-- Rift Beacon geometry/animation
+- spatial layout & transformation-heavy scene composition
+- Rift Beacon geometry and spinning torus animation
 - arena-specific lighting hooks
 - scene transition effects
 
 ### Dependencies
 M3 consumes:
-- M1 player position/orientation
-- M2 enemy spawn/combat state
-- M4 rendering/effects
+- `src/shared/collision.py` for arena boundary extents
+- M1 player coordinates
+- M2 enemy spawn states
+- M4 rendering & particle effects
 
 ---
 
 ## M4 — Rendering, Chrono, HUD & Integration
 
-**Primary responsibility:** graphics polish and the glue that turns the separate systems into one playable project.
+**Primary responsibility:** graphics pipeline, lighting, particle systems, Chrono Slow time dilation, 2D HUD, scoring, and full game-loop coordination.
 
 ### Folder
 `src/M4_rendering_gameplay/`
 
 ### Main deliverables
-- `renderer.py`
-- `primitives.py`
-- `lighting.py`
-- `materials.py`
-- `particles.py`
-- `effects.py`
-- `chrono_slow.py`
-- `hud.py`
-- `crosshair.py`
-- `scoring.py`
-- `game_state.py`
-- `level_manager.py`
+- `renderer.py` — master OpenGL 3D & 2D render pass coordinator
+- `primitives.py` — optimized procedural geometry helpers (cubes, cylinders, spheres, toruses)
+- `lighting.py` — directional sunlight (`GL_LIGHT0`) & beacon point lights (`GL_LIGHT1`)
+- `materials.py` — optical material presets (suit, visor, alien carapace)
+- `particles.py` — particle systems (teleport vortex, hit sparks, thrusters)
+- `effects.py` — screen flash & visual distortion filters
+- `chrono_slow.py` — **Chrono Slow Manager** (100% activation gate, 0% reset, 5s countdown, 0.30 scale)
+- `hud.py` — **2D Orthographic HUD** (Health bar, Chrono Charge/countdown bar, Score, Objective text)
+- `crosshair.py` — dynamic crosshair with hitmarker feedback
+- `scoring.py` — score tracking, kill feed, and combo multipliers
+- `game_state.py` — game state machine (`PLAYING`, `TELEPORTING`, `GAME_OVER`, `VICTORY`)
+- `level_manager.py` — wave spawning and arena progression
 
 ### Graphics focus
-- lighting
-- materials
-- particles
-- teleport visual effects
-- Chrono Slow visual effects
-- HUD composition
-- camera overlays
-- final presentation polish
+- lighting setup & point-light attenuation
+- material specular/diffuse properties
+- particle systems & alpha blending
+- teleport visual vortex transition
+- Chrono Slow cool blue screen tint overlay
+- 2D orthographic projection matrix switching (`glOrtho`)
 
 ### Integration responsibility
-
 M4 coordinates:
-- game start/restart
-- level transition
-- game-over/win state
-- final HUD
-- score/rank
-- rendering order
-- shared timing rules
+- `src/main.py` entry point and GLUT callbacks
+- game start / restart flow
+- arena transition triggers
+- victory / game-over state evaluation
+- delta-time distribution (unscaled `real_dt` vs. scaled `game_dt`)
 
 ---
 
-## Shared-code rule
+## Shared-code Rule (`src/shared/`)
 
-Nobody should modify `src/shared/` casually.
+`src/shared/` contains common infrastructure:
+- `constants.py`: authoritative constants
+- `math3d.py`: Vector3, Matrix4, linear algebra
+- `collision.py`: pure geometric tests (sphere-sphere, ray-box, bounds clamping)
+- `input_manager.py`: centralized keyboard and mouse state tracking
+- `game_time.py`: real-time vs. Chrono Slow scaled delta-time calculation
 
-For a shared change:
-
+Nobody should modify `src/shared/` casually. For any shared change:
 ```text
 1. Explain the reason.
 2. Identify affected modules.
@@ -1477,140 +1463,104 @@ For a shared change:
 4. Test M1 + M2 + M3 + M4 together.
 ```
 
-# 28. Development Phases
+# 28. Implementation Priority & Development Phases
 
-## Phase 0 — Starter Template Integration
+The project follows a strict **9-phase implementation priority order**. Do not attempt stretch features or secondary polish until earlier phases are stable and tested.
 
-**Goal:** Understand the supplied CG423 OpenGL code before adding project features.
-
-Tasks:
-
-- identify main loop
-- identify rendering entry point
-- identify input system
-- identify camera code
-- identify matrix stack usage
-- identify primitive drawing utilities
-- identify lighting setup
-- identify current collision/input helpers
-
-**Deliverable:** update this project specification with the actual starter architecture.
-
----
-
-## Phase 1 — Graphics Foundation
-
-Build:
-
-- primitive drawing helpers
-- transformation helpers
-- camera
-- lighting
-- procedural astronaut
-
-**Deliverable:** astronaut visible and controllable in a blank test scene.
+```text
+Phase 1: Starter-Code Integration + Core Rendering
+                    ↓
+Phase 2: Player + Camera + Astronaut
+                    ↓
+Phase 3: Arena 1 + Arena 2
+                    ↓
+Phase 4: Enemies + Combat + Collision
+                    ↓
+Phase 5: Rift Beacon Teleportation
+                    ↓
+Phase 6: Chrono Slow + Charge System
+                    ↓
+Phase 7: Boss + Scoring + HUD
+                    ↓
+Phase 8: Particles + Lighting + Visual Polish
+                    ↓
+Phase 9: Optional Stretch Features (Blink, Gravity Zone)
+```
 
 ---
 
-## Phase 2 — First Arena
-
-Build:
-
-- Kepler Relay geometry
-- lighting
-- player movement
-- third-person camera
-- first-person camera
-
-**Deliverable:** walkable playable test arena.
+## Phase 1 — Starter-Code Integration & Core Rendering
+- Audit course starter template and Assignment 3 callbacks.
+- Establish OpenGL matrix stack discipline (`glPushMatrix`/`glPopMatrix`).
+- Build procedural primitives helper (`primitives.py`) and master render loop (`renderer.py`).
+- **Deliverable:** Working graphics sandbox rendering basic geometry at 60 FPS.
 
 ---
 
-## Phase 3 — Combat
-
-Build:
-
-- weapon
-- raycast
-- collision
-- melee alien
-- ranged alien
-- enemy health
-
-**Deliverable:** basic combat loop.
+## Phase 2 — Player, Camera & Procedural Astronaut
+- Build articulated hierarchical astronaut model (`astronaut_rig.py`).
+- Implement 3rd-person orbit camera and 1st-person FPS camera (`camera.py`).
+- Implement WASD movement kinematics and orientation tracking.
+- Build astronaut weapon mesh attachment and 1st-person viewmodel presentation.
+- **Deliverable:** Controllable astronaut moving smoothly in dual camera modes.
 
 ---
 
-## Phase 4 — Rift Teleportation
-
-Build:
-
-- Rift Beacon geometry
-- beacon animation
-- teleport logic
-- screen flash
-- destination spawn handling
-
-**Deliverable:** working teleport from Arena 1 to Arena 2.
+## Phase 3 — Arena 1 & Arena 2 Environments
+- Construct Arena 1: Kepler Relay metallic platform, walls, and modular props.
+- Construct Arena 2: Sundered Rift floating obsidian asteroid and crystal spires.
+- Integrate shared collision geometry (`src/shared/collision.py`) for boundary limits.
+- **Deliverable:** Both arenas fully constructed and walkable.
 
 ---
 
-## Phase 5 — Second Arena
-
-Build:
-
-- Sundered Rift geometry
-- alien lighting
-- particles
-- enemy placements
-- return beacon
-
-**Deliverable:** two connected arenas.
+## Phase 4 — Enemies, Combat & Collision
+- Build procedural alien generator (`alien_generator.py`).
+- Implement Melee Rift Stalker (rush AI) and Ranged Rift Spitter (plasma projectile AI).
+- Implement hitscan raycasting, hitbox detection, damage application, and projectile pooling.
+- **Deliverable:** Playable combat loop with responsive enemy engagement and damage.
 
 ---
 
-## Phase 6 — Chrono Slow
-
-Build:
-
-- Gameplay-driven Chrono Charge meter (fills from kills and energy pickups)
-- 100% activation requirement (`Q` key) and 0% consumption reset
-- 5-second fixed duration timer
-- 30% enemy and projectile speed scale (`CHRONO_SLOW_FACTOR = 0.30`)
-- Visual cool blue screen tint overlay and radial particle distortion
-- HUD charge/countdown bar integration
-
-**Deliverable:** stable, locked-down 5-second time-slow mechanic without world rewind.
+## Phase 5 — Rift Beacon Teleportation (REQUIRED)
+- Construct animated Rift Beacon model with spinning concentric torus rings.
+- Implement bidirectional beacon link ($\text{Arena 1 Beacon A} \leftrightarrow \text{Arena 2 Beacon B}$).
+- Coordinate screen flash, control lockout, coordinate reset, and scene transition.
+- **Deliverable:** Mandatory spatial teleportation between Kepler Relay and Sundered Rift.
 
 ---
 
-## Phase 7 — Boss
-
-Build:
-
-- Rift Guardian model
-- boss health
-- two simple phases
-- boss attacks
-- defeat effect
-
-**Deliverable:** complete combat encounter.
+## Phase 6 — Chrono Slow & Charge System (REQUIRED)
+- Implement combat-driven Chrono Charge accumulator (earned from kills and pickups).
+- Implement 100% activation requirement (`Q` key) with immediate 0% reset.
+- Implement 5-second fixed active timer countdown.
+- Apply 30% speed scaling (`0.30`) to enemies and projectiles while player runs at 100% speed.
+- Apply cool blue screen tint overlay and radial particle pulse.
+- **Deliverable:** Locked-down 5-second time dilation mechanic without world rewind.
 
 ---
 
-## Phase 8 — Presentation / Polish
+## Phase 7 — Boss Encounter, Scoring & HUD
+- Construct Rift Guardian boss model with rotating orbital shields and radial attacks.
+- Implement 2D orthographic HUD overlay (Suit Health bar, Chrono Charge/countdown bar, Score, Objective text).
+- Implement score manager, combo multipliers, and full game state machine (`PLAYING` $\rightarrow$ `VICTORY` / `GAME_OVER`).
+- **Deliverable:** Complete, end-to-end playable game loop.
 
-Add:
+---
 
-- particle polish
-- camera polish
-- lighting polish
-- HUD polish
-- score/rank
-- sound only if allowed and time remains
-- screenshots/video for presentation
+## Phase 8 — Particles, Dynamic Lighting & Visual Polish
+- Implement multi-source dynamic lighting (directional sunlight `GL_LIGHT0`, beacon point lights `GL_LIGHT1`).
+- Configure specular/diffuse material properties for suits, visors, and alien carapaces.
+- Implement particle emitters (teleport vortex, hit sparks, jetpack thrusters).
+- **Deliverable:** Polished, visually impressive presentation meeting all CG423 criteria.
 
-**Deliverable:** final demo build.
+---
+
+## Phase 9 — Optional Stretch Features (Post-MVP Only)
+- *Optional:* Short-range Blink combat dash (`blink_teleport.py`).
+- *Optional:* Predefined low-gravity / jump-pad zone (`gravity_zone.py`).
+- *Optional:* Additional post-processing filters and sound effects.
+- **Rule:** Only proceed to Phase 9 if Phases 1–8 are 100% complete and fully verified.
 
 ---
 
@@ -2247,13 +2197,13 @@ Keep conventional gravity as the baseline. A small special gravity section may b
 
 Use simpler hierarchical arm posing instead.
 
----
+# 39. AI Assistant Quick Context & Scope Enforcement Rules
 
-# 39. AI Assistant Quick Context
+> **AUTHORITATIVE MANDATE FOR AI ASSISTANTS:** Any AI assistant working on this repository must treat `PROJECT_SPEC.md` as the authoritative single source of truth and scope boundary. AI assistants must **NOT** introduce or generate code for removed/out-of-scope features (e.g. world rewind buffers, complex 6-DOF physics, IK, arbitrary gravity, upgrade trees, multiple bosses) unless the user explicitly requests them.
 
 When giving this document to another AI assistant, the following compact context can be used:
 
-> We are building a CG423 Computer Graphics OpenGL project called **Riftwalker: Paradox Protocol**. It is a manageable sci-fi combat game targeting approximately 60% graphics and 40% gameplay. The player is an astronaut who can move, shoot, Blink, use Chrono Slow, and switch between first-person and third-person cameras. The game has exactly two baseline arenas: **Kepler Relay** and **Sundered Rift**. Rift Beacons teleport the player between the two arenas. Chrono Slow is the simplified time-manipulation feature; there is no world rewind. There are two normal enemies (melee and ranged) and one boss (Rift Guardian). The graphics priorities are procedural/hierarchical astronaut modeling, procedural alien generation, lighting, particles, camera transformations, and simple collision/raycasting. Avoid scope creep such as 6-DOF flight, multiple gravity systems, IK, upgrade trees, multiple bosses, or full temporal simulation. The supplied CG423 OpenGL starter code is authoritative and must be integrated rather than unnecessarily replaced.
+> We are building a CG423 Computer Graphics OpenGL project called **Riftwalker: Paradox Protocol**. It is a manageable sci-fi combat game targeting approximately 60% graphics and 40% gameplay. The player is an astronaut who can move, shoot, use Chrono Slow (5s duration at 30% enemy speed, activated only at 100% combat charge), and switch between first-person and third-person cameras. The game has exactly two baseline arenas: **Kepler Relay** and **Sundered Rift**. Linked Rift Beacons teleport the player between the two arenas as a clean scene state transition. Chrono Slow is a simple delta-time scaling mechanic without world rewind. There are two normal enemies (melee and ranged) and one boss (Rift Guardian). Collision is centralized in `src/shared/collision.py`. Blink and Gravity zones are optional stretch features. The graphics priorities are procedural/hierarchical astronaut modeling, procedural alien generation, lighting, particles, camera transformations, and raycast shooting. Avoid scope creep such as 6-DOF flight, arbitrary gravity systems, IK, upgrade trees, multiple bosses, or full temporal simulation. The supplied CG423 OpenGL starter code is authoritative and must be integrated rather than unnecessarily replaced.
 
 ---
 
