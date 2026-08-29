@@ -1,0 +1,69 @@
+"""Global Constants for Riftwalker: Paradox Protocol"""
+
+# Window & Display
+WINDOW_TITLE = b"Riftwalker: Paradox Protocol [CSE423 Final Project]"
+WINDOW_WIDTH = 1024
+WINDOW_HEIGHT = 768
+TARGET_FPS = 60
+
+# Game State Constants
+STATE_MENU = "MENU"
+STATE_PLAYING = "PLAYING"
+STATE_TELEPORTING = "TELEPORTING"
+STATE_GAME_OVER = "GAME_OVER"
+STATE_VICTORY = "VICTORY"
+
+# Scene / Arena Identifiers
+ARENA_01_KEPLER_RELAY = "ARENA_01_KEPLER_RELAY"
+ARENA_02_SUNDERED_RIFT = "ARENA_02_SUNDERED_RIFT"
+
+# Enemy Identifiers
+ENEMY_MELEE_RIFT_STALKER = "ENEMY_MELEE_RIFT_STALKER"
+ENEMY_RANGED_RIFT_SPITTER = "ENEMY_RANGED_RIFT_SPITTER"
+BOSS_RIFT_GUARDIAN = "BOSS_RIFT_GUARDIAN"
+
+# Player Attributes
+MAX_PLAYER_HP = 100.0
+PLAYER_MOVE_SPEED = 14.0
+PLAYER_ROTATION_SPEED = 120.0  # degrees per second
+PLAYER_RADIUS = 1.0
+PLAYER_HEIGHT = 2.4
+
+# Blink Teleport
+BLINK_DISTANCE = 12.0
+BLINK_COOLDOWN = 3.0  # seconds
+BLINK_ENERGY_COST = 20.0
+
+# Chrono Slow Mechanics
+MAX_CHRONO_ENERGY = 100.0
+CHRONO_DRAIN_RATE = 20.0   # energy per second while active
+CHRONO_RECHARGE_RATE = 10.0 # energy per second while inactive
+CHRONO_SLOW_FACTOR = 0.25  # 25% speed for enemies/world
+
+# Teleportation Sequence
+TELEPORT_ACTIVATION_RADIUS = 3.5
+TELEPORT_DURATION = 1.8  # seconds for vortex effect
+
+# Weapons & Combat
+PRIMARY_FIRE_COOLDOWN = 0.15  # seconds
+PRIMARY_FIRE_DAMAGE = 25.0
+PRIMARY_FIRE_RANGE = 120.0
+
+# Camera Parameters
+FOV_DEGREES = 60.0
+NEAR_PLANE = 0.1
+FAR_PLANE = 500.0
+
+# 3rd-Person Camera Offsets
+TP_CAM_DISTANCE = 8.0
+TP_CAM_HEIGHT = 3.2
+TP_CAM_PITCH_MIN = -45.0
+TP_CAM_PITCH_MAX = 75.0
+
+# Colors (RGBA tuples 0.0 - 1.0)
+COLOR_KEPLER_AMBIENT = (0.2, 0.25, 0.3, 1.0)
+COLOR_SUNDERED_AMBIENT = (0.25, 0.15, 0.3, 1.0)
+COLOR_CYAN_GLOW = (0.0, 0.85, 1.0, 1.0)
+COLOR_MAGENTA_GLOW = (1.0, 0.1, 0.8, 1.0)
+COLOR_HUD_HEALTH = (0.1, 0.9, 0.3, 0.9)
+COLOR_HUD_CHRONO = (0.0, 0.7, 1.0, 0.9)

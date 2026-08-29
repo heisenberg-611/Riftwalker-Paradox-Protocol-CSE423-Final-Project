@@ -1,0 +1,38 @@
+"""Visual Filters and Post-process-style Effects."""
+from OpenGL.GL import *
+
+
+class Effects:
+    @staticmethod
+    def draw_screen_flash(width: int, height: int, color=(1.0, 1.0, 1.0), alpha=0.5):
+        """Draws a semi-transparent full-screen flash quad."""
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        glOrtho(0, width, 0, height, -1, 1)
+
+        glMatrixMode(GL_MODELVIEW)
+        glPushMatrix()
+        glLoadIdentity()
+
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_LIGHTING)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        glColor4f(color[0], color[1], color[2], alpha)
+        glBegin(GL_QUADS)
+        glVertex2f(0, 0)
+        glVertex2f(width, 0)
+        glVertex2f(width, height)
+        glVertex2f(0, height)
+        glEnd()
+
+        glDisable(GL_BLEND)
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_LIGHTING)
+
+        glPopMatrix()
+        glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+        glMatrixMode(GL_MODELVIEW)

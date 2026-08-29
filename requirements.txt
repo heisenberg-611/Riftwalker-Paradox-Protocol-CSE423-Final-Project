@@ -1,0 +1,5 @@
+# Riftwalker: Paradox Protocol - Dependencies
+PyOpenGL>=3.1.5
+PyOpenGL_accelerate>=3.1.5
+numpy>=1.20.0
+pytest>=7.0.0
