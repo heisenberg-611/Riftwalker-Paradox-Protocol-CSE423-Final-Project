@@ -11,7 +11,7 @@ class FirstPersonCamera:
         self.eye_height = 2.1
 
     def update_orientation(self, mouse_dx: float, mouse_dy: float, sensitivity: float = 0.2):
-        self.yaw += mouse_dx * sensitivity
+        self.yaw -= mouse_dx * sensitivity
         self.pitch -= mouse_dy * sensitivity
         self.pitch = clamp(self.pitch, -85.0, 85.0)
 

@@ -218,8 +218,14 @@ I am working on **Module M2 (Enemies & Combat Systems)** for the computer graphi
 3. **Pre-Push Validation:** Always run `python3 -m unittest discover -s tests` before pushing. If any test fails, resolve the failure first.
 4. **Push & PR:** Push exclusively to `origin feature/m2-<feature-name>` and guide the user to open a Pull Request targeting `main`.
 
+### 🔮 Visual Design Direction (Crystalline Void Horrors):
+We avoid generic earthly bugs/cockroaches. The aliens are dimensional "Rift Horrors" composed of floating obsidian shards, glowing cyan/purple rift energy fissures, and sharp geometric silhouettes:
+- **Melee Stalker**: Predatory shadow-hound composed of angular obsidian carapace segments, glowing rift fissure cores, and articulated crystalline bladed limbs.
+- **Ranged Spitter**: Floating dimensional crystal monolith / prism surrounded by orbital rotating shard rings that charges and launches plasma bolts.
+- **Rift Guardian (Boss)**: Colossal hovering dimensional geometric core with independent orbiting defensive obelisks/shield plates and radial shockwave bursts.
+
 ### My Ownership & Deliverables (`src/M2_enemies_combat/`):
-1. `alien_generator.py`: Procedural articulated alien creature generator with segmented carapaces, glowing bio-luminescent nodes, and multi-jointed spider/insectoid legs.
+1. `alien_generator.py`: Procedural Crystalline Void alien generator with hierarchical transformation matrices, floating geometric shard rings, and glowing rift nodes.
 2. `enemy_base.py`: Abstract enemy base class tracking HP, states (`IDLE`, `CHASE`, `ATTACK`, `DEAD`), bounding spheres, and Chrono Slow time scaling.
 3. `melee_rift_stalker.py`: Fast melee rusher AI that closes distance and performs leaping/lunging attacks.
 4. `ranged_rift_spitter.py`: Long-range projectile spitter AI that strafes and launches plasma balls at the player's position.

@@ -10,6 +10,7 @@ class InputManager:
         self.mouse_delta: Tuple[int, int] = (0, 0)
         self.mouse_buttons: Set[int] = set()
         self.just_pressed_keys: Set[str] = set()
+        self.first_mouse: bool = True
 
     def on_key_down(self, key: bytes, x: int, y: int):
         try:
@@ -34,6 +35,11 @@ class InputManager:
         self.special_keys_down.discard(key)
 
     def on_mouse_motion(self, x: int, y: int):
+        if self.first_mouse:
+            self.mouse_pos = (x, y)
+            self.mouse_delta = (0, 0)
+            self.first_mouse = False
+            return
         dx = x - self.mouse_pos[0]
         dy = y - self.mouse_pos[1]
         self.mouse_delta = (dx, dy)

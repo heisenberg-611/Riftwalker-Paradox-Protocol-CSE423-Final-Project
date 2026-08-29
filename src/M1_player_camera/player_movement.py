@@ -22,7 +22,7 @@ class PlayerMovement:
 
         rad_yaw = math.radians(yaw_deg)
         fwd = Vector3(math.sin(rad_yaw), 0.0, math.cos(rad_yaw)).normalized()
-        right = Vector3(math.cos(rad_yaw), 0.0, -math.sin(rad_yaw)).normalized()
+        right = Vector3(-math.cos(rad_yaw), 0.0, math.sin(rad_yaw)).normalized()
 
         move_dir = (fwd * forward_input + right * strafe_input).normalized()
         self.velocity = move_dir * self.move_speed

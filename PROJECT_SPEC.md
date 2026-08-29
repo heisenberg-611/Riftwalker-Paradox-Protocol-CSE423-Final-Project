@@ -557,46 +557,57 @@ P_new = P + normalize(forward_aim_direction) * BLINK_DISTANCE
 
 ---
 
-# 12. Enemy Design
+# 12. Enemy Design (Crystalline Void Horrors)
 
-Only two normal enemy types are required.
+The dimensional invaders are designed as **Crystalline Void Horrors** — otherworldly entities composed of floating obsidian shards, sharp geometric facets, and glowing cyan/violet rift fissure nodes rather than generic earthly bugs. Only two normal enemy types are required.
 
 ## 12.1 Melee Alien — Rift Stalker
 
-Behavior:
+**Behavior:**
+1. Detect player position.
+2. Fast forward pursuit with sinusoidal zig-zag leaping.
+3. Lunge into melee range ($R \le 2.0$) and perform slashing attack.
+4. Cooldown and repeat.
 
-1. Detect player.
-2. Move toward player.
-3. Stop within attack range.
-4. Perform simple melee attack.
-5. Repeat.
-
-Visual:
-
-- curved spine
-- multiple simple limbs
-- glowing eyes/bioluminescent nodes
-- asymmetrical or slightly insectoid silhouette
+**Visual Aesthetic (M2 Deliverable):**
+- Sharp angular obsidian carapace plates.
+- Glowing cyan/purple rift energy core visible through rib fissures.
+- Articulated crystalline bladed front limbs with animated lunging transformations.
+- Menacing multi-eyed bioluminescent cluster.
 
 ## 12.2 Ranged Alien — Rift Spitter
 
-Behavior:
+**Behavior:**
+1. Detect player position and maintain standoff range ($12.0 \le R \le 22.0$).
+2. Hover and strafe perpendicularly to player line of sight.
+3. Charge energy core with accelerating spin animation.
+4. Fire plasma projectile toward player coordinates.
+5. Reposition if player closes in.
 
-1. Detect player.
-2. Maintain distance.
-3. Aim toward approximate player position.
-4. Fire projectile.
-5. Reposition if too close.
-
-Projectile behavior can be simple linear motion.
-
-No advanced pathfinding is required.
+**Visual Aesthetic (M2 Deliverable):**
+- Floating dimensional crystal prism/monolith.
+- Orbital rotating shard rings (`glRotatef`) that spin faster during attack windup.
+- Glowing pulsing plasma eye/emitter.
+- No ground legs (pure hovering dimensional entity).
 
 ---
 
 # 13. Boss — Rift Guardian
 
-One boss only.
+One final boss encounter only.
+
+## 13.1 Design & Phase Mechanics
+
+The **Rift Guardian** is a colossal dimensional nexus entity:
+- **Phase 1:** Core protected by 4 rotating orbital shield obelisks. Direct shots to shields deal reduced damage. Fires alternating plasma bursts.
+- **Phase 2 (HP $\le 50\%$):** Shield plates expand and rotate rapidly, unleashing radial shockwave bursts and aggressive arena-wide energy discharges.
+
+**Visual Aesthetic (M2 Deliverable):**
+- Massive pulsating central obsidian polyhedron core.
+- Floating independent orbiting shield obelisks with distinct transformation hierarchies.
+- Dynamic point-light emission and glowing dimensional runes.
+
+---
 
 ## 13.1 Concept
 
@@ -1142,9 +1153,20 @@ Do not add external packages simply because they make a feature easier unless th
 
 # 24. Scene Creation Prompts
 
-These prompts are intended for generating concept/reference images. They are **visual references**, not textures or final 3D assets unless explicitly converted later.
+These prompts are intended for generating concept/reference images. They are **visual references and texture-ready assets** conforming strictly to standard OpenGL-compatible image formats.
 
 When generating images for this project, preserve the same visual language across all scenes.
+
+## 24.0 Image Format & OpenGL Compatibility Standards
+
+All reference, concept, and potential texture images MUST adhere to the following OpenGL-compliant specifications:
+* **Image Format:** Standard lossless **PNG (`.png`)** with 24-bit RGB or 32-bit RGBA color channels.
+* **OpenGL Texture Pipeline:** Decodable via Python Pillow/PIL into raw byte arrays for `glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)`.
+* **Aspect Ratios:**
+  - **Environment / Arena Scenes:** `16:9` widescreen (`1920x1080` or `1280x720`).
+  - **Characters / Aliens / Beacons / Props:** `1:1` square (`1024x1024` or `512x512`).
+  - **Effects / VFX Frames:** `16:9` widescreen.
+* **Storage Location:** `assets/generated_images/<filename>.png`.
 
 ## 24.1 Global Visual Direction
 
@@ -1152,17 +1174,20 @@ Use this base context with scene prompts:
 
 > Stylized-realistic sci-fi computer graphics concept art for a university OpenGL game project, clean readable shapes, modular geometric architecture, strong cinematic lighting, moderate detail, practical game-environment design, no text, no logos, no UI, designed so a student can reconstruct the scene procedurally from primitive geometry.
 
-## 24.2 Arena 1 Prompt
+## 24.2 Arena 1 Prompt (Kepler Relay)
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `16:9` | **Target:** `assets/generated_images/arena_01_kepler_relay_concept_v01.png`
 
-> Create a wide game-environment concept image for **Kepler Relay**, a damaged human communications station. Show modular metallic corridors opening into a medium-sized combat room, industrial wall panels, structural beams, vents, cables, floor panels, a clearly visible glowing Rift Beacon, cool artificial overhead lighting, a few emergency red lights, subtle smoke/particles, clean navigable combat space, practical low-to-medium geometric complexity, cinematic perspective, no characters, no UI, no text. The environment must look realistically buildable from boxes, cylinders, planes, and simple procedural modules in OpenGL.
+> Create a wide game-environment concept image in PNG format for **Kepler Relay**, a damaged human communications station. Show modular metallic corridors opening into a medium-sized combat room, industrial wall panels, structural beams, vents, cables, floor panels, a clearly visible glowing Rift Beacon, cool artificial overhead lighting, a few emergency red lights, subtle smoke/particles, clean navigable combat space, practical low-to-medium geometric complexity, cinematic perspective, no characters, no UI, no text. The environment must look realistically buildable from boxes, cylinders, planes, and simple procedural modules in OpenGL.
 
-## 24.3 Arena 2 Prompt
+## 24.3 Arena 2 Prompt (Sundered Rift)
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `16:9` | **Target:** `assets/generated_images/arena_02_sundered_rift_concept_v01.png`
 
-> Create a wide game-environment concept image for **Sundered Rift**, an alien Rift chamber. Show a large open combat arena with an angular alien floor, towering organic-mechanical structures, glowing Rift energy veins, a prominent circular Rift Beacon, darker surroundings, dramatic cyan/blue/purple energy lighting, floating particles, a central platform suitable for a boss battle, readable paths and open movement space, moderate geometric complexity, cinematic perspective, no characters, no UI, no text. The environment must be practical to recreate with procedural primitives in OpenGL.
+> Create a wide game-environment concept image in PNG format for **Sundered Rift**, an alien Rift chamber. Show a large open combat arena with an angular alien floor, towering organic-mechanical structures, glowing Rift energy veins, a prominent circular Rift Beacon, darker surroundings, dramatic cyan/blue/purple energy lighting, floating particles, a central platform suitable for a boss battle, readable paths and open movement space, moderate geometric complexity, cinematic perspective, no characters, no UI, no text. The environment must be practical to recreate with procedural primitives in OpenGL.
 
 ## 24.4 Rift Beacon Prompt
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `1:1` | **Target:** `assets/generated_images/rift_beacon_concept_v01.png`
 
-> Design a standalone **Rift Beacon** for the game Riftwalker: Paradox Protocol. A futuristic circular teleportation platform with a thick glowing ring, central spatial distortion, rotating energy bands, small orbiting particles, simple mechanical base, strong emissive-looking energy, sci-fi but geometrically practical, front three-quarter view, clean silhouette, dark neutral background, no text, no UI. Make the design easy to reproduce using torus/ring geometry, cylinders, quads, particles, and simple transformations in OpenGL.
+> Design a standalone **Rift Beacon** in PNG format for the game Riftwalker: Paradox Protocol. A futuristic circular teleportation platform with a thick glowing ring, central spatial distortion, rotating energy bands, small orbiting particles, simple mechanical base, strong emissive-looking energy, sci-fi but geometrically practical, front three-quarter view, clean silhouette, dark neutral background, no text, no UI. Make the design easy to reproduce using torus/ring geometry, cylinders, quads, particles, and simple transformations in OpenGL.
 
 ---
 
@@ -1178,6 +1203,8 @@ Before generating the image, write a small note containing:
 Asset/Scene Name:
 Purpose:
 Arena:
+Target Format: PNG (.png)
+Aspect Ratio: 16:9 or 1:1
 Approximate dimensions:
 Main primitives:
 Color/material direction:
@@ -1198,7 +1225,10 @@ Use a clear filename such as:
 
 ```text
 arena_01_kepler_relay_concept_v01.png
-rift_beacon_concept_v02.png
+arena_02_sundered_rift_concept_v01.png
+rift_beacon_concept_v01.png
+rift_stalker_concept_v01.png
+rift_spitter_concept_v01.png
 rift_guardian_concept_v01.png
 ```
 
@@ -1227,37 +1257,48 @@ If the generated concept contains dozens of details, choose only the details tha
 
 # 25. Character / Object Reference Prompts
 
+All character and object concept images are generated in standard **PNG (`.png`) format with 1:1 square aspect ratio** to allow direct inspection and optional OpenGL 2D billboard/texture mapping.
+
 ## 25.1 Astronaut Prompt
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `1:1` | **Target:** `assets/generated_images/astronaut_concept_v01.png`
 
-> Design a procedural-friendly sci-fi astronaut for the university OpenGL game **Riftwalker: Paradox Protocol**. Full-body humanoid astronaut wearing a compact experimental Rift-Chrono suit, spherical helmet, dark visor, segmented torso, cylindrical arms and legs, small backpack, compact energy weapon. The body must be composed visually from spheres, cylinders, boxes, and simple capsule-like primitives. Clear articulated joints, readable silhouette, practical proportions, front three-quarter view, neutral background, no text, no UI.
+> Design a procedural-friendly sci-fi astronaut in PNG format for the university OpenGL game **Riftwalker: Paradox Protocol**. Full-body humanoid astronaut wearing a compact experimental Rift-Chrono suit, spherical helmet, dark visor, segmented torso, cylindrical arms and legs, small backpack, compact energy weapon. The body must be composed visually from spheres, cylinders, boxes, and simple capsule-like primitives. Clear articulated joints, readable silhouette, practical proportions, front three-quarter view, neutral background, no text, no UI.
 
-## 25.2 Melee Alien Prompt
+## 25.2 Melee Alien Prompt (Rift Stalker — Crystalline Void)
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `1:1` | **Target:** `assets/generated_images/rift_stalker_concept_v01.png`
 
-> Design a procedural alien enemy called **Rift Stalker** for a university OpenGL graphics project. Build its visual form around a curved central spine, multiple articulated clawed limbs, simple spherical glowing biological nodes, an aggressive but readable silhouette, slightly asymmetric creature anatomy, dark organic body with luminous accents, front three-quarter view, neutral background, no text, no UI. The design must be reconstructable from curves, cylinders, spheres, and repeated transformed limb segments.
+> Design a procedural Crystalline Void alien enemy called **Rift Stalker** in PNG format for a university OpenGL graphics project. Aggressive predatory quadrupedal silhouette constructed visually from sharp geometric obsidian shards, faceted angular carapace plates, glowing cyan and violet rift energy fissures pulsing through its core, and articulated crystalline bladed front limbs. Low-slung predatory stance, faceted geometry easily constructable with cubes, cones, and polyhedra, front three-quarter view, neutral dark sci-fi background, no text, no UI.
 
-## 25.3 Ranged Alien Prompt
+## 25.3 Ranged Alien Prompt (Rift Spitter — Floating Prism)
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `1:1` | **Target:** `assets/generated_images/rift_spitter_concept_v01.png`
 
-> Design a procedural alien enemy called **Rift Spitter** for a university OpenGL project. Creature with a curved spine, fewer but longer limbs, a distinctive glowing mouth/core for ranged attacks, spherical biological nodes, angular organic silhouette, dark body with luminous Rift energy, front three-quarter view, neutral background, no text, no UI. The design should be practical to generate by changing parameters of a reusable procedural creature function.
+> Design a procedural Crystalline Void alien enemy called **Rift Spitter** in PNG format for a university OpenGL project. Hovering dimensional entity composed of a floating central crystal monolith / prism surrounded by concentric orbital rotating shard rings and floating polyhedral fragments. Pulsating bioluminescent plasma eye charging a cyan energy bolt, no ground legs (pure floating/hovering entity), clean geometric faceted silhouette practical to build with OpenGL matrix transformations and rotation stacks, front three-quarter view, neutral dark background, no text, no UI.
 
-## 25.4 Boss Prompt
+## 25.4 Boss Prompt (Rift Guardian — Dimensional Nexus)
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `1:1` | **Target:** `assets/generated_images/rift_guardian_concept_v01.png`
 
-> Design the **Rift Guardian** boss for Riftwalker: Paradox Protocol. A large procedural alien built from a sweeping central spine, many articulated limbs, a massive glowing Rift core, symmetrical energy rings, threatening silhouette, readable weak point at the center, dark alien material with strong luminous accents, standing on a circular Rift platform, cinematic three-quarter view, neutral dark background, no text, no UI. The design must remain practical to approximate with procedural OpenGL primitives.
+> Design the **Rift Guardian** boss in PNG format for Riftwalker: Paradox Protocol. A colossal dimensional nexus entity featuring a massive pulsating central obsidian polyhedron core surrounded by four independent floating orbiting shield obelisks/plates. Symmetrical geometric rift energy rings, cyan and purple energetic lightning arcing between crystal facets, menacing floating silhouette, readable central weak point core, hovering above a circular glowing Rift Beacon platform, cinematic three-quarter view, neutral dark void background, no text, no UI.
 
 ---
 
 # 26. Effects Reference Prompts
 
-## 26.1 Blink Effect Prompt
+All visual effects references are generated in standard **PNG (`.png`) format with 16:9 widescreen aspect ratio**.
 
-> Create a game VFX concept for a short-range astronaut Blink teleport. Show a bright source burst, translucent ghost silhouette where the astronaut started, a sharp spatial streak connecting source and destination, particles expanding outward at both ends, clean sci-fi energy, dark background, centered composition, no UI, no text. Design it so it can be approximated with transparent quads, particles, rings, and simple animated geometry in OpenGL.
+## 26.1 Blink Effect Prompt
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `16:9` | **Target:** `assets/generated_images/vfx_blink_concept_v01.png`
+
+> Create a game VFX concept in PNG format for a short-range astronaut Blink teleport. Show a bright source burst, translucent ghost silhouette where the astronaut started, a sharp spatial streak connecting source and destination, particles expanding outward at both ends, clean sci-fi energy, dark background, centered composition, no UI, no text. Design it so it can be approximated with transparent quads, particles, rings, and simple animated geometry in OpenGL.
 
 ## 26.2 Chrono Slow Prompt
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `16:9` | **Target:** `assets/generated_images/vfx_chrono_slow_concept_v01.png`
 
-> Create a visual-effect concept for **Chrono Slow** in a sci-fi OpenGL game. Show a normal astronaut moving clearly while alien enemies and projectiles appear slowed, subtle ghost trails behind enemies, cool blue temporal distortion, thin circular energy ripples, restrained screen-space feel, cinematic but practical VFX, no UI, no text.
+> Create a visual-effect concept in PNG format for **Chrono Slow** in a sci-fi OpenGL game. Show a normal astronaut moving clearly while alien enemies and projectiles appear slowed, subtle ghost trails behind enemies, cool blue temporal distortion, thin circular energy ripples, restrained screen-space feel, cinematic but practical VFX, no UI, no text.
 
 ## 26.3 Teleport Transition Prompt
+* **Format:** `PNG (.png)` | **Aspect Ratio:** `16:9` | **Target:** `assets/generated_images/vfx_teleport_transition_concept_v01.png`
 
-> Create a cinematic gameplay frame showing an astronaut stepping into a glowing Rift Beacon during teleportation. Circular energy ring, spatial distortion, swirling particles, brief white-blue flash, destination-like depth visible through the portal, futuristic space-station environment, readable silhouette, practical game VFX aesthetic, no UI, no text.
+> Create a cinematic gameplay frame in PNG format showing an astronaut stepping into a glowing Rift Beacon during teleportation. Circular energy ring, spatial distortion, swirling particles, brief white-blue flash, destination-like depth visible through the portal, futuristic space-station environment, readable silhouette, practical game VFX aesthetic, no UI, no text.
 
 ---
 

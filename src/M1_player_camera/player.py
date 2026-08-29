@@ -1,7 +1,7 @@
 """Player Entity coordinating Rig, Movement, Weapons, Camera, and Stats."""
 from OpenGL.GL import glPushMatrix, glPopMatrix, glTranslatef, glRotatef
 from src.shared.math3d import Vector3, clamp
-from src.shared.constants import MAX_PLAYER_HP, MAX_CHRONO_ENERGY, PLAYER_RADIUS
+from src.shared.constants import MAX_PLAYER_HP, MAX_CHRONO_CHARGE, PLAYER_RADIUS
 from src.M1_player_camera.astronaut_rig import AstronautRig
 from src.M1_player_camera.player_movement import PlayerMovement
 from src.M1_player_camera.player_weapon import PlayerWeapon
@@ -15,8 +15,8 @@ class Player:
         self.position = start_pos
         self.hp = MAX_PLAYER_HP
         self.max_hp = MAX_PLAYER_HP
-        self.chrono_energy = MAX_CHRONO_ENERGY
-        self.max_chrono_energy = MAX_CHRONO_ENERGY
+        self.chrono_charge = 0.0
+        self.max_chrono_charge = MAX_CHRONO_CHARGE
         self.radius = PLAYER_RADIUS
         self.is_first_person = False
 

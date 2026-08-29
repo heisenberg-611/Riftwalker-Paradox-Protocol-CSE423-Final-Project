@@ -288,13 +288,13 @@ def special_up_callback(key, x, y):
 
 def mouse_motion_callback(x, y):
     if app:
-        dx = x - app.input_mgr.mouse_pos[0]
-        dy = y - app.input_mgr.mouse_pos[1]
         app.input_mgr.on_mouse_motion(x, y)
-        if app.player.is_first_person:
-            app.player.fp_cam.update_orientation(dx, dy)
-        else:
-            app.player.tp_cam.update_orientation(dx, dy)
+        dx, dy = app.input_mgr.mouse_delta
+        if dx != 0 or dy != 0:
+            if app.player.is_first_person:
+                app.player.fp_cam.update_orientation(dx, dy)
+            else:
+                app.player.tp_cam.update_orientation(dx, dy)
 
 
 def mouse_button_callback(button, state, x, y):

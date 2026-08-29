@@ -15,15 +15,16 @@
 
 ## Team Member 2 (M2) — Enemies & Combat Systems
 - **Directory**: `src/M2_enemies_combat/`
+- **Visual Aesthetic**: Crystalline Void Horrors (Obsidian shard geometry, glowing rift fissures, floating crystal prisms)
 - **Assigned Modules**:
-  - `alien_generator.py`: Procedural alien geometry generator (carapaces, legs, heads)
-  - `enemy_base.py`: Base class for AI, pathing, states, and hitboxes
-  - `melee_rift_stalker.py`: Aggressive melee rushing alien
-  - `ranged_rift_spitter.py`: Ranged acid/plasma projectile shooter
-  - `rift_guardian_boss.py`: Final multi-stage boss with rotating energy shields
-  - `weapon_system.py`: Bullet pools, firing logic, muzzle positions
-  - `raycast.py`: Raycasting algorithm for precision hitscan detection
-  - `collision.py`: Bounding sphere and AABB collision resolution
+  - `alien_generator.py`: Procedural Crystalline Void alien generator (hierarchical matrix stacks, floating shard rings, rift cores)
+  - `enemy_base.py`: Base class for AI, pathing, states, hitboxes, and Chrono Slow time scaling
+  - `melee_rift_stalker.py`: Aggressive melee rushing shadow-hound with bladed limbs
+  - `ranged_rift_spitter.py`: Floating dimensional crystal prism/spitter with rotating shard rings
+  - `rift_guardian_boss.py`: Final multi-stage boss with rotating orbital shield obelisks
+  - `weapon_system.py`: Combat firing rates, damage application, projectile pooling
+  - `raycast.py`: Raycasting algorithm for precision hitscan detection using `src/shared/collision.py`
+  - `collision.py`: Combat collision handler
 
 ---
 
