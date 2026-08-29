@@ -75,6 +75,89 @@ python -m src.main
 
 ---
 
+## 🛡️ Git Workflow & Main Branch Protection Policy
+
+To protect the stability of the master build and prevent accidental overwrites or merge conflicts across the 4 teammates, **direct pushes to the `main` branch are strictly prohibited**.
+
+All development by team members and AI assistants must follow the **Feature Branch & Pull Request (PR)** model.
+
+### 📌 Core Rules for Everyone (Members & AI Assistants)
+
+1. **Never commit or push directly to `main`**:
+   - Always create a new descriptive branch for each feature or bugfix (e.g., `feature/m1-astronaut-rig`, `feature/m2-alien-generator`, `feature/m3-arena-kepler`, `feature/m4-chrono-hud`, `fix/hud-font-fallback`).
+2. **One Feature, One Branch**:
+   - Keep branch changes focused strictly on your module's assigned tasks.
+3. **Pull Request (PR) Requirement**:
+   - Push your feature branch to GitHub and open a Pull Request targeting `main`.
+4. **Clean Merge Condition**:
+   - A PR may only be merged into `main` if:
+     - ✅ **No merge conflicts** exist with `main`.
+     - ✅ **All unit tests pass** (`python3 -m unittest discover -s tests`).
+     - ✅ The code runs cleanly without breaking the PyOpenGL game loop.
+5. **Mandate for AI Assistants**:
+   - Any AI assistant executing changes must work within an isolated feature branch and prepare commits for PR review rather than pushing straight to `main`.
+
+---
+
+### 🚀 Standard Git Workflow (Step-by-Step)
+
+#### 1. Fetch latest changes from `main`
+```bash
+git checkout main
+git pull origin main
+```
+
+#### 2. Create and switch to your feature branch
+```bash
+# Branch naming convention: feature/m<module_number>-<feature_name>
+git checkout -b feature/m1-astronaut-rig
+```
+
+#### 3. Make changes and verify locally
+```bash
+# Verify unit tests pass
+python3 -m unittest discover -s tests
+
+# Test the game loop
+python -m src.main
+```
+
+#### 4. Stage and commit your changes
+```bash
+git add src/M1_player_camera/...
+git commit -m "feat(M1): implement articulated astronaut rig with walking animation"
+```
+
+#### 5. Push branch to GitHub
+```bash
+git push -u origin feature/m1-astronaut-rig
+```
+
+#### 6. Open Pull Request on GitHub
+- Go to the repository on GitHub: [heisenberg-611/Riftwalker--Paradox-Protocol-CSE423-Final-Project-](https://github.com/heisenberg-611/Riftwalker--Paradox-Protocol-CSE423-Final-Project-)
+- Click **"Compare & pull request"**.
+- Confirm base is `main` and compare is your feature branch.
+- If **"Able to merge"** (no conflicts) and tests pass, merge the PR into `main`.
+
+#### 7. Update your local `main` after merging
+```bash
+git checkout main
+git pull origin main
+```
+
+---
+
+### ⚠️ IMPORTANT NOTICE ABOUT `git push` FOR ALL MEMBERS
+
+> [!WARNING]
+> **CRITICAL PUSH SAFETY NOTICES:**
+> 1. **DO NOT run `git push origin main` directly.** Always push to your dedicated feature branch (`git push origin feature/<branch-name>`).
+> 2. **NEVER use `git push --force` or `-f` on `main`.** Force pushing can overwrite and permanently delete your teammates' merged work.
+> 3. **Resolve Conflicts Locally Before Merging:** If your PR has conflicts with `main`, switch to your branch locally, pull/merge latest `main` (`git pull origin main`), resolve conflicting files in your editor, commit the resolution, and push back to your branch.
+> 4. **Run Unit Tests Before Pushing:** Always execute `python3 -m unittest discover -s tests` before pushing to ensure math, physics, and logic invariants remain 100% functional.
+
+---
+
 ## 🤖 Team AI Onboarding Prompts (Zero-Context Starters)
 
 When each team member opens an AI assistant session without prior context, they should copy and paste their module's starter prompt below.
@@ -86,6 +169,7 @@ I am working on **Module M1 (Player & Camera Systems)** for the computer graphic
 ### Project Context & Specifications:
 - The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
 - Core technologies: Python 3, PyOpenGL, GLUT, pure Python vector/matrix math in `src/shared/math3d.py`, centralized inputs in `src/shared/input_manager.py`, and shared geometric collision tests in `src/shared/collision.py`.
+- **Git Branch Policy**: NEVER push directly to `main`. Create and work inside a dedicated feature branch (`feature/m1-<feature-name>`) and prepare changes for Pull Request (PR) after verifying unit tests (`python3 -m unittest discover -s tests`).
 
 ### My Ownership & Deliverables (`src/M1_player_camera/`):
 1. `astronaut_rig.py`: Procedural hierarchical 3D astronaut model using OpenGL matrix stacks (`glPushMatrix`/`glPopMatrix`) with articulated limbs and sinusoidal walking animations.
@@ -114,6 +198,7 @@ I am working on **Module M2 (Enemies & Combat Systems)** for the computer graphi
 ### Project Context & Specifications:
 - The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
 - Core technologies: Python 3, PyOpenGL, GLUT, vector/matrix math in `src/shared/math3d.py`, and shared geometric collision utilities in `src/shared/collision.py`.
+- **Git Branch Policy**: NEVER push directly to `main`. Create and work inside a dedicated feature branch (`feature/m2-<feature-name>`) and prepare changes for Pull Request (PR) after verifying unit tests (`python3 -m unittest discover -s tests`).
 
 ### My Ownership & Deliverables (`src/M2_enemies_combat/`):
 1. `alien_generator.py`: Procedural articulated alien creature generator with segmented carapaces, glowing bio-luminescent nodes, and multi-jointed spider/insectoid legs.
@@ -142,6 +227,7 @@ I am working on **Module M3 (World, Arenas & Teleportation)** for the computer g
 ### Project Context & Specifications:
 - The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
 - Core technologies: Python 3, PyOpenGL, GLUT, math in `src/shared/math3d.py`, and shared boundary clamping in `src/shared/collision.py`.
+- **Git Branch Policy**: NEVER push directly to `main`. Create and work inside a dedicated feature branch (`feature/m3-<feature-name>`) and prepare changes for Pull Request (PR) after verifying unit tests (`python3 -m unittest discover -s tests`).
 
 ### My Ownership & Deliverables (`src/M3_world_teleport/`):
 1. `world.py`: World coordinator managing active arena switching, coordinate mapping, and teleportation triggers.
@@ -170,6 +256,7 @@ I am working on **Module M4 (Rendering, Chrono, HUD & Integration)** for the com
 ### Project Context & Specifications:
 - The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
 - Core technologies: Python 3, PyOpenGL, GLUT, math in `src/shared/math3d.py`, and timing in `src/shared/game_time.py`.
+- **Git Branch Policy**: NEVER push directly to `main`. Create and work inside a dedicated feature branch (`feature/m4-<feature-name>`) and prepare changes for Pull Request (PR) after verifying unit tests (`python3 -m unittest discover -s tests`).
 
 ### My Ownership & Deliverables (`src/M4_rendering_gameplay/` and `src/main.py`):
 1. `renderer.py`: Master OpenGL 3D and 2D render pass orchestrator (clearing buffers, setting projection, rendering world, enemies, player, lighting, particles, and HUD overlay).
