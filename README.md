@@ -72,3 +72,125 @@ python -m src.main
 | `Shift`                | Blink Teleport (Stretch Feature)                      |
 | `R`                    | Restart Game                                          |
 | `Esc`                  | Exit Game                                             |
+
+---
+
+## 🤖 Team AI Onboarding Prompts (Zero-Context Starters)
+
+When each team member opens an AI assistant session without prior context, they should copy and paste their module's starter prompt below.
+
+### 👤 Member 1 (M1 — Player & Camera Systems)
+```markdown
+I am working on **Module M1 (Player & Camera Systems)** for the computer graphics game **Riftwalker: Paradox Protocol** built with **Python, PyOpenGL, and GLUT**.
+
+### Project Context & Specifications:
+- The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
+- Core technologies: Python 3, PyOpenGL, GLUT, pure Python vector/matrix math in `src/shared/math3d.py`, centralized inputs in `src/shared/input_manager.py`, and shared geometric collision tests in `src/shared/collision.py`.
+
+### My Ownership & Deliverables (`src/M1_player_camera/`):
+1. `astronaut_rig.py`: Procedural hierarchical 3D astronaut model using OpenGL matrix stacks (`glPushMatrix`/`glPopMatrix`) with articulated limbs and sinusoidal walking animations.
+2. `first_person_camera.py`: 1st-person FPS camera with pitch/yaw clamping and first-person viewmodel gun positioning.
+3. `third_person_camera.py`: 3rd-person follow/orbit camera with smooth tracking and distance offset.
+4. `player_movement.py`: WASD movement kinematics, arena boundary clamping via `src/shared/collision.py`, and orientation synchronization.
+5. `player_weapon.py`: **Weapon Visual Presentation** (astronaut 3D weapon mesh attached to the character's right hand and first-person viewmodel presentation with firing recoil animation).
+6. `player.py`: Player coordinator tying health, cameras, rig, movement, and viewmodel together.
+7. `blink_teleport.py`: *(Optional Stretch Feature)* Short-range combat dash.
+
+### Boundaries & Rules:
+- M1 owns weapon *visuals & viewmodel*, while M2 owns *combat logic, hitscan raycasting, and damage*.
+- Use `src/shared/collision.py` for spatial bounds checks. Do not build a separate collision system.
+- Standard vertical gravity (+Y up, floor at Y=0) is the baseline; do not assume arbitrary gravity.
+- No Inverse Kinematics (IK); use hierarchical forward trigonometry.
+
+Please review `PROJECT_SPEC.md` (Sections 2, 7, 8, 9, 10, 27A) and `src/M1_player_camera/` before implementing or modifying M1 code.
+```
+
+---
+
+### 👾 Member 2 (M2 — Enemies & Combat Systems)
+```markdown
+I am working on **Module M2 (Enemies & Combat Systems)** for the computer graphics game **Riftwalker: Paradox Protocol** built with **Python, PyOpenGL, and GLUT**.
+
+### Project Context & Specifications:
+- The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
+- Core technologies: Python 3, PyOpenGL, GLUT, vector/matrix math in `src/shared/math3d.py`, and shared geometric collision utilities in `src/shared/collision.py`.
+
+### My Ownership & Deliverables (`src/M2_enemies_combat/`):
+1. `alien_generator.py`: Procedural articulated alien creature generator with segmented carapaces, glowing bio-luminescent nodes, and multi-jointed spider/insectoid legs.
+2. `enemy_base.py`: Abstract enemy base class tracking HP, states (`IDLE`, `CHASE`, `ATTACK`, `DEAD`), bounding spheres, and Chrono Slow time scaling.
+3. `melee_rift_stalker.py`: Fast melee rusher AI that closes distance and performs leaping/lunging attacks.
+4. `ranged_rift_spitter.py`: Long-range projectile spitter AI that strafes and launches plasma balls at the player's position.
+5. `rift_guardian_boss.py`: Multi-stage final boss encounter featuring rotating orbital shield plates, radial shockwaves, and phased combat.
+6. `weapon_system.py`: **Combat Gameplay Logic** (firing rate timers, damage values, projectile pooling, and active projectile updates).
+7. `raycast.py`: Precision 3D hitscan raycasting against enemy bounding spheres/AABBs using `src/shared/collision.py`.
+
+### Boundaries & Rules:
+- M2 owns *combat logic, hit detection, damage, and projectile physics*, while M1 owns the *weapon mesh & viewmodel rendering*.
+- Use `src/shared/collision.py` for pure geometric tests (ray-sphere, sphere-sphere). M2 decides damage and death effects.
+- Enemy updates and projectile movement must be scaled by `game_dt` (`dt * 0.30` during Chrono Slow).
+- Scope is locked to exactly 2 enemy types and 1 boss. Do not create extra enemy variants or multiple bosses.
+
+Please review `PROJECT_SPEC.md` (Sections 2, 10, 12, 13, 14, 15, 18, 27A) and `src/M2_enemies_combat/` before implementing or modifying M2 code.
+```
+
+---
+
+### 🌌 Member 3 (M3 — World, Arenas & Teleportation)
+```markdown
+I am working on **Module M3 (World, Arenas & Teleportation)** for the computer graphics game **Riftwalker: Paradox Protocol** built with **Python, PyOpenGL, and GLUT**.
+
+### Project Context & Specifications:
+- The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
+- Core technologies: Python 3, PyOpenGL, GLUT, math in `src/shared/math3d.py`, and shared boundary clamping in `src/shared/collision.py`.
+
+### My Ownership & Deliverables (`src/M3_world_teleport/`):
+1. `world.py`: World coordinator managing active arena switching, coordinate mapping, and teleportation triggers.
+2. `arena_base.py`: Abstract arena base class holding boundaries, spawn points, and environment props.
+3. `arena_01_kepler_relay.py`: Arena 1 environment — high-tech metallic relay station with industrial platforms, perimeter barriers, and server towers.
+4. `arena_02_sundered_rift.py`: Arena 2 environment — floating cosmic asteroid wasteland with obsidian ground, floating hazard platforms, and glowing crystal spires.
+5. `environment_generator.py`: Modular procedural geometry builder for crates, barricades, pillars, and crystal clusters.
+6. `rift_beacon.py`: **Rift Beacon Platform (REQUIRED)** — interactive beacon platform featuring glowing base, spinning concentric torus rings, and activation radius detection ($R \le 3.5$).
+7. `gravity_zone.py`: *(Optional Stretch Feature)* Predefined low-gravity / jump-pad zone.
+
+### Boundaries & Rules:
+- **Rift Beacon Teleportation is a REQUIRED core feature**: Linked pair ($\text{Arena 1 Beacon A} \leftrightarrow \text{Arena 2 Beacon B}$).
+- Implemented as a clean scene state transition with coordinate reset, screen flash, and particles. **Do NOT implement optical portals or simulated wormholes.**
+- Core movement model uses standard vertical gravity (+Y up). Do not implement arbitrary wall/ceiling gravity systems.
+- Use `src/shared/collision.py` for arena boundary limits and obstacle bounding boxes.
+
+Please review `PROJECT_SPEC.md` (Sections 2, 4, 5, 16, 17, 27A) and `src/M3_world_teleport/` before implementing or modifying M3 code.
+```
+
+---
+
+### 🎨 Member 4 (M4 — Rendering, Chrono, HUD & Integration)
+```markdown
+I am working on **Module M4 (Rendering, Chrono, HUD & Integration)** for the computer graphics game **Riftwalker: Paradox Protocol** built with **Python, PyOpenGL, and GLUT**.
+
+### Project Context & Specifications:
+- The project specification is strictly locked down in `PROJECT_SPEC.md` and `docs/architecture.md`. Treat `PROJECT_SPEC.md` as the single authoritative source of truth.
+- Core technologies: Python 3, PyOpenGL, GLUT, math in `src/shared/math3d.py`, and timing in `src/shared/game_time.py`.
+
+### My Ownership & Deliverables (`src/M4_rendering_gameplay/` and `src/main.py`):
+1. `renderer.py`: Master OpenGL 3D and 2D render pass orchestrator (clearing buffers, setting projection, rendering world, enemies, player, lighting, particles, and HUD overlay).
+2. `primitives.py`: Optimized procedural 3D drawing routines (cubes, cylinders, spheres, cones, torus rings).
+3. `lighting.py`: Multi-source dynamic lighting (directional sunlight `GL_LIGHT0`, dynamic beacon/hazard point lights `GL_LIGHT1`).
+4. `materials.py`: Specular, diffuse, and ambient material presets for suits, visors, metals, and alien carapaces.
+5. `particles.py`: Particle systems (teleport vortex swirl, hit sparks, jet thrusters, blood/death bursts).
+6. `effects.py`: Post-render visual filters (teleport cyan screen flash, Chrono Slow cool blue screen tint overlay).
+7. `chrono_slow.py`: **Chrono Slow Manager** (charge meter 0-100%, 100% activation gate via key `Q`, 0% reset, 5-second fixed timer countdown, 30% speed scale `0.30`).
+8. `hud.py`: **2D Orthographic HUD** (Suit Health bar, Chrono Charge/countdown bar, Score, Objective text prompts).
+9. `crosshair.py`: Dynamic interactive center crosshair with hitmarker animation feedback.
+10. `scoring.py`: Score manager tracking kills, combos, and letter rank evaluation ($S/A/B/C/D$).
+11. `game_state.py`: Global game state machine (`PLAYING`, `TELEPORTING`, `GAME_OVER`, `VICTORY`).
+12. `level_manager.py`: Enemy wave spawning and progression.
+13. `src/main.py`: Main executable entry point and GLUT callback orchestration.
+
+### Boundaries & Rules:
+- **Chrono Slow is simple delta-time scaling** (`game_dt = real_dt * 0.30`), NOT full world rewind or state buffering.
+- Player, camera, particles, and HUD update with unscaled `real_dt`; enemies, projectiles, and world physics update with scaled `game_dt`.
+- Resolve PyOpenGL GLUT bitmap fonts lazily inside rendering methods to avoid C-pointer reference issues.
+
+Please review `PROJECT_SPEC.md` (Sections 2, 6, 19, 20, 24, 25, 27A, 28) and `src/M4_rendering_gameplay/` before implementing or modifying M4 code.
+```
+
