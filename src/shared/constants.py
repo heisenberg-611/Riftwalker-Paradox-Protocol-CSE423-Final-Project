@@ -35,10 +35,13 @@ BLINK_COOLDOWN = 3.0  # seconds
 BLINK_ENERGY_COST = 20.0
 
 # Chrono Slow Mechanics
-MAX_CHRONO_ENERGY = 100.0
-CHRONO_DRAIN_RATE = 20.0   # energy per second while active
-CHRONO_RECHARGE_RATE = 10.0 # energy per second while inactive
-CHRONO_SLOW_FACTOR = 0.25  # 25% speed for enemies/world
+MAX_CHRONO_CHARGE = 100.0
+CHRONO_SLOW_DURATION = 5.0    # 5 seconds active duration
+CHRONO_SLOW_FACTOR = 0.30     # 30% speed for enemies/world
+CHRONO_CHARGE_KILL_STALKER = 25.0
+CHRONO_CHARGE_KILL_SPITTER = 35.0
+CHRONO_CHARGE_BOSS_HIT = 10.0
+CHRONO_CHARGE_PICKUP = 25.0
 
 # Teleportation Sequence
 TELEPORT_ACTIVATION_RADIUS = 3.5

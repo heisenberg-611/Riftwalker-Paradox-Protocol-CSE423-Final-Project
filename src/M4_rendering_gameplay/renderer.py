@@ -94,10 +94,11 @@ class MasterRenderer:
             height=self.height,
             hp=player.hp,
             max_hp=player.max_hp,
-            chrono_energy=chrono_manager.energy,
-            max_chrono=chrono_manager.max_energy,
+            chrono_charge=chrono_manager.charge,
+            max_chrono=chrono_manager.max_charge,
             score=score_manager.score,
             is_chrono_active=chrono_manager.is_active,
+            chrono_time_remaining=chrono_manager.active_time_remaining,
             can_teleport=can_teleport,
             is_first_person=player.is_first_person,
             game_state_str=game_state.current_state

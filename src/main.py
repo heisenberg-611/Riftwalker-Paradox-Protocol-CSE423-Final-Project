@@ -22,7 +22,13 @@ from src.shared.constants import (
     STATE_GAME_OVER,
     STATE_VICTORY,
     ARENA_01_KEPLER_RELAY,
-    ARENA_02_SUNDERED_RIFT
+    ARENA_02_SUNDERED_RIFT,
+    ENEMY_MELEE_RIFT_STALKER,
+    ENEMY_RANGED_RIFT_SPITTER,
+    BOSS_RIFT_GUARDIAN,
+    CHRONO_CHARGE_KILL_STALKER,
+    CHRONO_CHARGE_KILL_SPITTER,
+    CHRONO_CHARGE_BOSS_HIT
 )
 from src.shared.math3d import Vector3
 from src.shared.game_time import GameTime
@@ -71,20 +77,20 @@ class GameApp:
         if self.input_mgr.was_key_just_pressed('v') or self.input_mgr.was_key_just_pressed('c'):
             self.player.toggle_camera()
 
-        # 2. Chrono Slow (Q)
+        # 2. Chrono Slow (Q) - requires 100% charge
         if self.input_mgr.was_key_just_pressed('q'):
-            is_active = self.chrono_mgr.toggle()
-            self.game_time.set_chrono_slow(is_active)
+            if self.chrono_mgr.activate():
+                self.game_time.set_chrono_slow(True)
+                self.renderer.particles.spawn_teleport_vortex(self.player.position, count=25)
 
         # 3. Blink Teleport (Shift / E)
         if self.input_mgr.was_key_just_pressed('e'):
-            if self.player.blink.is_ready() and self.chrono_mgr.energy >= self.player.blink.energy_cost:
+            if self.player.blink.is_ready():
                 current_yaw = self.player.fp_cam.yaw if self.player.is_first_person else self.player.tp_cam.yaw
                 new_pos = self.player.blink.execute_blink(self.player.position, current_yaw)
                 self.player.position = CollisionSystem.clamp_to_arena_bounds(
                     new_pos, self.world.current_arena.half_extent
                 )
-                self.chrono_mgr.energy -= self.player.blink.energy_cost
                 self.renderer.particles.spawn_teleport_vortex(self.player.position, count=15)
 
         # 4. Arena Rift Teleportation (F)
@@ -143,9 +149,17 @@ class GameApp:
                         self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=10)
                         if hit.hit_enemy.is_dead:
                             self.score_mgr.add_kill(hit.hit_enemy.enemy_id)
-                            # Check win condition if boss died
-                            if hit.hit_enemy.enemy_id == "BOSS_RIFT_GUARDIAN":
+                            # Reward Chrono Charge on enemy kills
+                            if hit.hit_enemy.enemy_id == ENEMY_MELEE_RIFT_STALKER:
+                                self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_STALKER)
+                            elif hit.hit_enemy.enemy_id == ENEMY_RANGED_RIFT_SPITTER:
+                                self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_SPITTER)
+                            elif hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
+                                self.chrono_mgr.add_charge(50.0)
                                 self.game_state.trigger_victory()
+                        else:
+                            if hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
+                                self.chrono_mgr.add_charge(CHRONO_CHARGE_BOSS_HIT)
 
     def update(self):
         real_dt = self.game_time.tick()

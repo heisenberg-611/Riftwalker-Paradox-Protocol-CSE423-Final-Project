@@ -13,7 +13,7 @@ In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental 
 
 ### Signature Mechanics
 - **Rift Teleportation:** Seamless travel between arenas via linked Rift Beacons.
-- **Chrono Slow:** Time dilation ability that slows down enemies and projectiles while the player moves normally.
+- **Chrono Slow:** 5-second time dilation ability (enemies/projectiles at 30% speed) charged through active combat and activated at 100% charge.
 - **Blink Teleport:** Short-range combat evasion dash.
 - **Dual Camera System:** Toggle smoothly between 3rd-Person exploration and 1st-Person precision aiming.
 - **Procedural Modeling:** Hierarchically articulated astronaut rig and procedurally generated multi-legged alien variants.
@@ -55,7 +55,7 @@ python -m src.main
 | `Mouse Movement` | Look / Aim (Pitch and Yaw) |
 | `Left Click` / `Space` | Fire Hitscan Weapon |
 | `V` / `C` | Toggle 1st Person / 3rd Person Camera |
-| `Q` | Activate Chrono Slow (Time Dilation) |
+| `Q` | Activate Chrono Slow (Requires 100% Charge, lasts 5s) |
 | `F` | Interact / Teleport (near Rift Beacon) |
 | `Shift` | Blink Teleport (Combat Dash) |
 | `R` | Restart Game |

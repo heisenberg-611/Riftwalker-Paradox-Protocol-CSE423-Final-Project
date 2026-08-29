@@ -9,7 +9,7 @@
 | `Mouse Move` | Aim / Camera Rotation | Free look |
 | `Left Click` / `Space` | Fire Weapon (Hitscan) | Combat |
 | `V` / `C` | Toggle 1st Person / 3rd Person View | Exploration / Precision Combat |
-| `Q` | Toggle Chrono Slow (Time Dilation) | Costs Chrono Energy |
+| `Q` | Activate Chrono Slow (5s Time Dilation) | Requires 100% Chrono Charge |
 | `F` | Interact / Activate Rift Beacon | When within beacon radius |
 | `Shift` | Blink Teleport (Directional Dash) | Cooldown-based |
 | `R` | Restart Game | After Game Over / Win |

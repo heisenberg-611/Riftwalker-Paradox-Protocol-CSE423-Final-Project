@@ -21,15 +21,40 @@ class TestGameplayLogic(unittest.TestCase):
         chrono = ChronoSlowManager()
         self.assertFalse(chrono.is_active)
         self.assertEqual(chrono.current_time_scale, 1.0)
+        self.assertEqual(chrono.charge, 0.0)
 
-        # Activate Chrono Slow
-        chrono.toggle()
+        # Cannot activate below 100% charge
+        self.assertFalse(chrono.can_activate())
+        self.assertFalse(chrono.activate())
+
+        # Accumulate charge via combat
+        chrono.add_charge(50.0)
+        self.assertEqual(chrono.charge, 50.0)
+        self.assertFalse(chrono.can_activate())
+
+        chrono.add_charge(50.0)
+        self.assertEqual(chrono.charge, 100.0)
+        self.assertTrue(chrono.can_activate())
+
+        # Activate Chrono Slow: consumes 100% charge, resets to 0%, starts 5s timer
+        success = chrono.activate()
+        self.assertTrue(success)
         self.assertTrue(chrono.is_active)
-        self.assertEqual(chrono.current_time_scale, 0.25)
+        self.assertEqual(chrono.charge, 0.0)
+        self.assertAlmostEqual(chrono.active_time_remaining, 5.0)
+        self.assertAlmostEqual(chrono.current_time_scale, 0.30)
 
-        # Drain energy
-        chrono.update(dt=2.0)  # Drains 40 energy
-        self.assertAlmostEqual(chrono.energy, 60.0)
+        # Update 3 seconds into slow
+        chrono.update(dt=3.0)
+        self.assertTrue(chrono.is_active)
+        self.assertAlmostEqual(chrono.active_time_remaining, 2.0)
+        self.assertAlmostEqual(chrono.current_time_scale, 0.30)
+
+        # Complete 5 seconds
+        chrono.update(dt=2.5)
+        self.assertFalse(chrono.is_active)
+        self.assertAlmostEqual(chrono.active_time_remaining, 0.0)
+        self.assertEqual(chrono.current_time_scale, 1.0)
 
     def test_scoring_multipliers(self):
         score_mgr = ScoreManager()

@@ -67,10 +67,11 @@ class HUD:
         height: int,
         hp: float,
         max_hp: float,
-        chrono_energy: float,
+        chrono_charge: float,
         max_chrono: float,
         score: int,
         is_chrono_active: bool,
+        chrono_time_remaining: float,
         can_teleport: bool,
         is_first_person: bool,
         game_state_str: str
@@ -119,7 +120,7 @@ class HUD:
         glColor3f(1.0, 1.0, 1.0)
         self.draw_text(x0, y0 + bar_h + 6, f"SUIT INTEGRITY: {int(hp)}/{int(max_hp)}")
 
-        # 2. Chrono Energy Bar
+        # 2. Chrono Charge Bar
         y1 = y0 + 40.0
         # Chrono Background
         glColor4f(0.1, 0.1, 0.15, 0.7)
@@ -131,22 +132,41 @@ class HUD:
         glEnd()
 
         # Chrono Filled Portion
-        chrono_ratio = max(0.0, min(chrono_energy / max_chrono, 1.0))
         if is_chrono_active:
-            glColor4f(0.0, 0.8, 1.0, 1.0)  # Bright Active Cyan
+            # Active 5.0s countdown bar
+            countdown_ratio = max(0.0, min(chrono_time_remaining / 5.0, 1.0))
+            glColor4f(0.0, 0.9, 1.0, 1.0)  # Bright Cyan
+            glBegin(GL_QUADS)
+            glVertex2f(x0, y1)
+            glVertex2f(x0 + bar_w * countdown_ratio, y1)
+            glVertex2f(x0 + bar_w * countdown_ratio, y1 + bar_h)
+            glVertex2f(x0, y1 + bar_h)
+            glEnd()
+            glColor3f(0.2, 1.0, 1.0)
+            self.draw_text(x0, y1 + bar_h + 6, f"CHRONO SLOW: {chrono_time_remaining:.1f}s REMAINING")
         else:
-            glColor4f(0.0, 0.45, 0.75, 0.8)
-        glBegin(GL_QUADS)
-        glVertex2f(x0, y1)
-        glVertex2f(x0 + bar_w * chrono_ratio, y1)
-        glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
-        glVertex2f(x0, y1 + bar_h)
-        glEnd()
-
-        # Chrono Text
-        status = "[ACTIVE - Q to cancel]" if is_chrono_active else "[Q to slow time]"
-        glColor3f(0.4, 0.9, 1.0)
-        self.draw_text(x0, y1 + bar_h + 6, f"CHRONO DILATION: {int(chrono_energy)}% {status}")
+            # Charging bar (0% to 100%)
+            chrono_ratio = max(0.0, min(chrono_charge / max_chrono, 1.0))
+            if chrono_charge >= max_chrono:
+                glColor4f(0.0, 1.0, 0.9, 1.0)  # Full 100% Glow
+                glBegin(GL_QUADS)
+                glVertex2f(x0, y1)
+                glVertex2f(x0 + bar_w * chrono_ratio, y1)
+                glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
+                glVertex2f(x0, y1 + bar_h)
+                glEnd()
+                glColor3f(0.0, 1.0, 0.9)
+                self.draw_text(x0, y1 + bar_h + 6, "CHRONO CHARGE: [100% READY - PRESS 'Q']")
+            else:
+                glColor4f(0.0, 0.45, 0.75, 0.8)
+                glBegin(GL_QUADS)
+                glVertex2f(x0, y1)
+                glVertex2f(x0 + bar_w * chrono_ratio, y1)
+                glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
+                glVertex2f(x0, y1 + bar_h)
+                glEnd()
+                glColor3f(0.5, 0.8, 1.0)
+                self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [DEFEAT ENEMIES]")
 
         # 3. Score & Info (Top Left)
         glColor3f(1.0, 0.85, 0.2)

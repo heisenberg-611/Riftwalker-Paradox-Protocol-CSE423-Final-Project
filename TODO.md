@@ -31,5 +31,5 @@
 - [ ] Implement dynamic multi-source lighting (Sun, Beacon Pointlights, Muzzle flashes)
 - [ ] Implement particle effect systems (Rift vortex, bullet impacts, jet thrusters, sparks)
 - [ ] Implement Chrono Slow time-dilation shader/visual distortion filter
-- [ ] Implement 2D OpenGL HUD overlay (Health, Chrono Energy, Crosshair, Score, Objective)
+- [ ] Implement 2D OpenGL HUD overlay (Health, Chrono Charge bar, Crosshair, Score, Objective)
 - [ ] Integrate full game loop (Start Screen -> Arena 1 -> Teleport -> Arena 2 Boss -> Victory/GameOver)
