@@ -77,6 +77,43 @@ htmlcov/
 *.env
 
 # ==========================================
+# OpenGL, Shaders & Graphics Tooling
+# ==========================================
+# PyOpenGL bundled package directory
+OpenGL/
+OpenGL_accelerate/
+PyOpenGL/
+
+# Shader binaries and compiled intermediate files
+*.spv
+*.spv.json
+*.glsl.bin
+*.shaderbin
+*.meshbin
+*.cache
+
+# Graphics debugging & GPU profiling captures (RenderDoc, Nsight, Apitrace, Metal)
+*.rdc
+*.rdc.tmp
+*.trace
+*.gputrace
+*.nvvp
+*.nsight-*
+*.nvsnap
+*.gpa
+
+# 3D Modeling backup / cache files (Blender, Maya, etc.)
+*.blend1
+*.blend2
+*.blend@
+*.mayaSwatches
+*.swatch
+
+# Compressed / Transcoded texture caches & temp dumps
+*.dds.cache
+*.ktx.cache
+
+# ==========================================
 # C / C++ / Build Outputs (if used)
 # ==========================================
 *.o
@@ -118,7 +155,7 @@ CMakeUserPresets.json
 .#*
 
 # ==========================================
-# Logs, Dumps & Temp Files
+# Logs, Dumps, Captures & Course Submission Archives
 # ==========================================
 *.log
 *.tmp
@@ -127,3 +164,8 @@ tmp/
 recordings/
 debug_output/
 screenshots/
+captures/
+*.zip
+*.tar.gz
+*.rar
+*.7z
