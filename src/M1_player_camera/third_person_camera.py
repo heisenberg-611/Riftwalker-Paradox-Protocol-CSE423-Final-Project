@@ -40,6 +40,18 @@ class ThirdPersonCamera:
         cam_z = target.z - forward.z * self.distance
         return Vector3(cam_x, cam_y, cam_z)
 
+    def get_basis_vectors(self):
+        forward = self.get_aim_direction()
+        world_up = Vector3(0.0, 1.0, 0.0)
+        right = world_up.cross(forward)
+        if right.length_squared() < 1e-6:
+            right = Vector3(1.0, 0.0, 0.0)
+        else:
+            right = right.normalized()
+        up = forward.cross(right).normalized()
+        return forward, right, up
+
+
     def apply(self, player_pos: Vector3):
         eye = self.get_cam_eye(player_pos)
         target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
@@ -49,5 +61,6 @@ class ThirdPersonCamera:
             target.x, target.y, target.z,
             0.0, 1.0, 0.0
         )
+
 
 

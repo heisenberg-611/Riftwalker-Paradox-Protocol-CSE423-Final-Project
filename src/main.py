@@ -200,42 +200,47 @@ class GameApp:
                 if self.player.weapon.trigger_shot():
                     active_cam = self.player.fp_cam if self.player.is_first_person else self.player.tp_cam
                     cam_eye = active_cam.get_cam_eye(self.player.position)
-                    aim_dir = active_cam.get_aim_direction()
+                    cam_forward, cam_right, cam_up = active_cam.get_basis_vectors()
 
-                    # Gun muzzle position in 3D world
+                    # Calculate visual weapon muzzle in world space
                     if self.player.is_first_person:
-                        gun_muzzle = self.player.position + Vector3(0.18, 1.5, 0.2)
+                        muzzle_world = self.player.weapon.get_fp_muzzle_world(
+                            cam_eye, cam_forward, cam_right, cam_up
+                        )
                     else:
-                        gun_muzzle = self.player.position + Vector3(0.35, 1.35, 0.25)
+                        muzzle_world = self.player.rig.get_tp_muzzle_world(
+                            self.player.position, self.player.tp_cam.yaw, self.player.tp_cam.pitch
+                        )
 
-                    # Spawn muzzle flash sparks
-                    self.renderer.particles.spawn_muzzle_flash(gun_muzzle)
+                    # Spawn muzzle flash sparks at the visual weapon tip
+                    self.renderer.particles.spawn_muzzle_flash(muzzle_world)
 
-                    # Raycast from camera eye directly through crosshair
-                    hit = RaycastSystem.fire_ray(cam_eye, aim_dir, self.enemies, self.player.weapon.range)
-                    if hit and hit.hit_enemy:
-                        end_pos = hit.hit_point
-                        self.renderer.particles.spawn_laser_tracer(gun_muzzle, end_pos)
-                        hit.hit_enemy.take_damage(self.player.weapon.damage)
+                    # Authoritative crosshair-driven gameplay raycast from camera eye
+                    aim_result = RaycastSystem.fire_ray(cam_eye, cam_forward, self.enemies, self.player.weapon.range)
+
+                    # Visual 3D laser tracer connects weapon muzzle directly to aim_point
+                    self.renderer.particles.spawn_laser_tracer(muzzle_world, aim_result.hit_point)
+
+                    if aim_result.hit_enemy:
+                        enemy = aim_result.hit_enemy
+                        enemy.take_damage(self.player.weapon.damage)
                         self.renderer.hud.crosshair.trigger_hit()
-                        self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=14)
-                        if hit.hit_enemy.is_dead:
-                            self.score_mgr.add_kill(hit.hit_enemy.enemy_id)
-                            self.renderer.particles.spawn_death_burst(hit.hit_enemy.position, count=24)
+                        self.renderer.particles.spawn_hit_sparks(aim_result.hit_point, count=14)
+                        if enemy.is_dead:
+                            self.score_mgr.add_kill(enemy.enemy_id)
+                            self.renderer.particles.spawn_death_burst(enemy.position, count=24)
                             # Reward Chrono Charge on enemy kills
-                            if hit.hit_enemy.enemy_id == ENEMY_MELEE_RIFT_STALKER:
+                            if enemy.enemy_id == ENEMY_MELEE_RIFT_STALKER:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_STALKER)
-                            elif hit.hit_enemy.enemy_id == ENEMY_RANGED_RIFT_SPITTER:
+                            elif enemy.enemy_id == ENEMY_RANGED_RIFT_SPITTER:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_SPITTER)
-                            elif hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
+                            elif enemy.enemy_id == BOSS_RIFT_GUARDIAN:
                                 self.chrono_mgr.add_charge(50.0)
                                 self.game_state.trigger_victory()
                         else:
-                            if hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
+                            if enemy.enemy_id == BOSS_RIFT_GUARDIAN:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_BOSS_HIT)
-                    else:
-                        end_pos = cam_eye + aim_dir * self.player.weapon.range
-                        self.renderer.particles.spawn_laser_tracer(gun_muzzle, end_pos)
+
 
 
 

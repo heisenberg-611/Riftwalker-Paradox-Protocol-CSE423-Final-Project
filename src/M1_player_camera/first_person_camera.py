@@ -29,6 +29,18 @@ class FirstPersonCamera:
             math.cos(rad_yaw) * math.cos(rad_pitch)
         ).normalized()
 
+    def get_basis_vectors(self):
+        forward = self.get_aim_direction()
+        world_up = Vector3(0.0, 1.0, 0.0)
+        right = world_up.cross(forward)
+        if right.length_squared() < 1e-6:
+            right = Vector3(1.0, 0.0, 0.0)
+        else:
+            right = right.normalized()
+        up = forward.cross(right).normalized()
+        return forward, right, up
+
+
     def apply(self, player_pos: Vector3):
         forward = self.get_aim_direction()
         eye = self.get_cam_eye(player_pos)
@@ -39,4 +51,5 @@ class FirstPersonCamera:
             target.x, target.y, target.z,
             0.0, 1.0, 0.0
         )
+
 
