@@ -49,6 +49,7 @@ from src.M4_rendering_gameplay.game_state import GameState
 from src.M4_rendering_gameplay.scoring import ScoreManager
 from src.M4_rendering_gameplay.level_manager import LevelManager
 from src.M4_rendering_gameplay.story_intro import StoryIntroManager
+from src.M4_rendering_gameplay.story_epilogue import StoryEpilogueManager
 
 
 class GameApp:
@@ -61,6 +62,7 @@ class GameApp:
         self.weapons = WeaponSystem()
         self.chrono_mgr = ChronoSlowManager()
         self.story_intro = StoryIntroManager()
+        self.story_epilogue = StoryEpilogueManager()
         self.game_state = GameState(initial_state=STATE_STORY)
         self.score_mgr = ScoreManager()
 
@@ -77,13 +79,14 @@ class GameApp:
         self.weapons = WeaponSystem()
         self.chrono_mgr = ChronoSlowManager()
         self.score_mgr = ScoreManager()
+        self.story_epilogue.reset()
         self.level_mgr = LevelManager()
         active_beacon = self.world.current_arena.rift_beacons[0] if self.world.current_arena.rift_beacons else None
         self.enemies = self.level_mgr.start_arena(ARENA_01_KEPLER_RELAY, beacon=active_beacon)
         self.input_mgr.first_mouse = True
 
     def handle_input(self, real_dt: float):
-        # 0. Story Introduction Screen Controls
+        # 0A. Story Introduction Screen Controls
         if self.game_state.current_state == STATE_STORY:
             # Advance Panel on Left Click / Enter / Space / Right Arrow
             if (self.input_mgr.was_mouse_button_just_pressed(0) or
@@ -102,9 +105,25 @@ class GameApp:
                 glutFullScreen()
             return
 
+        # 0B. Cinematic Victory Epilogue Screen Controls
+        if self.game_state.current_state == STATE_VICTORY:
+            # Advance Epilogue Panel on Left Click / Enter / Space / Right Arrow
+            if (self.input_mgr.was_mouse_button_just_pressed(0) or
+                self.input_mgr.was_key_just_pressed('\r') or
+                self.input_mgr.was_key_just_pressed('\n') or
+                self.input_mgr.was_key_just_pressed(' ') or
+                self.input_mgr.was_special_key_just_pressed(GLUT_KEY_RIGHT)):
+                self.story_epilogue.next_panel()
+            # Restart on 'R'
+            if self.input_mgr.was_key_just_pressed('r'):
+                self.reset_game()
+            # Fullscreen Toggle on F11
+            if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+                glutFullScreen()
+            return
 
-        # End-Game (Game Over / Victory) Screen Controls - Freeze Camera & Movement
-        if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
+        # End-Game (Game Over) Screen Controls
+        if self.game_state.current_state == STATE_GAME_OVER:
             # Restart on 'R'
             if self.input_mgr.was_key_just_pressed('r'):
                 self.reset_game()
@@ -260,8 +279,15 @@ class GameApp:
             self.input_mgr.end_frame()
             return
 
-        # If in Game Over or Victory, freeze world simulation, player, and enemies
-        if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
+        # If in Victory Epilogue, update epilogue particles and fade
+        if self.game_state.current_state == STATE_VICTORY:
+            self.handle_input(real_dt)
+            self.story_epilogue.update(real_dt)
+            self.input_mgr.end_frame()
+            return
+
+        # If in Game Over, freeze world simulation, player, and enemies
+        if self.game_state.current_state == STATE_GAME_OVER:
             self.handle_input(real_dt)
             self.renderer.particles.update(real_dt)
             self.renderer.hud.crosshair.update(real_dt)
@@ -374,6 +400,7 @@ class GameApp:
             can_teleport=can_teleport,
             dt=self.game_time.real_dt,
             story_intro=self.story_intro,
+            story_epilogue=self.story_epilogue,
             level_manager=self.level_mgr
         )
 
