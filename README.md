@@ -35,31 +35,32 @@ The game follows a structured narrative and wave-progression combat loop with st
 
 ```mermaid
 flowchart TD
-    A["🎬 Cinematic Story Intro<br>(STATE_STORY)"] -->|Space / Enter / Click / S| B["🛰️ Arena 1: Kepler Relay<br>(STATE_PLAYING)"]
+    A["🎬 Cinematic Story Intro<br>STATE_STORY"] -->|Space / Enter / Click / S| B["🛰️ Arena 1: Kepler Relay<br>STATE_PLAYING"]
     
     subgraph Kepler_Relay ["Kepler Relay Wave Combat"]
         B --> W1["Wave 1: 3 Melee Stalkers"]
-        W1 -->|Intermission (3.5s)| W2["Wave 2: 2 Stalkers + 2 Spitters"]
-        W2 -->|Intermission (3.5s)| W3["Wave 3: 3 Stalkers + 2 Spitters"]
-        W3 -->|All Waves Defeated| B_UNLOCK["🔓 Rift Beacon Online<br>(Amber -> Cyan Glow)"]
+        W1 -->|Intermission 3.5s| W2["Wave 2: 2 Stalkers + 2 Spitters"]
+        W2 -->|Intermission 3.5s| W3["Wave 3: 3 Stalkers + 2 Spitters"]
+        W3 -->|All Waves Defeated| B_UNLOCK["🔓 Rift Beacon Online<br>Amber to Cyan Glow"]
     end
     
-    B_UNLOCK -->|Stand Near Beacon + Press [F]| C["🌀 Dimensional Teleportation<br>(STATE_TELEPORTING)"]
-    C -->|Vortex Transition| D["🌌 Arena 2: Sundered Rift<br>(STATE_PLAYING)"]
+    B_UNLOCK -->|Stand Near Beacon + Press F| C["🌀 Dimensional Teleportation<br>STATE_TELEPORTING"]
+    C -->|Vortex Transition| D["🌌 Arena 2: Sundered Rift<br>STATE_PLAYING"]
     
     subgraph Sundered_Rift ["Sundered Rift Wave Combat & Boss"]
         D --> SW1["Wave 1: 3 Stalkers + 2 Spitters"]
-        SW1 -->|Intermission (3.5s)| SW2["Wave 2: 4 Stalkers + 3 Spitters"]
-        SW2 -->|Intermission (3.5s)| SW3["Wave 3: 2 Stalkers + 4 Spitters"]
-        SW3 -->|Intermission (3.5s)| BOSS["👑 Wave 4: Rift Guardian Boss<br>Phase 1 (Shields) -> Phase 2 (Rage)"]
+        SW1 -->|Intermission 3.5s| SW2["Wave 2: 4 Stalkers + 3 Spitters"]
+        SW2 -->|Intermission 3.5s| SW3["Wave 3: 2 Stalkers + 4 Spitters"]
+        SW3 -->|Intermission 3.5s| BOSS["👑 Wave 4: Rift Guardian Boss<br>Phase 1 Shields to Phase 2 Rage"]
     end
     
-    BOSS -->|Boss Eliminated| E["🏆 Cinematic Victory Epilogue<br>(STATE_VICTORY)"]
-    E --> RANK["📊 Performance Rank S / A / B / C / D<br>(Final Score & Accuracy)"]
-    RANK -->|Press [R]| A
+    BOSS -->|Boss Eliminated| E["🏆 Cinematic Victory Epilogue<br>STATE_VICTORY"]
+    E --> RANK["📊 Performance Rank S / A / B / C / D<br>Final Score and Accuracy"]
+    RANK -->|Press R| A
     
-    B & D -.->|Player HP = 0| F["💀 Game Over (STATE_GAME_OVER)"]
-    F -->|Press [R] to Restart| B
+    B -.->|Player HP 0| F["💀 Game Over<br>STATE_GAME_OVER"]
+    D -.->|Player HP 0| F
+    F -->|Press R to Restart| B
 ```
 
 ### 📋 Mission Progression Breakdown
