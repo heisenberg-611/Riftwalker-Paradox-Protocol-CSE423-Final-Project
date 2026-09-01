@@ -237,6 +237,59 @@ class TestGameplayLogic(unittest.TestCase):
         self.assertTrue(hasattr(rend, 'STATE_STORY'))
         self.assertTrue(hasattr(rend, 'STATE_TELEPORTING'))
 
+    def test_weapon_cooldown_and_overcharge(self):
+        from src.M1_player_camera.player_weapon import PlayerWeapon
+        weapon = PlayerWeapon()
+        self.assertTrue(weapon.can_fire())
+        self.assertEqual(weapon.get_charge_ratio(), 0.0)
+
+        # Standard shot (tap fire)
+        self.assertTrue(weapon.trigger_shot())
+        self.assertFalse(weapon.is_overcharged)
+        self.assertEqual(weapon.last_shot_damage, 25.0)
+        self.assertFalse(weapon.can_fire())
+
+        # Cooldown cycle over time
+        weapon.update(dt=0.15)
+        self.assertAlmostEqual(weapon.get_cooldown_ratio(), 0.50, places=2)
+        self.assertFalse(weapon.can_fire())
+
+        weapon.update(dt=0.20)
+        self.assertTrue(weapon.can_fire())
+
+        # Hold to Charge up to 100%
+        weapon.update(dt=0.30, is_holding_fire=True)
+        self.assertGreater(weapon.get_charge_ratio(), 0.50)
+        self.assertFalse(weapon.is_fully_charged())
+
+        weapon.update(dt=0.35, is_holding_fire=True)
+        self.assertTrue(weapon.is_fully_charged())
+
+        # Discharging full overcharge
+        self.assertTrue(weapon.trigger_shot())
+        self.assertTrue(weapon.is_overcharged)
+        self.assertEqual(weapon.last_shot_damage, 70.0)
+
+    def test_input_manager_release_events(self):
+        from src.shared.input_manager import InputManager
+        inp = InputManager()
+        # Key down and up
+        inp.on_key_down(b' ', 0, 0)
+        self.assertTrue(inp.is_key_down(' '))
+        self.assertTrue(inp.was_key_just_pressed(' '))
+        self.assertFalse(inp.was_key_just_released(' '))
+
+        inp.end_frame()
+        self.assertTrue(inp.is_key_down(' '))
+        self.assertFalse(inp.was_key_just_pressed(' '))
+
+        inp.on_key_up(b' ', 0, 0)
+        self.assertFalse(inp.is_key_down(' '))
+        self.assertTrue(inp.was_key_just_released(' '))
+
+        inp.end_frame()
+        self.assertFalse(inp.was_key_just_released(' '))
+
 
 if __name__ == '__main__':
     unittest.main()

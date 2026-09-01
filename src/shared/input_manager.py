@@ -18,7 +18,9 @@ class InputManager:
         self.mouse_delta: Tuple[float, float] = (0.0, 0.0)
         self.mouse_buttons: Set[int] = set()
         self.just_pressed_mouse_buttons: Set[int] = set()
+        self.just_released_mouse_buttons: Set[int] = set()
         self.just_pressed_keys: Set[str] = set()
+        self.just_released_keys: Set[str] = set()
         self.just_pressed_special_keys: Set[int] = set()
         self.first_mouse: bool = True
 
@@ -60,6 +62,8 @@ class InputManager:
     def on_key_up(self, key, x: int, y: int):
         char = self._parse_key(key)
         if char:
+            if char in self.keys_down:
+                self.just_released_keys.add(char)
             self.keys_down.discard(char)
 
 
@@ -107,6 +111,8 @@ class InputManager:
                 self.just_pressed_mouse_buttons.add(button)
             self.mouse_buttons.add(button)
         else:
+            if button in self.mouse_buttons:
+                self.just_released_mouse_buttons.add(button)
             self.mouse_buttons.discard(button)
         self.last_x = x
         self.last_y = y
@@ -118,17 +124,25 @@ class InputManager:
     def was_key_just_pressed(self, key: str) -> bool:
         return key.lower() in self.just_pressed_keys
 
+    def was_key_just_released(self, key: str) -> bool:
+        return key.lower() in self.just_released_keys
+
     def is_mouse_button_down(self, button: int) -> bool:
         return button in self.mouse_buttons
 
     def was_mouse_button_just_pressed(self, button: int) -> bool:
         return button in self.just_pressed_mouse_buttons
 
+    def was_mouse_button_just_released(self, button: int) -> bool:
+        return button in self.just_released_mouse_buttons
+
     def end_frame(self):
         """Clear single-frame trigger buffers at the end of the frame."""
         self.just_pressed_keys.clear()
+        self.just_released_keys.clear()
         self.just_pressed_special_keys.clear()
         self.just_pressed_mouse_buttons.clear()
+        self.just_released_mouse_buttons.clear()
         self.mouse_delta = (0.0, 0.0)
 
 

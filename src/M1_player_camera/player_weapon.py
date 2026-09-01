@@ -3,7 +3,13 @@ import math
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-from src.shared.constants import PRIMARY_FIRE_COOLDOWN, PRIMARY_FIRE_DAMAGE, PRIMARY_FIRE_RANGE
+from src.shared.constants import (
+    PRIMARY_FIRE_COOLDOWN,
+    PRIMARY_FIRE_DAMAGE,
+    PRIMARY_FIRE_RANGE,
+    OVERCHARGE_FIRE_TIME,
+    OVERCHARGE_DAMAGE
+)
 
 
 class PlayerWeapon:
@@ -13,24 +19,54 @@ class PlayerWeapon:
         self.range = PRIMARY_FIRE_RANGE
         self.time_since_last_shot = 999.0
         self.is_firing_effect_active = False
+        self.charge_time = 0.0
+        self.max_charge_time = OVERCHARGE_FIRE_TIME
+        self.is_charging = False
+        self.is_overcharged = False
+        self.last_shot_damage = PRIMARY_FIRE_DAMAGE
 
-    def update(self, dt: float):
+    def update(self, dt: float, is_holding_fire: bool = False):
         self.time_since_last_shot += dt
         if self.time_since_last_shot > 0.08:
             self.is_firing_effect_active = False
 
+        if self.can_fire() and is_holding_fire:
+            self.is_charging = True
+            self.charge_time = min(self.max_charge_time, self.charge_time + dt)
+        else:
+            if not is_holding_fire:
+                self.is_charging = False
+                self.charge_time = 0.0
+
     def can_fire(self) -> bool:
         return self.time_since_last_shot >= self.cooldown
+
+    def get_charge_ratio(self) -> float:
+        """Returns 0.0 to 1.0 charge percentage."""
+        return min(1.0, self.charge_time / self.max_charge_time) if self.max_charge_time > 0 else 0.0
+
+    def is_fully_charged(self) -> bool:
+        return self.get_charge_ratio() >= 1.0
 
     def get_cooldown_ratio(self) -> float:
         """Returns 0.0 (just fired) to 1.0 (ready to fire)."""
         return min(1.0, self.time_since_last_shot / self.cooldown)
 
-
     def trigger_shot(self) -> bool:
+        """
+        Discharges a shot (either standard or full overcharge).
+        Calculates damage scaling based on accumulated charge.
+        """
         if not self.can_fire():
             return False
+
+        charge_ratio = self.get_charge_ratio()
+        self.is_overcharged = charge_ratio >= 0.85
+        self.last_shot_damage = OVERCHARGE_DAMAGE if self.is_overcharged else self.damage
+
         self.time_since_last_shot = 0.0
+        self.charge_time = 0.0
+        self.is_charging = False
         self.is_firing_effect_active = True
         return True
 
@@ -146,15 +182,39 @@ class PlayerWeapon:
             Primitives.draw_textured_cube(1.0)
             glPopMatrix()
 
-            # 7. Muzzle Flash Flare on Fire
+            # 7A. Dynamic Hold-to-Charge Plasma Gathering Flare
+            if self.is_charging and self.charge_time > 0.0:
+                glDisable(GL_LIGHTING)
+                charge_ratio = self.get_charge_ratio()
+                pulse = math.sin(self.charge_time * 24.0) * 0.012
+                flare_rad = 0.02 + (charge_ratio * 0.06) + pulse
+                if charge_ratio >= 0.85:
+                    glColor4f(1.0, 0.90, 0.25, 0.95)
+                else:
+                    glColor4f(0.1, 0.95, 1.0, 0.85)
+                glPushMatrix()
+                glTranslatef(0.0, 0.015, 0.54)
+                glutSolidSphere(flare_rad, 8, 8)
+                glRotatef(self.charge_time * 360.0, 0.0, 0.0, 1.0)
+                glutSolidTorus(0.01, flare_rad * 1.3, 6, 12)
+                glPopMatrix()
+                glEnable(GL_LIGHTING)
+
+            # 7B. Muzzle Flash Flare on Fire
             if self.is_firing_effect_active:
                 glDisable(GL_LIGHTING)
-                glColor4f(0.4, 1.0, 1.0, 0.9)
+                if getattr(self, 'is_overcharged', False):
+                    glColor4f(1.0, 0.85, 0.2, 0.95)  # Heavy Golden Flare
+                    flare_sz = 0.12
+                else:
+                    glColor4f(0.4, 1.0, 1.0, 0.9)    # Standard Cyan Flare
+                    flare_sz = 0.085
+
                 glPushMatrix()
                 glTranslatef(0.0, 0.015, 0.56)
-                glutSolidSphere(0.085, 10, 10)
-                glColor4f(0.0, 0.85, 1.0, 0.6)
-                glutSolidTorus(0.018, 0.10, 8, 16)
+                glutSolidSphere(flare_sz, 10, 10)
+                glColor4f(1.0, 0.5, 0.1 if getattr(self, 'is_overcharged', False) else 0.85, 0.6)
+                glutSolidTorus(0.022, flare_sz * 1.2, 8, 16)
                 glPopMatrix()
                 glEnable(GL_LIGHTING)
 

@@ -176,7 +176,7 @@ class HUD:
                     glColor3f(0.5, 0.8, 1.0)
                     self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [KILLS / RIFT PICKUPS]")
 
-            # 3. Weapon Cooldown Bar (Bottom Left)
+            # 3. Weapon Cooldown & Overcharge Status Bar
             y2 = y1 + 40.0
             glColor4f(0.1, 0.1, 0.15, 0.7)
             glBegin(GL_QUADS)
@@ -187,18 +187,11 @@ class HUD:
             glEnd()
 
             w_ratio = max(0.0, min(weapon_cooldown_ratio, 1.0))
-            if w_ratio >= 1.0:
-                glColor4f(0.0, 0.95, 1.0, 0.95)  # Bright Cyan
-                glBegin(GL_QUADS)
-                glVertex2f(x0, y2)
-                glVertex2f(x0 + bar_w, y2)
-                glVertex2f(x0 + bar_w, y2 + bar_h)
-                glVertex2f(x0, y2 + bar_h)
-                glEnd()
-                glColor3f(0.3, 1.0, 1.0)
-                self.draw_text(x0, y2 + bar_h + 6, "LASER RIFLE: [READY - CLICK / SPACE]")
-            else:
-                glColor4f(1.0, 0.65, 0.1, 0.85)  # Amber charging
+            charge_ratio = max(0.0, min(kwargs.get('weapon_charge_ratio', 0.0), 1.0))
+
+            if w_ratio < 1.0:
+                # Cooling down / cycling
+                glColor4f(1.0, 0.65, 0.1, 0.85)  # Amber
                 glBegin(GL_QUADS)
                 glVertex2f(x0, y2)
                 glVertex2f(x0 + bar_w * w_ratio, y2)
@@ -207,16 +200,51 @@ class HUD:
                 glEnd()
                 glColor3f(1.0, 0.75, 0.2)
                 self.draw_text(x0, y2 + bar_h + 6, f"RIFLE CYCLING: {int(w_ratio * 100)}%")
+            else:
+                # Weapon Ready -> Check if charging
+                if charge_ratio <= 0.0:
+                    glColor4f(0.0, 0.95, 1.0, 0.95)  # Bright Cyan
+                    glBegin(GL_QUADS)
+                    glVertex2f(x0, y2)
+                    glVertex2f(x0 + bar_w, y2)
+                    glVertex2f(x0 + bar_w, y2 + bar_h)
+                    glVertex2f(x0, y2 + bar_h)
+                    glEnd()
+                    glColor3f(0.3, 1.0, 1.0)
+                    self.draw_text(x0, y2 + bar_h + 6, "LASER RIFLE: [READY - TAP OR HOLD TO CHARGE]")
+                elif charge_ratio < 0.85:
+                    # Charging Up
+                    glColor4f(1.0, 0.85, 0.2, 0.95)  # Golden Yellow
+                    glBegin(GL_QUADS)
+                    glVertex2f(x0, y2)
+                    glVertex2f(x0 + bar_w * charge_ratio, y2)
+                    glVertex2f(x0 + bar_w * charge_ratio, y2 + bar_h)
+                    glVertex2f(x0, y2 + bar_h)
+                    glEnd()
+                    glColor3f(1.0, 0.9, 0.3)
+                    self.draw_text(x0, y2 + bar_h + 6, f"⚡ CHARGING OVERCHARGE: {int(charge_ratio * 100)}% ⚡")
+                else:
+                    # Full Overcharge Ready!
+                    glColor4f(1.0, 0.95, 0.4, 0.98)  # Blinding Gold
+                    glBegin(GL_QUADS)
+                    glVertex2f(x0, y2)
+                    glVertex2f(x0 + bar_w, y2)
+                    glVertex2f(x0 + bar_w, y2 + bar_h)
+                    glVertex2f(x0, y2 + bar_h)
+                    glEnd()
+                    glColor3f(1.0, 1.0, 0.4)
+                    self.draw_text(x0, y2 + bar_h + 6, "⚡ OVERCHARGE READY [3X DAMAGE - RELEASE] ⚡")
 
             # 4. Boss Health Bar (Top Center)
-            if boss_hp > 0.0 and boss_max_hp > 0.0:
-                boss_w = 340.0
+            has_boss = boss_hp > 0.0 and boss_max_hp > 0.0
+            if has_boss:
+                boss_w = 380.0
                 boss_h = 16.0
                 bx0 = (width - boss_w) * 0.5
-                by0 = height - 55.0
+                by0 = height - 52.0
 
                 # Background
-                glColor4f(0.1, 0.1, 0.15, 0.8)
+                glColor4f(0.1, 0.1, 0.15, 0.85)
                 glBegin(GL_QUADS)
                 glVertex2f(bx0, by0)
                 glVertex2f(bx0 + boss_w, by0)
@@ -226,7 +254,10 @@ class HUD:
 
                 # Filled Health Bar
                 b_ratio = max(0.0, min(boss_hp / boss_max_hp, 1.0))
-                glColor4f(1.0, 0.15, 0.25, 0.95)
+                if b_ratio <= 0.5:
+                    glColor4f(1.0, 0.15, 0.25, 0.98)  # Rage Red in Phase 2
+                else:
+                    glColor4f(0.85, 0.2, 0.95, 0.95)  # Violet in Phase 1
                 glBegin(GL_QUADS)
                 glVertex2f(bx0, by0)
                 glVertex2f(bx0 + boss_w * b_ratio, by0)
@@ -234,10 +265,12 @@ class HUD:
                 glVertex2f(bx0, by0 + boss_h)
                 glEnd()
 
-                # Boss Name & Phase Text
-                glColor3f(1.0, 0.8, 0.3)
-                phase_str = "PHASE 2" if b_ratio <= 0.5 else "PHASE 1"
-                self.draw_text(bx0, by0 + boss_h + 6, f"RIFT GUARDIAN [{phase_str}]: {int(boss_hp)}/{int(boss_max_hp)}")
+                # Boss Name & Phase Text (Centered Above Boss Bar)
+                glColor3f(1.0, 0.85, 0.3)
+                phase_str = "PHASE 2 — DESTABILIZED" if b_ratio <= 0.5 else "PHASE 1 — SHIELDED"
+                boss_title_str = f"👑 RIFT GUARDIAN [{phase_str}]: {int(boss_hp)}/{int(boss_max_hp)}"
+                boss_title_x = width * 0.5 - (len(boss_title_str) * 4.4)
+                self.draw_text(boss_title_x, by0 + boss_h + 6.0, boss_title_str)
 
             # 5. Score & Combo Multiplier (Top Left)
             glColor3f(1.0, 0.85, 0.2)
@@ -262,26 +295,30 @@ class HUD:
             glColor3f(0.8, 0.8, 0.9)
             self.draw_text(30.0, view_y, f"CAMERA: {view_mode_str}")
 
-            # 6. Live Wave Objectives & Banners (Upper Center)
+            # 6. Live Wave Objectives & Banners (Upper Center - dynamically placed below Boss Bar)
             if objective_title:
+                # If boss is active, place objective banner lower so it NEVER collides with Boss Bar
+                obj_y_title = height - 76.0 if has_boss else height - 35.0
+                obj_y_sub = height - 96.0 if has_boss else height - 58.0
+
                 if is_intermission:
                     # Prominent yellow/orange banner during wave intermission
                     glColor3f(1.0, 0.85, 0.1)
                     title_x = width * 0.5 - (len(objective_title) * 4.8)
-                    self.draw_text(title_x, height - 35.0, objective_title)
+                    self.draw_text(title_x, obj_y_title, objective_title)
                     if objective_subtitle:
                         glColor3f(0.9, 0.9, 1.0)
                         sub_x = width * 0.5 - (len(objective_subtitle) * 4.0)
-                        self.draw_text(sub_x, height - 58.0, objective_subtitle)
+                        self.draw_text(sub_x, obj_y_sub, objective_subtitle)
                 else:
                     # Standard active wave objective
                     glColor3f(0.2, 0.95, 1.0)
                     title_x = width * 0.5 - (len(objective_title) * 4.4)
-                    self.draw_text(title_x, height - 35.0, objective_title)
+                    self.draw_text(title_x, obj_y_title, objective_title)
                     if objective_subtitle:
                         glColor3f(1.0, 0.8, 0.3)
                         sub_x = width * 0.5 - (len(objective_subtitle) * 4.0)
-                        self.draw_text(sub_x, height - 58.0, objective_subtitle)
+                        self.draw_text(sub_x, obj_y_sub, objective_subtitle)
 
             # 7. Teleport Prompt (Center Screen)
             if can_teleport:
