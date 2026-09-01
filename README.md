@@ -173,29 +173,55 @@ CSE423_LAB_Project/
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### ⚡ One-Click Automated Setup & Launch (Windows / Cross-Platform)
 
+For the easiest setup, simply use the automated setup launcher:
+
+* **Windows Users (1-Click):** Double-click **[`run_game.bat`](file:///Users/dhrubojyoti/Projects/CSE423_LAB_Project/run_game.bat)** (or **[`run_game.ps1`](file:///Users/dhrubojyoti/Projects/CSE423_LAB_Project/run_game.ps1)** in PowerShell).
+  * Automatically checks Python version & pip.
+  * Automatically detects missing packages and installs them via `pip`.
+  * Automatically configures Windows FreeGLUT DLLs (`OpenGL/DLLS`).
+  * Pre-generates all 16 procedural texture PNG assets.
+  * Launches the game immediately!
+* **Cross-Platform / Command Line:**
+  ```bash
+  # Check dependencies, auto-install missing packages, and launch game
+  python check_requirements.py --run
+
+  # Or only check status:
+  python check_requirements.py --check
+
+  # Or install dependencies and run unit test suite:
+  python check_requirements.py --install --test
+  ```
+* **macOS / Linux:**
+  ```bash
+  ./run_game.sh
+  ```
+
+---
+
+### 📦 Manual Installation & Setup
+
+#### Prerequisites
 * Python 3.8+
 * PyOpenGL & PyOpenGL_accelerate
 * NumPy
-* Pillow (optional for loading custom textures from disk)
+* Pillow (for procedural PNG texture generation)
+* pytest (for testing)
 
-### Installation
-
+#### Manual Installation:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Running Automated Unit Tests
-
-All 35 automated unit tests across 7 test suites verify game math, physics, collision detection, Chrono Slow resource management, texture loading, story sequence, scoring, and state machines:
-
+#### Running Automated Unit Tests:
+All 35+ automated unit tests across test suites verify game math, physics, collision detection, Chrono Slow resource management, texture loading, story sequence, scoring, and state machines:
 ```bash
 python3 -m unittest discover -s tests
 ```
 
-### Running the Game
-
+#### Running the Game:
 ```bash
 python3 src/main.py
 ```

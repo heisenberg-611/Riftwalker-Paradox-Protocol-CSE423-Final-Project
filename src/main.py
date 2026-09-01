@@ -8,7 +8,25 @@ import math
 import time
 
 # Ensure project root is in sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
+# Windows FreeGLUT DLL Setup
+if sys.platform == 'win32':
+    _dll_dir = os.path.join(_PROJECT_ROOT, 'OpenGL', 'DLLS')
+    if os.path.exists(_dll_dir):
+        if hasattr(os, 'add_dll_directory'):
+            try:
+                os.add_dll_directory(_dll_dir)
+            except Exception:
+                pass
+        os.environ['PATH'] = _dll_dir + os.pathsep + _PROJECT_ROOT + os.pathsep + os.environ.get('PATH', '')
+    if hasattr(os, 'add_dll_directory'):
+        try:
+            os.add_dll_directory(_PROJECT_ROOT)
+        except Exception:
+            pass
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
