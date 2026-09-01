@@ -899,6 +899,30 @@ riftwalker_paradox_protocol/
 ├── TODO.md
 ├── requirements.txt
 │
+├── assets/
+│   └── textures/
+│       ├── environment/
+│       │   ├── kepler_metal_wall.png
+│       │   ├── kepler_floor_panel.png
+│       │   ├── kepler_warning_panel.png
+│       │   ├── kepler_pipe_metal.png
+│       │   ├── sundered_rock.png
+│       │   ├── sundered_crystal.png
+│       │   └── alien_structure.png
+│       ├── characters/
+│       │   ├── astronaut_suit.png
+│       │   ├── astronaut_visor.png
+│       │   ├── rift_stalker_body.png
+│       │   ├── rift_spitter_body.png
+│       │   └── rift_guardian_core.png
+│       ├── weapons/
+│       │   └── plasma_rifle.png
+│       ├── rift/
+│       │   ├── rift_energy.png
+│       │   └── beacon_runes.png
+│       └── background/
+│           └── space_background.png
+│
 ├── src/
 │   ├── main.py                         # M4 — integration entry point
 │   │
@@ -931,9 +955,9 @@ riftwalker_paradox_protocol/
 │   │
 │   ├── M4_rendering_gameplay/
 │   │   ├── renderer.py                 # M4 — master 3D/2D render pipeline
-│   │   ├── primitives.py               # M4 — procedural geometry helpers
+│   │   ├── primitives.py               # M4 — procedural & textured geometry helpers
 │   │   ├── lighting.py                 # M4 — directional sunlight & point lights
-│   │   ├── materials.py                # M4 — material optical properties
+│   │   ├── materials.py                # M4 — material optical & texture properties
 │   │   ├── particles.py                # M4 — vortex, sparks, thruster particles
 │   │   ├── effects.py                  # M4 — screen flash & color filters
 │   │   ├── chrono_slow.py              # M4 — Chrono Slow manager & countdown
@@ -947,8 +971,10 @@ riftwalker_paradox_protocol/
 │       ├── constants.py                # Global constants, IDs, speeds, keys
 │       ├── math3d.py                   # Vector3, Matrix4, linear algebra
 │       ├── collision.py                # Shared geometric collision & raycast utilities
+│       ├── texture_loader.py           # Shared PIL/OpenGL texture loader & caching manager
 │       ├── input_manager.py            # Centralized keyboard & mouse input state
 │       └── game_time.py                # Real-time dt vs. Chrono Slow scaled dt
+
 │
 ├── scenes/
 │   ├── arena_01_kepler_relay/
@@ -1451,17 +1477,17 @@ M3 consumes:
 
 ## M4 — Rendering, Chrono, HUD & Integration
 
-**Primary responsibility:** graphics pipeline, lighting, particle systems, Chrono Slow time dilation, 2D HUD, scoring, and full game-loop coordination.
+**Primary responsibility:** graphics pipeline, texture mapping, dynamic lighting, particle systems, Chrono Slow time dilation, 2D HUD, scoring, and full game-loop coordination.
 
 ### Folder
 `src/M4_rendering_gameplay/`
 
 ### Main deliverables
 - `renderer.py` — master OpenGL 3D & 2D render pass coordinator
-- `primitives.py` — optimized procedural geometry helpers (cubes, cylinders, spheres, toruses)
+- `primitives.py` — optimized procedural & UV-mapped geometry helpers (textured cubes, cylinders, spheres, planes)
 - `lighting.py` — directional sunlight (`GL_LIGHT0`) & beacon point lights (`GL_LIGHT1`)
-- `materials.py` — optical material presets (suit, visor, alien carapace)
-- `particles.py` — particle systems (teleport vortex, hit sparks, thrusters)
+- `materials.py` — optical material presets & texture binding integration
+- `particles.py` — particle systems (teleport vortex, hit sparks, thrusters, laser beams)
 - `effects.py` — screen flash & visual distortion filters
 - `chrono_slow.py` — **Chrono Slow Manager** (100% activation gate, 0% reset, 5s countdown, 0.30 scale)
 - `hud.py` — **2D Orthographic HUD** (Health bar, Chrono Charge/countdown bar, Score, Objective text)
@@ -1470,17 +1496,21 @@ M3 consumes:
 - `game_state.py` — game state machine (`PLAYING`, `TELEPORTING`, `GAME_OVER`, `VICTORY`)
 - `level_manager.py` — wave spawning and arena progression
 
-### Graphics focus
-- lighting setup & point-light attenuation
-- material specular/diffuse properties
-- particle systems & alpha blending
-- teleport visual vortex transition
-- Chrono Slow cool blue screen tint overlay
-- 2D orthographic projection matrix switching (`glOrtho`)
+### Graphics focus & CG423 Procedural Pipeline
+Texture mapping is a required graphics feature added to improve visual realism while preserving the project's procedural-modeling requirement. No external 3D models or game engines are used.
+```text
+Primitive Geometry → Hierarchical / Procedural Modeling → Texture Mapping → Lighting → Particles / Effects → Final Scene
+```
+- **Texture Mapping & UV Coordinates:** Reusable PIL loader (`src/shared/texture_loader.py`), 512x512 tileable PBR-style textures, clean binding/unbinding lifecycle.
+- **Dynamic Lighting:** Multi-source lighting setup & quadratic point-light attenuation.
+- **Material Properties:** Specular/diffuse/ambient optical properties and surface texture modulation.
+- **Particle Systems:** Additive alpha blending, glowing laser tracers, and teleport vortices.
+- **2D Orthographic HUD:** Matrix switching (`glOrtho`) with health, chrono, and crosshair overlays.
 
 ### Integration responsibility
 M4 coordinates:
 - `src/main.py` entry point and GLUT callbacks
+- texture resource pre-loading (`init_textures()`)
 - game start / restart flow
 - arena transition triggers
 - victory / game-over state evaluation
@@ -1495,7 +1525,8 @@ M4 coordinates:
 | **M1: Player & Camera** | **Procedural Hierarchical Astronaut Rig** (`glPushMatrix`/`glPopMatrix`, suit, visor, thruster pack, articulated walking limbs) | **Dual Camera System** (`V` hotkey, 1st-person FPS & 3rd-person orbital TPS view matrix preservation) | **Player Movement & 1P Blaster Viewmodel** (WASD kinematics, velocity damping, foreground 3D rifle viewmodel with firing recoil) |
 | **M2: Enemies & Combat** | **Procedural Crystalline Void Alien Generator** (Obsidian carapaces, glowing rift cores, articulated scythes & rotating shard rings) | **Enemy AI & Hitscan Combat** (Melee Stalker pursuit, Ranged Spitter kiting, 3D raycast laser fire & projectile collisions) | **Rift Guardian Boss Encounter** (Pulsating nexus core, 4 rotating orbital shield obelisks, Phase 1 vs Phase 2 rapid spinning) |
 | **M3: World & Teleportation** | **Kepler Relay Arena** (Industrial space station, metallic floor grid, security walls, pillars, crates, tighter covered combat) | **Sundered Rift Arena** (Floating obsidian asteroid void, neon purple anomaly grid, crystal spires, open boss battleground) | **Tactical Rift Beacon Teleportation & Pickups** (Linked interactive beacons with vortex transitions + glowing collectible Rift Energy crystals) |
-| **M4: Rendering & Gameplay** | **Multi-Source Dynamic Lighting** (`GL_LIGHT0` directional sun + `GL_LIGHT1` dynamic beacon/projectile point light attenuation) | **Procedural Particle & VFX System** (Teleport vortex, hit sparks, collectible sparkle bursts, alien death shatter, Chrono ripples) | **Chrono Slow Dilation & 2D HUD Loop** (100% gate, 0% reset, 5s 30% time dilation, cool-blue screen overlay, health/chrono/boss bars, score & crosshair) |
+| **M4: Rendering & Gameplay** | **Multi-Source Dynamic Lighting** (`GL_LIGHT0` directional sun + `GL_LIGHT1` dynamic beacon/projectile point light attenuation) | **Texture Mapping & Materials** (Reusable PIL texture loader, 512x512 tileable PBR-style textures, UV coordinate mapping across procedural geometry, optical material presets) | **Particle/VFX + Chrono/HUD Presentation** (Teleport vortex, hit sparks, collectible sparkle bursts, alien death shatter, 5s 30% time dilation, cool-blue screen overlay, 2D HUD loop, score & crosshair) |
+
 
 ---
 

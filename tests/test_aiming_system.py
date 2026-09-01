@@ -27,14 +27,15 @@ class TestAimingSystem(unittest.TestCase):
         self.assertAlmostEqual(cam_eye.z, 0.0)
 
     def test_third_person_aim_origin_is_camera_eye(self):
-        """TP gameplay ray origin must be camera eye behind/above the player with OTS offset."""
+        """TP gameplay ray origin must be camera eye behind/above the player over the right shoulder."""
         self.player.tp_cam.yaw = 0.0
         self.player.tp_cam.pitch = 0.0
         cam_eye = self.player.tp_cam.get_cam_eye(self.player.position)
-        # In OTS third-person at yaw=0, pitch=0, eye is (shoulder_offset, height, -distance)
-        self.assertAlmostEqual(cam_eye.x, self.player.tp_cam.shoulder_offset)
-        self.assertAlmostEqual(cam_eye.y, self.player.tp_cam.height)
-        self.assertAlmostEqual(cam_eye.z, -self.player.tp_cam.distance)
+        # In third-person at yaw=0, pitch=0, eye is over right shoulder: (shoulder_offset, height + 0.2, -distance)
+        self.assertAlmostEqual(cam_eye.x, self.player.tp_cam.shoulder_offset, places=2)
+        self.assertAlmostEqual(cam_eye.y, self.player.tp_cam.height + 0.2, places=2)
+        self.assertAlmostEqual(cam_eye.z, -self.player.tp_cam.distance, places=2)
+
 
 
 

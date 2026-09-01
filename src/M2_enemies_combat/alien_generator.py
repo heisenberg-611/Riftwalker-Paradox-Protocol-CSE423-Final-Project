@@ -24,13 +24,18 @@ class AlienGenerator:
         leg_rot = stride * 30.0
         blade_swing = math.sin(anim_time * 8.0 + 1.5) * 25.0
 
+        from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
+
         # 1. Main Obsidian Carapace (Spine & Ribs)
-        glColor3f(0.12, 0.08, 0.18)
+        Materials.bind_alien_carapace()
+        glColor3f(0.85, 0.75, 0.95)
         glPushMatrix()
         glTranslatef(0.0, 0.9, 0.0)
         glScalef(0.6, 0.45, 1.2)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
+        Materials.unbind_all()
 
         # 2. Glowing Cyan/Violet Rift Fissure Core (Inside Chest)
         pulse = 1.0 + 0.15 * math.sin(anim_time * 10.0)
@@ -38,18 +43,20 @@ class AlienGenerator:
         glPushMatrix()
         glTranslatef(0.0, 0.9, 0.1)
         glScalef(0.35 * pulse, 0.35 * pulse, 0.5 * pulse)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
 
         # 3. Predatory Angular Head
         glPushMatrix()
         glTranslatef(0.0, 1.0, 0.85)
         glRotatef(12.0, 1.0, 0.0, 0.0)
-        glColor3f(0.15, 0.10, 0.22)
+        Materials.bind_alien_carapace()
+        glColor3f(0.9, 0.8, 1.0)
         glPushMatrix()
         glScalef(0.4, 0.3, 0.55)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
+        Materials.unbind_all()
 
         # 4 Glowing Cyan Sensory Eyes
         glColor3f(0.0, 1.0, 0.9)
@@ -73,7 +80,7 @@ class AlienGenerator:
             glRotatef(side * -25.0, 0.0, 0.0, 1.0)
             glTranslatef(side * 0.2, -0.2, 0.1)
             glScalef(0.12, 0.45, 0.12)
-            glutSolidCube(1.0)
+            Primitives.draw_textured_cube(1.0)
             glPopMatrix()
 
             # Razor-Sharp Crystalline Scythe Blade
@@ -82,7 +89,7 @@ class AlienGenerator:
             glTranslatef(side * 0.35, -0.45, 0.35)
             glRotatef(45.0, 1.0, 0.0, 0.0)
             glScalef(0.08, 0.6, 0.25)
-            glutSolidOctahedron()
+            Primitives.draw_textured_octahedron(1.0)
             glPopMatrix()
             glColor3f(0.2, 0.15, 0.3)
 
@@ -103,7 +110,7 @@ class AlienGenerator:
                 glRotatef(side * -25.0, 0.0, 0.0, 1.0)
                 glTranslatef(side * 0.2, -0.25, 0.0)
                 glScalef(0.14, 0.5, 0.14)
-                glutSolidCube(1.0)
+                Primitives.draw_textured_cube(1.0)
                 glPopMatrix()
 
                 # Lower Taloned Leg
@@ -111,7 +118,7 @@ class AlienGenerator:
                 glTranslatef(side * 0.35, -0.55, 0.0)
                 glRotatef(side * 40.0, 0.0, 0.0, 1.0)
                 glScalef(0.1, 0.6, 0.1)
-                glutSolidCube(1.0)
+                Primitives.draw_textured_cube(1.0)
                 glPopMatrix()
 
                 glPopMatrix()
@@ -124,30 +131,35 @@ class AlienGenerator:
         Rift Spitter: Floating dimensional crystal monolith / prism
         surrounded by concentric orbital rotating shard rings.
         """
+        from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
+
         glPushMatrix()
         hover = math.sin(anim_time * 3.0) * 0.2
         glTranslatef(0.0, 1.8 + hover, 0.0)
 
         # 1. Central Hovering Faceted Obsidian Monolith
         pulse = 1.0 + 0.1 * math.sin(anim_time * 5.0)
-        glColor3f(0.14, 0.08, 0.22)
+        Materials.bind_alien_carapace()
+        glColor3f(0.9, 0.8, 1.0)
         glPushMatrix()
         glRotatef(anim_time * 30.0, 0.0, 1.0, 0.0)
         glScalef(0.65 * pulse, 1.5 * pulse, 0.65 * pulse)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
+        Materials.unbind_all()
 
         # 2. Glowing Plasma Energy Eye (Charging Core)
         glColor3f(0.0, 1.0, 0.65)
         glPushMatrix()
         glTranslatef(0.0, 0.2, 0.55)
         glScalef(0.25, 0.25, 0.35)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
 
         # 3. Inner Orbital Rotating Shard Ring
         rot_inner = anim_time * 90.0
-        glColor3f(0.2, 0.15, 0.32)
+        glColor3f(0.8, 0.6, 1.0)
         glPushMatrix()
         glRotatef(rot_inner, 0.0, 1.0, 0.0)
         glRotatef(25.0, 1.0, 0.0, 0.0)
@@ -156,7 +168,7 @@ class AlienGenerator:
             glRotatef(i * 90.0, 0.0, 1.0, 0.0)
             glTranslatef(1.25, 0.0, 0.0)
             glScalef(0.2, 0.45, 0.2)
-            glutSolidOctahedron()
+            Primitives.draw_textured_octahedron(1.0)
             glPopMatrix()
         glPopMatrix()
 
@@ -198,21 +210,26 @@ class AlienGenerator:
         pulse_rate = 4.0 if phase == 1 else 8.0
         pulse = 1.0 + 0.08 * math.sin(anim_time * pulse_rate)
 
+        from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
+
         # Inner Glowing Energy Heart
         glColor3f(1.0, 0.1, 0.35)
         glPushMatrix()
         glRotatef(anim_time * 50.0, 0.0, 1.0, 0.0)
         glScalef(1.4 * pulse, 2.0 * pulse, 1.4 * pulse)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
 
         # Outer Obsidian Crystal Lattice
-        glColor3f(0.15, 0.08, 0.22)
+        Materials.bind_alien_carapace()
+        glColor3f(0.9, 0.8, 1.0)
         glPushMatrix()
         glRotatef(anim_time * -35.0, 0.0, 1.0, 0.0)
         glScalef(1.9 * pulse, 2.5 * pulse, 1.9 * pulse)
-        glutSolidOctahedron()
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
+        Materials.unbind_all()
 
         # 2. Four Independent Orbiting Defensive Shield Obelisks
         shield_speed = 50.0 if phase == 1 else 135.0
@@ -225,11 +242,13 @@ class AlienGenerator:
             glTranslatef(shield_dist, 0.0, 0.0)
 
             # Shield Obelisk Body
-            glColor3f(0.22, 0.18, 0.3)
+            Materials.bind_alien_carapace()
+            glColor3f(0.85, 0.75, 0.95)
             glPushMatrix()
             glScalef(0.4, 2.2, 1.1)
-            glutSolidCube(1.0)
+            Primitives.draw_textured_cube(1.0)
             glPopMatrix()
+            Materials.unbind_all()
 
             # Glowing Rift Rune Stripe on Shield Face
             rune_color = (0.0, 0.9, 1.0) if phase == 1 else (1.0, 0.2, 0.1)
@@ -237,8 +256,9 @@ class AlienGenerator:
             glPushMatrix()
             glTranslatef(0.22, 0.0, 0.0)
             glScalef(0.08, 1.8, 0.3)
-            glutSolidCube(1.0)
+            Primitives.draw_textured_cube(1.0)
             glPopMatrix()
+
 
             glPopMatrix()
 

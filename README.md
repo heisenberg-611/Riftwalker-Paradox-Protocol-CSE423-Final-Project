@@ -40,6 +40,89 @@ In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental 
 
 ---
 
+## 🏗️ Architecture & Directory Structure
+
+The project follows a clean, modular architecture dividing gameplay, rendering, mathematics, physics, and assets across isolated subsystems. Detailed design specifications are documented in [docs/architecture.md](docs/architecture.md).
+
+```text
+CSE423_LAB_Project/
+├── assets/textures/                      # PNG textures & visual assets
+│   ├── background/                       # Space skybox textures
+│   ├── characters/                       # Suit, visor, & alien textures
+│   ├── environment/                      # Floor panels, metal walls, rock textures
+│   ├── rift/                             # Teleportation beacon runes & energy textures
+│   └── weapons/                          # Plasma rifle & blaster textures
+│
+├── docs/                                 # Architecture & design documentation
+│   └── architecture.md                   # Complete architectural specification & diagrams
+│
+├── src/                                  # Core application source code
+│   ├── main.py                           # Master application entry point & GLUT loop
+│   │
+│   ├── shared/                           # Central shared utilities & physics
+│   │   ├── collision.py                  # Geometric tests, obstacles (Cylinders, AABBs), & sliding physics
+│   │   ├── constants.py                  # Physics, gameplay, speed, camera, & key constants
+│   │   ├── game_time.py                  # Delta time regulation & Chrono Slow time scaling
+│   │   ├── input_manager.py              # Centralized keyboard & mouse state tracking
+│   │   ├── math3d.py                     # Vector3 math, transformations, & ray intersections
+│   │   └── texture_loader.py             # Texture loading, caching, & procedural pattern generators
+│   │
+│   ├── M1_player_camera/                 # [M1] Player Character & View Systems
+│   │   ├── astronaut_rig.py              # Procedural hierarchical astronaut rig with walking limbs
+│   │   ├── blink_teleport.py             # Short-range evasive combat dash
+│   │   ├── first_person_camera.py        # 1st-person FPS camera with look-at transformations
+│   │   ├── player.py                     # Player coordinator, health, & camera binding
+│   │   ├── player_movement.py            # Kinematics, WASD movement, & velocity calculations
+│   │   ├── player_weapon.py              # 1P weapon 3D viewmodel with recoil & muzzle flare
+│   │   └── third_person_camera.py        # 3rd-person orbital follow camera
+│   │
+│   ├── M2_enemies_combat/                # [M2] Alien AI & Combat Systems
+│   │   ├── alien_generator.py            # Procedural crystalline void enemy geometry builder
+│   │   ├── collision.py                  # Combat collision bridge & boundary helpers
+│   │   ├── enemy_base.py                 # Abstract base enemy class with HP & draw transformations
+│   │   ├── melee_rift_stalker.py         # Quadrupedal melee hunter AI with scythe blades
+│   │   ├── ranged_rift_spitter.py        # Hovering plasma spitter AI with rotating shard rings
+│   │   ├── raycast.py                    # Authoritative crosshair raycasting for hitscan lasers
+│   │   ├── rift_guardian_boss.py         # Multi-phase boss with orbiting shield obelisks
+│   │   └── weapon_system.py              # Enemy projectile manager, active projectiles & pool
+│   │
+│   ├── M3_world_teleport/                # [M3] Arenas, Environment & Teleportation
+│   │   ├── arena_01_kepler_relay.py      # Arena 1: Metallic space outpost with pillars & crates
+│   │   ├── arena_02_sundered_rift.py     # Arena 2: Floating asteroid void with crystal spires
+│   │   ├── arena_base.py                 # Abstract arena container with obstacle registry
+│   │   ├── environment_generator.py      # Modular 3D props (crates, pillars, crystal spires)
+│   │   ├── gravity_zone.py               # Predefined gravity & jump-pad zones
+│   │   ├── rift_beacon.py                # Interactive teleportation beacon pillar with rotating rings
+│   │   ├── rift_energy_pickup.py         # Collectible floating crystal restoring Chrono Charge
+│   │   └── world.py                      # World manager coordinating active arenas & transitions
+│   │
+│   └── M4_rendering_gameplay/            # [M4] Graphics Pipeline, Effects, HUD & Game State
+│       ├── chrono_slow.py                # Chrono Slow manager (100% gate, 0% reset, 5s duration)
+│       ├── crosshair.py                  # Interactive 2D crosshair with hitmarker animations
+│       ├── effects.py                    # Post-processing screen flash & Chrono distortion tint
+│       ├── game_state.py                 # Global state machine (STORY, PLAYING, TELEPORT, GAMEOVER, VICTORY)
+│       ├── hud.py                        # 2D Orthographic HUD (Health, Chrono, Boss bar, Score)
+│       ├── level_manager.py              # Wave progression & enemy spawn tables
+│       ├── lighting.py                   # Multi-source lighting (GL_LIGHT0 sun, GL_LIGHT1 point lights)
+│       ├── materials.py                  # Specular, diffuse, ambient, & texture binding materials
+│       ├── particles.py                  # GPU-style particle emitter (vortex, sparks, bursts, ripples)
+│       ├── primitives.py                 # Procedural textured primitives (cubes, cylinders, spheres, etc.)
+│       ├── renderer.py                   # Master render orchestrator coordinating all passes
+│       ├── scoring.py                    # Score evaluation, combo multipliers, & kill tracking
+│       └── story_intro.py                # Terminal story intro with typewriter text & audio waveform
+│
+└── tests/                                # Automated Unit Test Suite
+    ├── test_aiming_system.py             # Precision raycasting & muzzle alignment tests
+    ├── test_camera_input.py              # Camera yaw/pitch clamping & view switching tests
+    ├── test_collision.py                 # Sphere, AABB, cylinder sliding, & arena collision tests
+    ├── test_gameplay_logic.py            # Scoring, state transitions, & chrono charge tests
+    ├── test_math3d.py                    # Vector3 math, transformations, & ray tests
+    ├── test_story_intro.py               # Story mode state machine & typing tests
+    └── test_texture_loader.py            # Texture loading & procedural generator fallback tests
+```
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -47,6 +130,7 @@ In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental 
 * Python 3.8+
 * PyOpenGL & PyOpenGL_accelerate
 * NumPy
+* Pillow (optional for loading custom textures from disk)
 
 ### Installation
 
@@ -56,7 +140,7 @@ pip install -r requirements.txt
 
 ### Running Automated Unit Tests
 
-All 15 automated test suites verify game math, physics, collision detection, Chrono Slow resource management, scoring, and state machines:
+All 35 automated unit tests across 7 test suites verify game math, physics, collision detection, Chrono Slow resource management, texture loading, story sequence, scoring, and state machines:
 
 ```bash
 python3 -m unittest discover -s tests

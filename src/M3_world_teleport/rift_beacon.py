@@ -21,24 +21,28 @@ class RiftBeacon:
         return self.position.distance_to(player_pos) <= self.activation_radius
 
     def draw(self):
+        from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
         glPushMatrix()
         glTranslatef(self.position.x, self.position.y, self.position.z)
 
-        # 1. Base Pedestal
-        glColor3f(0.2, 0.25, 0.3)
+        # 1. Base Pedestal (Textured with Beacon Runes)
+        Materials.bind_beacon_material()
+        glColor3f(0.85, 0.95, 1.0)
         glPushMatrix()
         glTranslatef(0.0, 0.2, 0.0)
         glScalef(2.2, 0.4, 2.2)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
 
         # 2. Central Core Column
-        glColor3f(0.15, 0.18, 0.22)
         glPushMatrix()
         glTranslatef(0.0, 1.8, 0.0)
         glScalef(0.5, 3.2, 0.5)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
+        Materials.unbind_all()
+
 
         # 3. Rotating Dual Concentric Torus Rings (Cyan Glow)
         glColor3f(0.0, 0.85, 1.0)

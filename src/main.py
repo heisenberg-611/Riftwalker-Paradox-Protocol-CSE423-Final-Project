@@ -130,8 +130,9 @@ class GameApp:
             if self.player.blink.is_ready():
                 current_yaw = self.player.fp_cam.yaw if self.player.is_first_person else self.player.tp_cam.yaw
                 new_pos = self.player.blink.execute_blink(self.player.position, current_yaw)
+                resolved_pos = self.world.current_arena.resolve_collision(new_pos, self.player.radius)
                 self.player.position = CollisionSystem.clamp_to_arena_bounds(
-                    new_pos, self.world.current_arena.half_extent
+                    resolved_pos, self.world.current_arena.half_extent
                 )
                 self.renderer.particles.spawn_teleport_vortex(self.player.position, count=15)
 
@@ -190,8 +191,9 @@ class GameApp:
             current_yaw = self.player.fp_cam.yaw if self.player.is_first_person else self.player.tp_cam.yaw
             delta_pos = self.player.movement.compute_movement(fwd, strafe, current_yaw, real_dt)
             new_pos = self.player.position + delta_pos
+            resolved_pos = self.world.current_arena.resolve_collision(new_pos, self.player.radius)
             self.player.position = CollisionSystem.clamp_to_arena_bounds(
-                new_pos, self.world.current_arena.half_extent
+                resolved_pos, self.world.current_arena.half_extent
             )
             self.player.is_moving = delta_pos.length_squared() > 1e-6
 
@@ -309,6 +311,13 @@ class GameApp:
                 else:
                     enemy.update(self.player.position, game_dt)
 
+                if not enemy.is_dead:
+                    enemy.position = self.world.current_arena.resolve_collision(enemy.position, enemy.radius)
+                    enemy.position = CollisionSystem.clamp_to_arena_bounds(
+                        enemy.position, self.world.current_arena.half_extent
+                    )
+
+
                 # Melee contact damage
                 if not enemy.is_dead and hasattr(enemy, 'attack_damage'):
                     if CollisionSystem.check_sphere_sphere(
@@ -364,6 +373,9 @@ TARGET_FRAME_DURATION: float = 1.0 / 60.0
 def display_callback():
     if app:
         app.render()
+
+
+
 
 
 def idle_callback():
@@ -442,9 +454,11 @@ def main():
     glutCreateWindow(WINDOW_TITLE)
 
     LightingSystem.init_lighting()
-
+    from src.shared.texture_loader import init_textures
+    init_textures()
 
     app = GameApp()
+
 
     glutDisplayFunc(display_callback)
     glutIdleFunc(idle_callback)

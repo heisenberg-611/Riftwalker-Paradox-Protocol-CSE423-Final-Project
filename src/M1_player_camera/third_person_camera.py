@@ -18,6 +18,7 @@ class ThirdPersonCamera:
         self.shoulder_offset = shoulder_offset
         self.yaw = 0.0
         self.pitch = 0.0
+        self.shoulder_offset = 1.15  # Offset to the right of the astronaut
 
     def update_orientation(self, mouse_dx: float, mouse_dy: float, sensitivity: float = MOUSE_SENSITIVITY):
         self.yaw -= mouse_dx * sensitivity
@@ -46,16 +47,17 @@ class ThirdPersonCamera:
 
     def get_cam_eye(self, player_pos: Vector3) -> Vector3:
         forward, right, up = self.get_basis_vectors()
-        target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
-        cam_x = target.x - forward.x * self.distance + right.x * self.shoulder_offset
-        cam_y = max(0.4, target.y - forward.y * self.distance + right.y * self.shoulder_offset)
-        cam_z = target.z - forward.z * self.distance + right.z * self.shoulder_offset
-        return Vector3(cam_x, cam_y, cam_z)
+        # Over-the-shoulder placement: elevated, shifted right, pulled back along forward
+        head_pos = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
+        cam_pos = head_pos + (right * self.shoulder_offset) + (up * 0.2) - (forward * self.distance)
+        cam_pos.y = max(0.5, cam_pos.y)
+        return cam_pos
 
     def apply(self, player_pos: Vector3):
+        forward, right, up = self.get_basis_vectors()
         eye = self.get_cam_eye(player_pos)
-        forward = self.get_aim_direction()
-        target = eye + forward * 30.0
+        # Look forward into the world along the crosshair aim vector
+        target = eye + forward * 100.0
 
         gluLookAt(
             eye.x, eye.y, eye.z,
