@@ -40,13 +40,14 @@ class PlayerWeapon:
         camera_forward,
         camera_right,
         camera_up,
-        offset_right: float = 0.26,
+        offset_right: float = 0.28,
         offset_up: float = -0.20,
         offset_forward: float = 0.50
     ):
         """
         Converts the camera-space weapon viewmodel muzzle position into world coordinates.
-        Aligned directly with the 1P blaster rifle muzzle on screen.
+        Aligned directly with the 1P blaster rifle muzzle on the left side of the screen.
+        (Note: camera_right basis vector points toward screen-left in world coordinates).
         """
         return (
             camera_eye
@@ -57,7 +58,7 @@ class PlayerWeapon:
 
     def draw_viewmodel(self, width: int, height: int, is_moving: bool = False):
         """
-        Renders the First-Person Sci-Fi Laser Rifle Viewmodel in the bottom-right foreground.
+        Renders the First-Person Sci-Fi Laser Rifle Viewmodel in the bottom-left foreground.
         Uses an isolated camera projection so it never clips into arena walls or alters world matrices.
         """
         glMatrixMode(GL_PROJECTION)
@@ -80,9 +81,9 @@ class PlayerWeapon:
             # Dynamic firing recoil and idle bobbing
             recoil_z = -0.09 * max(0.0, 1.0 - (self.time_since_last_shot / 0.10)) if self.is_firing_effect_active else 0.0
 
-            # Position weapon in bottom-right foreground
-            glTranslatef(0.30, -0.24, -0.66 + recoil_z)
-            glRotatef(-6.0, 0.0, 1.0, 0.0)
+            # Position weapon in bottom-left foreground
+            glTranslatef(-0.30, -0.24, -0.66 + recoil_z)
+            glRotatef(6.0, 0.0, 1.0, 0.0)
             glRotatef(2.0, 1.0, 0.0, 0.0)
 
             # 1. Main Rifle Receiver Chassis (Textured gunmetal alloy)
