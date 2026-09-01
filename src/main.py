@@ -98,6 +98,20 @@ class GameApp:
                 glutFullScreen()
             return
 
+        # End-Game (Game Over / Victory) Screen Controls - Freeze Camera & Movement
+        if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
+            # Restart on 'R'
+            if self.input_mgr.was_key_just_pressed('r'):
+                self.reset_game()
+            # Fullscreen Toggle on F11
+            if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+                glutFullScreen()
+            return
+
+        # Fullscreen Toggle (F11)
+        if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+            glutFullScreen()
+
         # 1. View Switching (V / C)
         if self.input_mgr.was_key_just_pressed('v') or self.input_mgr.was_key_just_pressed('c'):
             self.player.toggle_camera()
@@ -127,6 +141,7 @@ class GameApp:
                 self.destination_arena = dest
                 self.game_state.start_teleport(duration=1.8)
                 self.renderer.particles.spawn_teleport_vortex(self.player.position, count=35)
+
 
         # 5. Restart (R)
         if self.input_mgr.was_key_just_pressed('r'):
@@ -223,8 +238,17 @@ class GameApp:
             self.input_mgr.end_frame()
             return
 
+        # If in Game Over or Victory, freeze world simulation, player, and enemies
+        if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
+            self.handle_input(real_dt)
+            self.renderer.particles.update(real_dt)
+            self.renderer.hud.crosshair.update(real_dt)
+            self.input_mgr.end_frame()
+            return
+
         # Update input
         self.handle_input(real_dt)
+
 
         # Update player & camera
         self.player.update(real_dt)
@@ -376,12 +400,14 @@ def special_up_callback(key, x, y):
 def mouse_motion_callback(x, y):
     if app:
         app.input_mgr.on_mouse_motion(x, y)
-        dx, dy = app.input_mgr.mouse_delta
-        if dx != 0 or dy != 0:
-            if app.player.is_first_person:
-                app.player.fp_cam.update_orientation(dx, dy)
-            else:
-                app.player.tp_cam.update_orientation(dx, dy)
+        if app.game_state.current_state in (STATE_PLAYING, STATE_TELEPORTING):
+            dx, dy = app.input_mgr.mouse_delta
+            if dx != 0 or dy != 0:
+                if app.player.is_first_person:
+                    app.player.fp_cam.update_orientation(dx, dy)
+                else:
+                    app.player.tp_cam.update_orientation(dx, dy)
+
 
 
 def mouse_button_callback(button, state, x, y):
