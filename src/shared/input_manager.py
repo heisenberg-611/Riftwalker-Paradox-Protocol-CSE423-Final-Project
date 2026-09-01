@@ -35,21 +35,33 @@ class InputManager:
         """Handle mouse entering or leaving the window (GLUT entry func)."""
         self.first_mouse = True
 
-    def on_key_down(self, key: bytes, x: int, y: int):
-        try:
-            char = key.decode('utf-8').lower()
+    def _parse_key(self, key) -> str:
+        if isinstance(key, bytes):
+            try:
+                return key.decode('utf-8').lower()
+            except UnicodeDecodeError:
+                return ""
+        elif isinstance(key, int):
+            try:
+                return chr(key).lower()
+            except Exception:
+                return ""
+        elif isinstance(key, str):
+            return key.lower()
+        return ""
+
+    def on_key_down(self, key, x: int, y: int):
+        char = self._parse_key(key)
+        if char:
             if char not in self.keys_down:
                 self.just_pressed_keys.add(char)
             self.keys_down.add(char)
-        except UnicodeDecodeError:
-            pass
 
-    def on_key_up(self, key: bytes, x: int, y: int):
-        try:
-            char = key.decode('utf-8').lower()
+    def on_key_up(self, key, x: int, y: int):
+        char = self._parse_key(key)
+        if char:
             self.keys_down.discard(char)
-        except UnicodeDecodeError:
-            pass
+
 
     def on_special_down(self, key: int, x: int, y: int):
         if key not in self.special_keys_down:

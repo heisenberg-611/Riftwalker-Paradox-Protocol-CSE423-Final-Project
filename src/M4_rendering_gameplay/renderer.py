@@ -126,7 +126,9 @@ class MasterRenderer:
             is_first_person=player.is_first_person,
             game_state_str=game_state.current_state,
             boss_hp=boss_hp,
-            boss_max_hp=boss_max_hp
+            boss_max_hp=boss_max_hp,
+            weapon_cooldown_ratio=player.weapon.get_cooldown_ratio()
         )
+
 
         glutSwapBuffers()
