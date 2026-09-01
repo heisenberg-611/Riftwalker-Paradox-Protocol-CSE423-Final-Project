@@ -18,6 +18,7 @@ from src.shared.constants import (
     WINDOW_TITLE,
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
+    STATE_STORY,
     STATE_PLAYING,
     STATE_TELEPORTING,
     STATE_GAME_OVER,
@@ -47,6 +48,7 @@ from src.M4_rendering_gameplay.chrono_slow import ChronoSlowManager
 from src.M4_rendering_gameplay.game_state import GameState
 from src.M4_rendering_gameplay.scoring import ScoreManager
 from src.M4_rendering_gameplay.level_manager import LevelManager
+from src.M4_rendering_gameplay.story_intro import StoryIntroManager
 
 
 class GameApp:
@@ -58,11 +60,14 @@ class GameApp:
         self.player = Player(Vector3(0.0, 0.0, -35.0))
         self.weapons = WeaponSystem()
         self.chrono_mgr = ChronoSlowManager()
-        self.game_state = GameState()
+        self.story_intro = StoryIntroManager()
+        initial_state = STATE_STORY if not self.story_intro.is_story_seen() else STATE_PLAYING
+        self.game_state = GameState(initial_state=initial_state)
         self.score_mgr = ScoreManager()
         self.level_mgr = LevelManager()
         self.enemies = self.level_mgr.init_arena_enemies(self.world.active_arena_id)
         self.destination_arena = None
+
 
     def reset_game(self):
         self.game_state.restart()
@@ -75,6 +80,23 @@ class GameApp:
         self.input_mgr.first_mouse = True
 
     def handle_input(self, real_dt: float):
+        # 0. Story Introduction Screen Controls
+        if self.game_state.current_state == STATE_STORY:
+            # Advance Panel on Enter / Space / Right Arrow
+            if (self.input_mgr.was_key_just_pressed('\r') or
+                self.input_mgr.was_key_just_pressed('\n') or
+                self.input_mgr.was_key_just_pressed(' ') or
+                self.input_mgr.was_special_key_just_pressed(GLUT_KEY_RIGHT)):
+                if not self.story_intro.next_panel():
+                    self.game_state.current_state = STATE_PLAYING
+            # Skip Story on 'S'
+            elif self.input_mgr.was_key_just_pressed('s'):
+                self.story_intro.skip_story()
+                self.game_state.current_state = STATE_PLAYING
+            # Fullscreen Toggle on F11 during Story
+            if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+                glutFullScreen()
+            return
 
         # 1. View Switching (V / C)
         if self.input_mgr.was_key_just_pressed('v') or self.input_mgr.was_key_just_pressed('c'):
@@ -194,6 +216,13 @@ class GameApp:
         real_dt = self.game_time.tick()
         game_dt = self.game_time.dt
 
+        # If in story introduction mode, update story and skip world physics
+        if self.game_state.current_state == STATE_STORY:
+            self.handle_input(real_dt)
+            self.story_intro.update(real_dt)
+            self.input_mgr.end_frame()
+            return
+
         # Update input
         self.handle_input(real_dt)
 
@@ -279,8 +308,10 @@ class GameApp:
             game_state=self.game_state,
             score_manager=self.score_mgr,
             can_teleport=can_teleport,
-            dt=self.game_time.real_dt
+            dt=self.game_time.real_dt,
+            story_intro=self.story_intro
         )
+
 
 
 # Global Application Instance for GLUT Callbacks

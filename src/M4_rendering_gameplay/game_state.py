@@ -1,5 +1,5 @@
-"""Game State Machine."""
 from src.shared.constants import (
+    STATE_STORY,
     STATE_MENU,
     STATE_PLAYING,
     STATE_TELEPORTING,
@@ -9,9 +9,13 @@ from src.shared.constants import (
 
 
 class GameState:
-    def __init__(self):
-        self.current_state = STATE_PLAYING
+    def __init__(self, initial_state: str = STATE_PLAYING):
+        self.current_state = initial_state
         self.teleport_timer = 0.0
+
+    def start_story(self):
+        self.current_state = STATE_STORY
+
 
     def start_teleport(self, duration: float = 1.8):
         self.current_state = STATE_TELEPORTING
