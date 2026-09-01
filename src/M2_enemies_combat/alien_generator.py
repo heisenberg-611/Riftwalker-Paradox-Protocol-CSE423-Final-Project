@@ -172,8 +172,6 @@ class AlienGenerator:
             glPopMatrix()
         glPopMatrix()
 
-        glPopMatrix()
-
         # 4. Outer Counter-Rotating Shard Ring with Glowing Nodes
         rot_outer = anim_time * -65.0
         glPushMatrix()

@@ -36,6 +36,16 @@ class ArenaKeplerRelay(ArenaBase):
             RiftEnergyPickup(Vector3(-18.0, 0.0, -18.0)),
         ]
 
+        # Physical Scene Collision Obstacles
+        from src.shared.collision import CylinderObstacle, BoxObstacle
+        for p in self.pillars:
+            self.obstacles.append(CylinderObstacle(p, radius=1.2))
+        for c in self.crates:
+            self.obstacles.append(BoxObstacle.from_center_cube(c, size=2.0))
+        # Center Rift Beacon pedestal collision
+        self.obstacles.append(CylinderObstacle(Vector3(0.0, 0.0, 0.0), radius=1.2))
+
+
     def draw(self):
         # 1. Floor Grid / Textured Metallic Platform
         glPushMatrix()

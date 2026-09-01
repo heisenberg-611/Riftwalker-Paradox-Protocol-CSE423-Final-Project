@@ -32,6 +32,14 @@ class ArenaSunderedRift(ArenaBase):
             RiftEnergyPickup(Vector3(-20.0, 0.0, 40.0)),
         ]
 
+        # Physical Scene Collision Obstacles
+        from src.shared.collision import CylinderObstacle
+        for spire in self.crystal_spires:
+            self.obstacles.append(CylinderObstacle(spire, radius=1.3))
+        # Return Beacon pedestal collision
+        self.obstacles.append(CylinderObstacle(Vector3(0.0, 0.0, -45.0), radius=1.2))
+
+
     def draw(self):
         # 1. Main Obsidian Island (Textured Rock)
         from src.M4_rendering_gameplay.materials import Materials
