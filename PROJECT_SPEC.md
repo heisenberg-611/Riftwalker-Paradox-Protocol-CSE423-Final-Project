@@ -47,36 +47,36 @@ The course examples also establish the simpler 2D/interactive callback style: Op
 
 Riftwalker adds:
 
-1. **Two complete arenas**
-2. **Rift Beacon teleportation between arenas**
-3. **Blink teleport for combat**
-4. **Procedural astronaut with hierarchy**
-5. **Reusable procedural alien generator**
-6. **Two distinct enemy behaviors**
-7. **One multi-phase boss**
-8. **First-person and third-person cameras**
-9. **Chrono Slow**
-10. **Lighting system / scene lighting variation**
-11. **Particle/effect system**
-12. **Modular procedural environment construction**
-13. **Improved collision and ray-based aiming**
-14. **HUD with multiple live game values**
-15. **Score/rank and complete-game flow**
-16. **Optional restrained gravity-zone showcase**
-17. **A polished teleport visual transition**
+1. **Two complete arenas with distinct tactical profiles** (Kepler Relay & Sundered Rift)
+2. **Structured Wave-Based Combat** (3 escalating waves per arena with defined clear conditions)
+3. **Tactical Arena Hazards** (Moving laser barriers, electrified floors, closing bulkheads, rotating energy beams, rift damage zones)
+4. **Linked Rift Beacon Teleportation** (Tactical repositioning and escape mechanism; unlocked upon arena wave clearance)
+5. **Dynamic Combo Scoring System** (`COMBO x1` to `x4` multiplier with decay window)
+6. **Procedural astronaut with hierarchy**
+7. **Reusable procedural alien generator**
+8. **Two distinct, aggressive enemy behaviors** (Zig-zagging lunging Stalker, strafing projectile Spitter)
+9. **One multi-phase boss** (Rift Guardian with rotating shield obelisks)
+10. **First-person and third-person cameras** (with synchronized crosshair aiming)
+11. **Chrono Slow strategic time dilation** (100% combat charge gate, 5s duration, 30% enemy speed scaling)
+12. **Lighting system / scene lighting variation**
+13. **Particle/effect system** (Vortex swirls, hit sparks, tracers, death bursts)
+14. **Modular procedural environment construction**
+15. **Centralized 3D collision resolution and ray-based aiming**
+16. **2D Orthographic HUD with live wave objectives, combo meter, cooldown bar, and boss status**
+17. **Score/rank and complete-game flow**
+18. **Optional restrained gravity-zone showcase**
+19. **A polished teleport visual transition**
 
-This is intentionally much more than Assignment 3 while remaining centered on CG techniques rather than a giant game engine.
+This is intentionally much more challenging and engaging than Assignment 3 while remaining centered on CG techniques (60% graphics / 40% gameplay) rather than a giant game engine.
 
 ---
 
-
-
 ### 1.1 High Concept
 
-**Riftwalker: Paradox Protocol** is a small sci-fi combat game in which an astronaut uses an experimental Rift-Chrono suit to fight alien creatures across two arenas. The suit provides two signature abilities:
+**Riftwalker: Paradox Protocol** is a fast-paced sci-fi combat arena game in which an astronaut uses an experimental Rift-Chrono suit to survive waves of aggressive alien invaders and navigate hazardous environments across two interconnected arenas. The suit provides two signature abilities:
 
-1. **Rift Teleportation** — teleport between linked Rift Beacons and move between the two arenas.
-2. **Chrono Slow** — temporarily slow enemies and enemy projectiles while the player continues at normal speed.
+1. **Rift Teleportation** — tactical teleportation between linked Rift Beacons to transition between arenas and escape overwhelming swarms once arena waves are cleared.
+2. **Chrono Slow** — a strategic 5-second 30% time dilation ability earned through combat kills to survive intense enemy encounters and dodge hazardous traps.
 
 The game supports both **third-person** and **first-person** camera modes.
 
@@ -85,7 +85,7 @@ The game is deliberately scoped for a Computer Graphics course. The priority is 
 - **60% graphics / visual systems**
 - **40% gameplay / supporting systems**
 
-The project should look technically ambitious while keeping gameplay architecture simple enough for a student team to finish reliably.
+The project delivers intense, engaging combat and challenging hazards while keeping the architecture simple and robust for a 4-person student team.
 
 ---
 
@@ -96,25 +96,30 @@ The project should look technically ambitious while keeping gameplay architectur
 ### 2.1 Scope Categorization
 
 #### REQUIRED (Core Baseline Scope):
-* **2 Arenas:** Arena 1 (*Kepler Relay*) and Arena 2 (*Sundered Rift*).
-* **Linked Rift Beacon Teleportation:** Spatial teleportation between the two arenas via linked beacons (Arena 1 Beacon A $\leftrightarrow$ Arena 2 Beacon B).
-* **Dual Camera System:** Dedicated First-Person and Third-Person camera modes with synchronized aiming.
+* **2 Arenas:** Arena 1 (*Kepler Relay*) and Arena 2 (*Sundered Rift*) with distinct combat layouts and tactical characteristics.
+* **Wave-Based Combat (NEW REQUIRED):** Structured combat waves (3 waves per arena) with defined completion conditions. Rift Beacons remain locked until arena waves are cleared.
+* **Tactical Arena Hazards (NEW REQUIRED):** Dynamic environmental traps forcing player movement:
+  - *Kepler Relay:* Moving laser barrier, electrified floor zone, temporary closing/opening bulkhead doors.
+  - *Sundered Rift:* Rift energy damage zone, rotating energy beam, unstable/falling platform area.
+* **Tactical Rift Beacon Teleportation (NEW REQUIRED):** Spatial teleportation between arenas via linked beacons (Arena 1 Beacon A $\leftrightarrow$ Arena 2 Beacon B) serving as arena transition and tactical repositioning.
+* **Combo Scoring System (NEW REQUIRED):** Dynamic kill-chain multiplier (`COMBO x1` to `x4`) rewarding rapid consecutive kills with configurable time decay.
+* **Dual Camera System:** Dedicated First-Person and Third-Person (over-the-shoulder) camera modes with synchronized crosshair aiming.
 * **Procedural Astronaut Model:** Multi-joint hierarchical modeling with nested transformation matrices.
 * **Procedural Alien Models:** Reusable multi-legged/segmented procedural alien generator.
 * **Hierarchical Modeling & Animation:** Walking animations, articulated limbs, weapon aiming.
-* **Lighting System:** Directional sunlight (`GL_LIGHT0`) and dynamic localized point lights (`GL_LIGHT1` on beacons).
-* **Particle Effects:** Teleport vortex swirl, hit sparks, thruster plumes, and death effects.
-* **Shooting & Combat:** Hitscan primary weapon with raycast hit detection and projectile system.
-* **Collision Detection:** Reusable geometric tests defined in `src/shared/collision.py` (sphere-sphere, ray-box, bounds clamping).
-* **2 Enemy Types:** Melee Rift Stalker (rusher) + Ranged Rift Spitter (projectile shooter).
-* **1 Boss Encounter:** Multi-phase Rift Guardian with rotating orbital shields and radial attacks.
+* **Lighting System:** Directional sunlight (`GL_LIGHT0`) and dynamic localized point lights (`GL_LIGHT1` on beacons/hazards).
+* **Particle Effects:** Teleport vortex swirl, hit sparks, dual-pass laser tracers, thruster plumes, and death effects.
+* **Shooting & Combat:** Hitscan primary weapon with raycast hit detection, visual muzzle alignment, and projectile system.
+* **Collision Detection & Obstacle Resolution:** Reusable geometric tests and sliding push-out physics defined in `src/shared/collision.py` (cylinder pillars, AABB crates, hazard triggers, boundary clamping).
+* **2 Dangerous Enemy Types:** Melee Rift Stalker (fast pursuit, zig-zag pathing, melee lunge) + Ranged Rift Spitter (strafing standoff AI, projectile volley).
+* **1 Boss Encounter:** Multi-phase Rift Guardian with rotating orbital shield obelisks and radial energy shockwaves.
 * **Chrono Slow with Charge Bar:** 5-second 30% enemy time dilation powered by a combat-filled Chrono Charge bar (available only at 100%, resets to 0%).
-* **2D HUD:** 2D orthographic overlay displaying Health, Chrono Charge/countdown bar, Score, Objective prompts, and Crosshair.
-* **Score & Rank:** Kill scores, multipliers, combo timer, and rank assessment.
-* **Basic Level Progression:** Start Menu $\rightarrow$ Arena 1 $\rightarrow$ Beacon Teleport $\rightarrow$ Arena 2 $\rightarrow$ Boss Fight $\rightarrow$ Victory / Game Over $\rightarrow$ Restart.
+* **2D Orthographic HUD:** Overlay displaying Health, Chrono Charge/countdown bar, Weapon Cooldown bar, live Wave Objectives, Remaining Enemies counter, Combo Multiplier meter, Boss Health Bar with Phase indicator, and Crosshair.
+* **Score & Rank:** Kill scores, combo multipliers, hazard penalties, and final rank assessment (S/A/B/C/D).
+* **Structured Level Progression:** Start Menu / Story Intro $\rightarrow$ Arena 1 (Waves 1–3) $\rightarrow$ Beacon Unlock $\rightarrow$ Teleportation $\rightarrow$ Arena 2 (Waves 1–3) $\rightarrow$ Boss Fight (Phases 1 & 2) $\rightarrow$ Victory / Game Over $\rightarrow$ Restart.
 
 #### OPTIONAL / STRETCH (Only After MVP Completion):
-* **Blink Teleport:** Short-range combat dash/teleport. Must NOT be required for the core project, demo, or grading.
+* **Blink Teleport:** Short-range combat dash/teleport (`E` key). Must NOT be required for the core project, demo, or grading.
 * **One Special Gravity/Wall-Walking Section:** Single predefined low-gravity / jump-pad zone. Core movement remains standard vertical gravity.
 * **Additional Visual Polish:** Extra post-processing screen filters, audio effects, destructible debris.
 
@@ -124,9 +129,9 @@ The project should look technically ambitious while keeping gameplay architectur
 * **Full 6-DOF Zero-G Flight:** No arbitrary free-floating 6-axis flight mechanics.
 * **Arbitrary Gravity Everywhere:** Camera, movement, and collision architecture must NOT depend on arbitrary-gravity support.
 * **Inverse Kinematics (IK):** Use forward hierarchical trigonometric joint posing instead.
-* **Upgrade Economy / Persistent Currency:** No skill trees, shop systems, or persistent currency.
+* **Upgrade Economy / Persistent Currency / Skill Trees:** No inventory, equipment shops, or character stats.
 * **Multiple Bosses:** Scope is strictly locked to exactly one boss (Rift Guardian).
-* **Complex Temporal Simulation:** Simple delta-time scaling only.
+* **Complex Physics Simulation:** Simple geometric trigger checks and obstacle sliding only; no rigid-body dynamics engine.
 * **Physically Simulated Wormholes / Real-Time Portals:** Teleportation is a clean transform/scene transition, not optical portal physics.
 
 ---
@@ -135,111 +140,152 @@ The project should look technically ambitious while keeping gameplay architectur
 
 ## 3.1 Player Fantasy
 
-The player is an astronaut equipped with a classified **Rift-Chrono Suit**. The suit manipulates spatial position and local time through unstable experimental technology.
+The player is an elite astronaut equipped with an experimental **Rift-Chrono Combat Suit**. Trapped behind enemy lines in an active spatial breach, the player must outmaneuver swarms of crystalline void predators, evade hazardous station traps, and leverage time manipulation and teleportation to eliminate the Rift Guardian boss.
 
-The game should communicate this through visuals rather than lengthy narrative systems:
-
-- glowing Rift energy
-- short teleport flash
-- temporal distortion during Chrono Slow
-- futuristic astronaut silhouette
-- alien bio-luminescence
-- strong lighting contrast
+Visual storytelling cues:
+- Glowing cyan/violet Rift energy conduits and hazard indicators
+- Instantaneous screen flash and vortex swirl during teleportation
+- Cool-blue chromatic overlay and slowed audio/motion during Chrono Slow
+- Detailed astronaut rig with articulated arms tracking weapon aim
+- Bioluminescent crystalline alien silhouettes and glowing weak-point cores
+- High-contrast sci-fi industrial and cosmic void lighting
 
 ---
 
-## 3.2 Core Gameplay Loop
+## 3.2 Master Gameplay Loop
 
 ```text
-Start Game
-    ↓
-Arena 1
-    ↓
-Fight Aliens
-    ↓
-Use Blink / Weapon / Chrono Slow
-    ↓
-Reach Rift Beacon
-    ↓
-Teleport
-    ↓
-Arena 2
-    ↓
-Fight Harder Aliens
-    ↓
-Boss
-    ↓
-Final Score / Rank
+Start / Story Intro
+        ↓
+Arena 1: Kepler Relay
+        ↓
+     Wave 1 (3 Stalkers)
+        ↓
+     Wave 2 (2 Stalkers + 2 Spitters + Hazards)
+        ↓
+     Wave 3 (3 Stalkers + 2 Spitters + Active Hazards)
+        ↓
+Arena 1 Cleared → Rift Beacon Unlocked & Online
+        ↓
+Rift Teleport (Press 'F' at Beacon)
+        ↓
+Arena 2: Sundered Rift
+        ↓
+     Wave 1 (3 Stalkers + 2 Spitters)
+        ↓
+     Wave 2 (4 Stalkers + 3 Spitters + Void Hazards)
+        ↓
+     Wave 3 (2 Stalkers + 4 Spitters + Rotating Beams)
+        ↓
+Arena 2 Waves Cleared → Boss Breach
+        ↓
+Rift Guardian Boss Encounter
+        ↓
+     Phase 1 (Rotating Orbital Shield Obelisks)
+        ↓
+     Phase 2 (HP ≤ 50% - Rapid Rotation & Radial Shockwaves)
+        ↓
+Victory Screen & Final Rank Evaluation (S/A/B/C/D)
 ```
 
-The game should be finishable in a short session and should not require a large amount of progression content.
+### In-Wave Tactical Micro-Loop
+
+```text
+Move & Strafe (WASD)
+        ↓
+Evade Hazards (Laser barriers, electrified zones, energy beams)
+        ↓
+Aim & Fire Laser Rifle (Crosshair-aligned raycast)
+        ↓
+Maintain Distance / Dodge Stalker Lunges & Spitter Projectiles
+        ↓
+Earn Chrono Charge & Build Combo Multiplier (Quick consecutive kills)
+        ↓
+Activate Chrono Slow (At 100% Charge) to survive lethal swarms
+        ↓
+Clear Wave → Transition to Next Wave or Unlock Rift Beacon
+```
 
 ---
 
-# 4. Arenas
+# 4. Arenas & Tactical Hazards
 
 ## 4.1 Arena 1 — Kepler Relay
 
-### Theme
+### Theme & Tactical Profile
+A damaged industrial space station communications outpost.
+- **Combat Characteristics:** Smaller interior spaces, tight corridors, extensive structural cover (pillars, crates).
+- **Tactical Advantage:** Excellent cover for breaking line-of-sight against ranged Spitters.
+- **Tactical Danger:** High risk in close quarters against fast melee Stalkers.
+- **Bounds:** Rectangular metallic deck ($[-28, +28] \times [-28, +28]$).
 
-A human communications/research station damaged by the first alien breach.
+### Wave Structure (Kepler Relay)
+* **Wave 1 — Initial Breach:** 3 Melee Rift Stalkers. (Teaches movement, hip-fire aiming, and melee evasion).
+* **Wave 2 — Combined Assault:** 2 Rift Stalkers + 2 Rift Spitters. (Introduces ranged projectile dodging and cover usage).
+* **Wave 3 — Station Overrun:** 3 Rift Stalkers + 2 Rift Spitters with active hazards. (Demands combo building and Chrono Slow usage).
 
-### Visual Identity
-
-- metallic corridors
-- modular wall panels
-- industrial floors
-- cool technical lights
-- emergency lights
-- cables / vents / structural frames
-- occasional broken panels
-
-### Gameplay
-
-- introductory arena
-- conventional gravity
-- smaller combat areas
-- teaches shooting
-- teaches teleportation
-- introduces Chrono Slow
-
-### Enemies
-
-- melee alien
-- ranged alien
-
-### Rift Beacon
-
-One destination beacon should clearly communicate that it connects to Arena 2.
+### Tactical Arena Hazards (Kepler Relay — REQUIRED)
+1. **Moving Laser Barrier:**
+   - *Visual:* Neon-red horizontal laser beam oscillating between two structural pillars.
+   - *Logic:* Moves back and forth along an axis ($Z$ or $X$). AABB/line trigger check.
+   - *Effect:* Deals 15 damage and applies a brief 0.5s movement slow if touched. Cooldown: 1.0s.
+2. **Electrified Floor Zone:**
+   - *Visual:* Pulsing yellow-orange warning grid on floor panel section.
+   - *Logic:* Activates periodically (3.0s active, 3.0s safe). Bounding box trigger.
+   - *Effect:* Deals 8 damage per tick while standing inside the active electrified grid.
+3. **Closing/Opening Security Bulkhead Door:**
+   - *Visual:* Heavy metal door frame that periodically opens and closes across a corridor choke point.
+   - *Logic:* Cyclic vertical motion. Solid AABB collision when closed, passable when open.
+   - *Effect:* Blocks player and enemy movement/sightlines, dynamically altering escape routes.
 
 ---
 
 ## 4.2 Arena 2 — Sundered Rift
 
-### Theme
+### Theme & Tactical Profile
+A shattered cosmic asteroid plateau suspended over a dimensional abyss.
+- **Combat Characteristics:** Vast open arena with towering floating crystal spires and long sightlines.
+- **Tactical Advantage:** Wide maneuvering room, clear visibility, easy to track enemy positions.
+- **Tactical Danger:** Sparse cover makes the player vulnerable to crossfire from multiple ranged Spitters.
+- **Bounds:** Cosmic obsidian plateau ($[-35, +35] \times [-35, +35]$).
 
-An alien rift chamber surrounding the source of the spatial anomaly.
+### Wave Structure (Sundered Rift)
+* **Wave 1 — Void Vanguard:** 3 Rift Stalkers + 2 Rift Spitters. (Introduces open-field kite tactics).
+* **Wave 2 — Swarm Surge:** 4 Rift Stalkers + 3 Rift Spitters + active void hazards. (High-density swarm requiring Chrono Slow).
+* **Wave 3 — Elite Cadre:** 2 Rift Stalkers + 4 Rift Spitters + rotating energy beams. (Heavy ranged projectile barrages).
+* **Boss Encounter — Rift Guardian:** Multi-phase boss fight with rotating orbital shields and radial shockwaves.
 
-### Visual Identity
+### Tactical Arena Hazards (Sundered Rift — REQUIRED)
+1. **Rift Energy Damage Zone:**
+   - *Visual:* Swirling pool of violet void particles and dark energy crackles on the arena floor.
+   - *Logic:* Static circular trigger zone ($R = 4.0$).
+   - *Effect:* Deals 12 damage per second and rapidly drains suit integrity if traversed.
+2. **Rotating Energy Beam:**
+   - *Visual:* High-intensity cyan laser beam radiating from a central spire and sweeping 360° across the arena.
+   - *Logic:* Continuous angular rotation (`angle += rotation_speed * dt`). Radial ray-cylinder collision test.
+   - *Effect:* Deals 20 damage and knocks the player back. Encourages timed movement and jump/dash timing.
+3. **Unstable Platform Area:**
+   - *Visual:* Floating obsidian rock slab with glowing stress fractures.
+   - *Logic:* Steps onto platform $\rightarrow$ 1.5s warning flash $\rightarrow$ platform collapses/disables collision for 3.0s before respawning.
+   - *Effect:* Forces player to stay mobile and avoid cornering themselves on unstable ground.
 
-- large open combat space
-- alien architecture
-- glowing rift structures
-- darker environment
-- stronger contrast
-- volumetric-looking particles simulated with simple transparent sprites/geometry
-- stronger Rift color effects
+---
 
-### Gameplay
+## 4.3 Hazard Architecture & Collision Logic
 
-- larger combat arena
-- more enemy density
-- more aggressive ranged enemies
-- final boss encounter
+Hazards are designed to be **mechanically lightweight and computationally robust**:
 
-### Rift Beacon
+```text
+Player position (x, y, z) + radius
+        ↓
+Check against Hazard Trigger Volumes (AABB / Sphere / Radial Ray)
+        ↓
+Is Hazard currently in Active State?
+   ├─ No  → Ignore
+   └─ Yes → Apply damage to Player HP + Spawn Hazard Sparks + Trigger brief invulnerability cooldown (0.8s)
+```
 
-The beacon links back to Arena 1 for the teleportation demonstration and provides a natural gameplay anchor.
+> **Constraint:** Hazards use simple geometric intersection tests in `src/shared/collision.py` or arena classes. No continuous rigid-body physics engine is required.
 
 ---
 
@@ -247,7 +293,7 @@ The beacon links back to Arena 1 for the teleportation demonstration and provide
 
 Spatial teleportation between the two arenas is a **mandatory core feature** of the game and demo.
 
-## 5.1 Design & Linked Beacon Pair
+## 5.1 Tactical Beacon Design & Lock State
 
 The game defines one bidirectional linked beacon pair:
 $$\text{Arena 1: Kepler Relay Beacon A} \longleftrightarrow \text{Arena 2: Sundered Rift Beacon B}$$
@@ -259,7 +305,10 @@ Kepler Relay (Arena 1)                          Sundered Rift (Arena 2)
           └─── Spatial Arena State Transition (Key 'F') ──┘
 ```
 
-Interacting with / activating Beacon A seamlessly transports the player to Beacon B in Arena 2 (and vice-versa for the return trip).
+### Tactical Gameplay Rules:
+1. **Wave Lockout:** While active waves are spawning or enemies remain alive, the Rift Beacon is **LOCKED** (rings rotate slowly in amber standby mode, HUD indicates beacon offline).
+2. **Wave Clear Unlock:** Upon defeating the final enemy of Wave 3 in an arena, the Beacon **ACTIVATES** (rings spin rapidly with bright cyan energy glow, HUD displays `ARENA CLEARED - RIFT BEACON ONLINE - PRESS 'F' TO TELEPORT`).
+3. **Tactical Repositioning:** Once unlocked, the beacon serves as a spatial conduit between arenas, allowing the player to transition between environments or strategically reposition.
 
 ## 5.2 Teleport Sequence & Execution Pipeline
 
@@ -279,7 +328,7 @@ class RiftBeacon:
     position: Vector3          # 3D world coordinate
     linked_arena_id: str       # e.g., "ARENA_02_SUNDERED_RIFT"
     activation_radius: float   # 3.5 units
-    is_active: bool            # True
+    is_unlocked: bool          # Set to True once arena waves are cleared
 ```
 
 ### Critical Scope Constraints:
@@ -559,15 +608,17 @@ P_new = P + normalize(forward_aim_direction) * BLINK_DISTANCE
 
 # 12. Enemy Design (Crystalline Void Horrors)
 
-The dimensional invaders are designed as **Crystalline Void Horrors** — otherworldly entities composed of floating obsidian shards, sharp geometric facets, and glowing cyan/violet rift fissure nodes rather than generic earthly bugs. Only two normal enemy types are required.
+The dimensional invaders are designed as **Crystalline Void Horrors** — otherworldly entities composed of floating obsidian shards, sharp geometric facets, and glowing cyan/violet rift fissure nodes rather than generic earthly bugs. Only two normal enemy types are required, each featuring dangerous tactical combat behaviors.
 
 ## 12.1 Melee Alien — Rift Stalker
 
-**Behavior:**
-1. Detect player position.
-2. Fast forward pursuit with sinusoidal zig-zag leaping.
-3. Lunge into melee range ($R \le 2.0$) and perform slashing attack.
-4. Cooldown and repeat.
+A swift, predatory quadrupedal horror that closes the gap aggressively:
+
+**Tactical Behaviors & Combat AI:**
+1. **Aggressive Pursuit:** Moves at high velocity ($6.5\text{–}8.5\text{ units/sec}$) directly tracking player position.
+2. **Sinusoidal Zig-Zag Evasion:** Alternates lateral velocity perpendicular to line of sight while charging, making straight hitscan shots harder to land.
+3. **Melee Lunge Burst:** When closing into short range ($R \le 4.5\text{ units}$), accelerates forward in a rapid lunging leap with slashing scythe animations.
+4. **Slash Strike & Cooldown:** Deals 20 damage on contact ($R \le 1.8$), then pauses briefly (0.8s attack cooldown) before resuming pursuit.
 
 **Visual Aesthetic (M2 Deliverable):**
 - Sharp angular obsidian carapace plates.
@@ -575,14 +626,18 @@ The dimensional invaders are designed as **Crystalline Void Horrors** — otherw
 - Articulated crystalline bladed front limbs with animated lunging transformations.
 - Menacing multi-eyed bioluminescent cluster.
 
+---
+
 ## 12.2 Ranged Alien — Rift Spitter
 
-**Behavior:**
-1. Detect player position and maintain standoff range ($12.0 \le R \le 22.0$).
-2. Hover and strafe perpendicularly to player line of sight.
-3. Charge energy core with accelerating spin animation.
-4. Fire plasma projectile toward player coordinates.
-5. Reposition if player closes in.
+A hovering dimensional prism monolith that controls space through ranged projectile barrages:
+
+**Tactical Behaviors & Combat AI:**
+1. **Standoff Range Regulation:** Actively maintains a safe engagement distance ($15.0 \le R \le 22.0\text{ units}$) from the player.
+2. **Perpendicular Strafing:** Constantly strafes clockwise/counter-clockwise around the player to avoid incoming fire.
+3. **Repositioning:** If the player charges into close quarters ($R < 10.0$), the Spitter immediately retreats backwards to re-establish standoff range.
+4. **Targeted Projectile Volley:** Charges its core (accelerating shard ring spin) and fires high-velocity plasma bolts directly toward the player's predicted position.
+5. **Wave Speed Scaling:** Projectile travel speed increases moderately in later waves ($14\text{ u/s}$ in Wave 2 $\rightarrow$ $18\text{ u/s}$ in Wave 3), making Chrono Slow essential for dodging.
 
 **Visual Aesthetic (M2 Deliverable):**
 - Floating dimensional crystal prism/monolith.
@@ -828,61 +883,123 @@ To prevent fragmented or incompatible collision implementations across the team:
 
 ---
 
-# 19. HUD
+# 19. HUD & Objective Communication
 
 Keep the HUD clean, responsive, and informative in both 1st-person and 3rd-person camera modes.
 
-### Required Elements
+### 2D Orthographic HUD Layout
 
 ```text
-SUIT INTEGRITY:  [██████████] 100 / 100
-CHRONO CHARGE:   [███████░░░] 70%  [READY AT 100% - DEFEAT ENEMIES]
-                 (During 5s Slow: [██████░░░░] 3.2s REMAINING)
-SCORE:           012500
-
-                       + (Centered Crosshair with Hit Feedback)
-
->> PRESS 'F' TO RIFT TELEPORT << (When in Beacon Radius)
+┌──────────────────────────────────────────────────────────────────────────┐
+│ SCORE: 014500  [COMBO x3 ■■■■░░ (2.1s)]           CAMERA: 3rd Person [V] │
+│                                                                          │
+│                 RIFT GUARDIAN [PHASE 1]: 850/1000                        │
+│                 [████████████████████░░░░░░]                             │
+│                                                                          │
+│                                                                          │
+│                       OBJECTIVE: Clear Wave 2                            │
+│                         ENEMIES REMAINING: 3                             │
+│                                                                          │
+│                                  +                                       │
+│                                                                          │
+│                 >> PRESS 'F' TO RIFT TELEPORT <<                         │
+│                                                                          │
+│ SUIT INTEGRITY:  [██████████] 85 / 100                                   │
+│ CHRONO CHARGE:   [███████░░░] 70%  [READY AT 100% - DEFEAT ENEMIES]      │
+│                  (Active: [██████░░░░] 3.2s REMAINING)                   │
+│ LASER RIFLE:     [██████████] READY [CLICK / SPACE]                      │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Chrono Charge Bar Specification
-- **Charge State (< 100%):** Renders progress bar from 0% to 100% filled via combat kills and energy pickups. Status text displays percentage and reminds player to defeat enemies.
-- **Ready State (= 100%):** Turns glowing bright cyan with animated status text: `[100% READY - PRESS 'Q']`.
-- **Active State (Chrono Slow Active):** The 100% charge is consumed; the bar displays a 5.0-second countdown bar with `[CHRONO SLOW ACTIVE: X.Xs REMAINING]`.
-- **Post-Effect:** Resets to 0% once the 5 seconds conclude.
+### HUD Components & State Feedback
 
-### First-person and third-person
-The same 2D orthographic overlay (`glOrtho`) is reused across both camera modes. The crosshair remains locked at center screen.
+1. **Suit Integrity (Bottom Left):**
+   - Green-to-red horizontal health bar ($0\text{--}100\text{ HP}$).
+   - Status text: `SUIT INTEGRITY: [HP]/100`.
+
+2. **Chrono Charge Bar (Bottom Left):**
+   - **Charging (< 100%):** Cyan-blue bar filling from kills and pickups with percentage read-out.
+   - **Ready (= 100%):** Glowing cyan bar with pulsing text: `CHRONO CHARGE: [100% READY - PRESS 'Q']`.
+   - **Active (5s Duration):** Cyan countdown bar with `CHRONO SLOW: X.Xs REMAINING`.
+   - **Post-Slow:** Automatically resets to 0%.
+
+3. **Laser Rifle Cycling Cooldown Bar (Bottom Left):**
+   - Renders real-time weapon cycling state ($0.0\text{--}1.0$).
+   - Bright cyan `[READY - CLICK / SPACE]` when ready to fire; amber fill bar `RIFLE CYCLING: XX%` during cooldown.
+
+4. **Live Wave Objectives & Status Banners (Center / Upper-Center):**
+   - Active Wave: `OBJECTIVE: Clear Wave X` and `ENEMIES REMAINING: N`.
+   - Wave Transition: `WAVE CLEARED - NEXT WAVE IN 2.0s`.
+   - Arena Clearance: `ARENA CLEARED - RIFT BEACON ONLINE - PRESS 'F' TO TELEPORT`.
+
+5. **Combo Multiplier Meter (Top Left):**
+   - Displays current multiplier badge: `COMBO x1`, `COMBO x2`, `COMBO x3`, `COMBO x4`.
+   - Includes horizontal decaying timer bar indicating remaining window before reset.
+
+6. **Boss Health Bar & Phase Indicator (Top Center):**
+   - Active during the Rift Guardian boss fight.
+   - Renders health bar with phase text: `RIFT GUARDIAN [PHASE 1 / PHASE 2]: [HP]/[MaxHP]`.
+
+7. **Crosshair & Hitmarkers (Center Screen):**
+   - Centered 2D crosshair with dynamic red hitmarker flares on successful hits.
+
+8. **End-Game Overlay:**
+   - `GAME OVER` with red banner and `Press 'R' to Restart Mission`.
+   - `MISSION ACCOMPLISHED!` with green victory banner and final rank evaluation.
 
 ---
 
-# 20. Scoring
+# 20. Scoring & Combo Multiplier System — REQUIRED
 
-Use simple scoring.
+The scoring system actively rewards aggressive, fast-paced play through a **time-sensitive combo chain**.
 
-## Suggested Formula
+## 20.1 Score Calculation Formula
+
+$$\text{Total Score} = \sum (\text{Base Kill Score} \times \text{Combo Multiplier}) + \text{Bonuses} - \text{Hazard Penalties}$$
+
+### Base Score Values:
+* **Melee Rift Stalker Kill:** $+100\text{ pts}$
+* **Ranged Rift Spitter Kill:** $+150\text{ pts}$
+* **Wave Clearance Bonus:** $+300\text{ pts}$ (Wave 1), $+500\text{ pts}$ (Wave 2), $+800\text{ pts}$ (Wave 3)
+* **Boss Phase 1 Milestone:** $+500\text{ pts}$
+* **Boss Defeated:** $+2000\text{ pts}$
+* **Arena Completion Bonus:** $+1000\text{ pts}$
+
+## 20.2 Combo Multiplier Mechanics
 
 ```text
-Enemy Kill       = +100
-Boss Damage      = +50 per damage milestone, if useful
-Boss Defeated    = +1000
-Arena Completed  = +500
-Time Bonus       = optional
+Kill Enemy 1 (COMBO x1)
+       │ (Kill within 3.5s window)
+       ▼
+Kill Enemy 2 (COMBO x2)
+       │ (Kill within 3.5s window)
+       ▼
+Kill Enemy 3 (COMBO x3)
+       │ (Kill within 3.5s window)
+       ▼
+Kill Enemy 4+ (COMBO x4 — Maximum Multiplier)
 ```
 
-The final score can map to a rank:
+* **Combo Window Duration:** $3.5\text{ seconds}$ (`COMBO_TIMEOUT = 3.5`).
+* **Multiplier Scaling:**
+  - 1 kill: $\times 1$
+  - 2 consecutive kills: $\times 2$
+  - 3 consecutive kills: $\times 3$
+  - 4+ consecutive kills: $\times 4$ (Max cap)
+* **Decay Rule:** If no enemy is killed within the 3.5-second window, the combo timer expires and multiplier resets to $\times 1$.
+* **Damage Penalty:** Taking damage from enemy attacks or arena hazards reduces the active combo multiplier by 1 step.
 
-```text
-S = excellent
-A = very good
-B = good
-C = completed
-D = poor
-```
+## 20.3 Performance Ranks
 
-Exact thresholds should be tuned during playtesting.
+The final end-game score maps directly to an operational performance rank:
 
-No upgrade tree or persistent currency is required.
+* **Rank S (Elite Riftwalker):** $\ge 12,000\text{ pts}$ (Fast clears, sustained $\times 3/\times 4$ combos, minimal hazard hits)
+* **Rank A (Senior Operative):** $9,000\text{ -- }11,999\text{ pts}$
+* **Rank B (Field Agent):** $6,500\text{ -- }8,999\text{ pts}$
+* **Rank C (Survivor):** $4,000\text{ -- }6,499\text{ pts}$
+* **Rank D (Compromised):** $< 4,000\text{ pts}$
+
+> **Constraint:** No persistent currency, skill trees, or RPG stat upgrades are required. Scoring is purely performance-based and resets each run.
 
 ---
 
@@ -2281,6 +2398,26 @@ Keep conventional gravity as the baseline. A small special gravity section may b
 
 Use simpler hierarchical arm posing instead.
 
+## Decision 08 — Wave-Based Combat Progression
+
+**Status:** Approved — REQUIRED Baseline
+
+Replace flat continuous enemy spawning with structured 3-wave encounters per arena. Rift Beacons remain locked until all waves are cleared.
+
+## Decision 09 — Tactical Arena Hazards
+
+**Status:** Approved — REQUIRED Baseline
+
+Add lightweight geometric hazards (moving laser barriers, electrified floors, closing doors, rotating energy beams, rift damage zones) to force active player movement and spatial awareness.
+
+## Decision 10 — Combo Scoring System
+
+**Status:** Approved — REQUIRED Baseline
+
+Incorporate time-decaying combo multipliers (`COMBO x1` to `x4`) to reward aggressive play and high accuracy.
+
+---
+
 # 39. AI Assistant Quick Context & Scope Enforcement Rules
 
 > **AUTHORITATIVE MANDATE FOR AI ASSISTANTS:** Any AI assistant working on this repository must treat `PROJECT_SPEC.md` as the authoritative single source of truth and scope boundary.
@@ -2289,7 +2426,7 @@ Use simpler hierarchical arm posing instead.
 
 When giving this document to another AI assistant, the following compact context can be used:
 
-> We are building a CG423 Computer Graphics OpenGL project called **Riftwalker: Paradox Protocol**. It is a manageable sci-fi combat game targeting approximately 60% graphics and 40% gameplay. The player is an astronaut who can move, shoot, use Chrono Slow (5s duration at 30% enemy speed, activated only at 100% combat charge), and switch between first-person and third-person cameras. The game has exactly two baseline arenas: **Kepler Relay** and **Sundered Rift**. Linked Rift Beacons teleport the player between the two arenas as a clean scene state transition. Chrono Slow is a simple delta-time scaling mechanic without world rewind. There are two normal enemies (melee and ranged) and one boss (Rift Guardian). Collision is centralized in `src/shared/collision.py`. Blink and Gravity zones are optional stretch features. The graphics priorities are procedural/hierarchical astronaut modeling, procedural alien generation, lighting, particles, camera transformations, and raycast shooting. Avoid scope creep such as 6-DOF flight, arbitrary gravity systems, IK, upgrade trees, multiple bosses, or full temporal simulation. NEVER push directly to `main`; always use isolated feature branches (`feature/mX-...`) and Pull Requests. The supplied CG423 OpenGL starter code is authoritative and must be integrated rather than unnecessarily replaced.
+> We are building a CG423 Computer Graphics OpenGL project called **Riftwalker: Paradox Protocol**. It is a manageable sci-fi combat game targeting approximately 60% graphics and 40% gameplay. The player is an astronaut who can move, shoot, use Chrono Slow (5s duration at 30% enemy speed, activated only at 100% combat charge), and switch between first-person and third-person cameras. The game has exactly two baseline arenas: **Kepler Relay** (tight cover, moving lasers, electrified floors) and **Sundered Rift** (open plateau, rotating beams, rift zones). Linked Rift Beacons teleport the player between the two arenas once 3 structured combat waves per arena are cleared. Chrono Slow is a simple delta-time scaling mechanic without world rewind. Combat features combo multipliers (`COMBO x1` to `x4`), two aggressive enemies (zig-zagging Stalkers and strafing Spitters), and one multi-phase boss (Rift Guardian). Collision is centralized in `src/shared/collision.py`. Blink and Gravity zones are optional stretch features. Avoid scope creep such as 6-DOF flight, arbitrary gravity systems, IK, upgrade trees, multiple bosses, or full temporal simulation. NEVER push directly to `main`; always use isolated feature branches (`feature/mX-...`) and Pull Requests.
 
 ---
 
@@ -2297,19 +2434,18 @@ When giving this document to another AI assistant, the following compact context
 
 | Area | Assignment 3 Baseline | Riftwalker Final |
 |---|---|---|
-| Player | Primitive astronaut | Detailed hierarchical astronaut + animation |
-| Camera | Basic first/third-person state | Dedicated first/third-person systems |
-| Enemy | One simple pursuer | Procedural melee + ranged + boss |
-| Combat | Bullet movement/collision | Raycast weapon + enemy/projectile combat |
-| World | Flat square arena + walls | Two distinct modular arenas |
-| Teleportation | None | Blink + Rift Beacon arena teleport |
-| Time | Frame-based update | Chrono Slow with independent enemy time scale |
-| Graphics | Primitive composition | Procedural models + lighting + particles + effects |
-| HUD | Life/score/missed bullets | HP + Chrono + score + objective/state + crosshair |
-| Game flow | Restart/game over | Arena 1 → teleport → Arena 2 → boss → victory/rank |
-| Scene variety | One arena | Two visually different arenas |
-| Boss | None | One final multi-phase boss |
-| Presentation | Functional | Designed visual identity + VFX polish |
+| Player | Primitive astronaut | Detailed hierarchical astronaut + articulated arms + weapon aim |
+| Camera | Basic first/third-person state | Dedicated 1P viewmodel + 3P OTS camera with synced crosshair |
+| Enemy | One simple pursuer | Zig-zagging melee Stalkers + strafing ranged Spitters + multi-phase boss |
+| Combat & Waves | Continuous respawn / bullets | 3 structured combat waves per arena + hitscan raycast + projectiles |
+| Arena Hazards | None | Moving laser barriers, electrified floors, rotating energy beams, rift zones |
+| World | Flat square arena + walls | Two distinct modular arenas with unique tactical cover & sightline profiles |
+| Teleportation | None | Wave-unlocked tactical Rift Beacon teleportation between arenas + Blink |
+| Time | Frame-based update | Strategic Chrono Slow (5s, 30% enemy speed, 100% combat charge gate) |
+| Graphics | Primitive composition | Procedural models + multi-source lighting + particles + laser tracers |
+| HUD | Life/score/missed bullets | HP + Chrono bar + cooldown bar + live wave objectives + combo meter + boss bar |
+| Scoring | Flat kill score | Base kill score × dynamic combo multiplier (`x1` to `x4`) + performance ranks |
+| Game flow | Restart/game over | Story Intro → Arena 1 (Waves 1–3) → Beacon → Arena 2 (Waves 1–3) → Boss → Victory |
 
 This is the intended reason the final project qualifies as a substantial expansion rather than a small modification of Assignment 3.
 
