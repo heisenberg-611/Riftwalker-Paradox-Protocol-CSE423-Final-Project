@@ -7,12 +7,10 @@ class Effects:
     def draw_screen_flash(width: int, height: int, color=(1.0, 1.0, 1.0), alpha=0.5):
         """Draws a semi-transparent full-screen flash quad."""
         glMatrixMode(GL_PROJECTION)
-        glPushMatrix()
         glLoadIdentity()
         glOrtho(0, width, 0, height, -1, 1)
 
         glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
         glLoadIdentity()
 
         glDisable(GL_DEPTH_TEST)
@@ -32,22 +30,16 @@ class Effects:
             glDisable(GL_BLEND)
             glEnable(GL_DEPTH_TEST)
             glEnable(GL_LIGHTING)
-
-            glPopMatrix()
-            glMatrixMode(GL_PROJECTION)
-            glPopMatrix()
             glMatrixMode(GL_MODELVIEW)
 
     @staticmethod
     def draw_chrono_slow_overlay(width: int, height: int, alpha: float = 0.15):
         """Draws cool-blue temporal distortion tint and corner vignette."""
         glMatrixMode(GL_PROJECTION)
-        glPushMatrix()
         glLoadIdentity()
         glOrtho(0, width, 0, height, -1, 1)
 
         glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
         glLoadIdentity()
 
         glDisable(GL_DEPTH_TEST)
@@ -84,9 +76,6 @@ class Effects:
             glDisable(GL_BLEND)
             glEnable(GL_DEPTH_TEST)
             glEnable(GL_LIGHTING)
-
-            glPopMatrix()
-            glMatrixMode(GL_PROJECTION)
-            glPopMatrix()
             glMatrixMode(GL_MODELVIEW)
+
 

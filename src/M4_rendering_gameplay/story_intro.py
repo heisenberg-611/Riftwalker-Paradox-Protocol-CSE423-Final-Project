@@ -255,12 +255,10 @@ class StoryIntroManager:
     def draw(self, width: int, height: int):
         """Renders 2D cinematic story panel overlay with clean text alignment."""
         glMatrixMode(GL_PROJECTION)
-        glPushMatrix()
         glLoadIdentity()
         glOrtho(0, width, 0, height, -1, 1)
 
         glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
         glLoadIdentity()
 
         glDisable(GL_DEPTH_TEST)
@@ -273,6 +271,7 @@ class StoryIntroManager:
             glBegin(GL_QUADS)
             glVertex2f(0, 0)
             glVertex2f(width, 0)
+
             glVertex2f(width, height)
             glVertex2f(0, height)
             glEnd()
@@ -407,8 +406,5 @@ class StoryIntroManager:
             glDisable(GL_BLEND)
             glEnable(GL_LIGHTING)
             glEnable(GL_DEPTH_TEST)
-
-            glPopMatrix()
-            glMatrixMode(GL_PROJECTION)
-            glPopMatrix()
             glMatrixMode(GL_MODELVIEW)
+

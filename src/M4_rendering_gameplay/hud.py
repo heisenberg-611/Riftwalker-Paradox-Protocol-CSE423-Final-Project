@@ -81,18 +81,17 @@ class HUD:
     ):
         # Switch to 2D Orthographic projection
         glMatrixMode(GL_PROJECTION)
-        glPushMatrix()
         glLoadIdentity()
         glOrtho(0, width, 0, height, -1, 1)
 
         glMatrixMode(GL_MODELVIEW)
-        glPushMatrix()
         glLoadIdentity()
 
         glDisable(GL_DEPTH_TEST)
         glDisable(GL_LIGHTING)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
 
         try:
             # 1. Health Bar (Bottom Left)
@@ -235,9 +234,6 @@ class HUD:
             glDisable(GL_BLEND)
             glEnable(GL_LIGHTING)
             glEnable(GL_DEPTH_TEST)
-
-            glPopMatrix()
-            glMatrixMode(GL_PROJECTION)
-            glPopMatrix()
             glMatrixMode(GL_MODELVIEW)
+
 
