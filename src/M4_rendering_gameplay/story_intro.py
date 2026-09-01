@@ -27,6 +27,18 @@ def get_glut_font(font_name: str = "GLUT_BITMAP_HELVETICA_18"):
     return None
 
 
+def get_text_width(font, text: str) -> float:
+    """Calculates pixel width of string rendered in given GLUT font."""
+    if not text:
+        return 0.0
+    try:
+        if font is not None and hasattr(glut, 'glutBitmapWidth'):
+            return float(sum(glut.glutBitmapWidth(font, ord(c)) for c in text))
+    except Exception:
+        pass
+    return float(len(text) * 9.0)
+
+
 class StoryParticle:
     __slots__ = ('x', 'y', 'vx', 'vy', 'size', 'alpha', 'color')
 
@@ -102,7 +114,7 @@ class StoryIntroManager:
             },
             {
                 "heading": "THE RIFTBORN",
-                "accent_color": (1.0, 0.25, 0.35),
+                "accent_color": (1.0, 0.3, 0.4),
                 "lines": [
                     "The creatures were called Riftborn.",
                     "",
@@ -145,7 +157,7 @@ class StoryIntroManager:
             },
             {
                 "heading": "THE PARADOX",
-                "accent_color": (0.3, 0.8, 1.0),
+                "accent_color": (0.3, 0.85, 1.0),
                 "lines": [
                     "Because the greatest danger may not be that the aliens are invading Earth...",
                     "",
@@ -213,7 +225,7 @@ class StoryIntroManager:
     def update(self, dt: float):
         """Update fade-in transitions and particle drift."""
         self.fade_timer += dt
-        self.fade_alpha = min(1.0, self.fade_timer / 0.45)
+        self.fade_alpha = min(1.0, self.fade_timer / 0.40)
         self.pulse_timer += dt
 
         # Update ambient floating particles
@@ -241,7 +253,7 @@ class StoryIntroManager:
                 break
 
     def draw(self, width: int, height: int):
-        """Renders 2D cinematic story panel overlay."""
+        """Renders 2D cinematic story panel overlay with clean text alignment."""
         glMatrixMode(GL_PROJECTION)
         glPushMatrix()
         glLoadIdentity()
@@ -256,8 +268,8 @@ class StoryIntroManager:
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        # 1. Dark Futuristic Deep Space Background
-        glColor4f(0.03, 0.03, 0.06, 1.0)
+        # 1. Dark Futuristic Deep Space Void Background
+        glColor4f(0.02, 0.02, 0.05, 1.0)
         glBegin(GL_QUADS)
         glVertex2f(0, 0)
         glVertex2f(width, 0)
@@ -271,72 +283,92 @@ class StoryIntroManager:
         for p in self.particles:
             sx = (p.x / 1280.0) * width
             sy = (p.y / 800.0) * height
-            glColor4f(p.color[0], p.color[1], p.color[2], p.alpha * 0.7)
+            glColor4f(p.color[0], p.color[1], p.color[2], p.alpha * 0.75)
             glVertex2f(sx, sy)
-        glEnd()
-
-        # 3. Futuristic HUD Frame Borders & Corner Brackets
-        margin = 40.0
-        frame_w = width - margin * 2
-        frame_h = height - margin * 2
-        glColor4f(0.1, 0.35, 0.55, 0.4)
-        glLineWidth(1.5)
-        glBegin(GL_LINE_LOOP)
-        glVertex2f(margin, margin)
-        glVertex2f(margin + frame_w, margin)
-        glVertex2f(margin + frame_w, margin + frame_h)
-        glVertex2f(margin, margin + frame_h)
-        glEnd()
-
-        # Corner accent brackets
-        bracket_len = 25.0
-        glColor4f(0.0, 0.85, 1.0, 0.85)
-        glBegin(GL_LINES)
-        # Bottom-left
-        glVertex2f(margin, margin)
-        glVertex2f(margin + bracket_len, margin)
-        glVertex2f(margin, margin)
-        glVertex2f(margin, margin + bracket_len)
-        # Bottom-right
-        glVertex2f(margin + frame_w, margin)
-        glVertex2f(margin + frame_w - bracket_len, margin)
-        glVertex2f(margin + frame_w, margin)
-        glVertex2f(margin + frame_w, margin + bracket_len)
-        # Top-right
-        glVertex2f(margin + frame_w, margin + frame_h)
-        glVertex2f(margin + frame_w - bracket_len, margin + frame_h)
-        glVertex2f(margin + frame_w, margin + frame_h)
-        glVertex2f(margin + frame_w, margin + frame_h - bracket_len)
-        # Top-left
-        glVertex2f(margin, margin + frame_h)
-        glVertex2f(margin + bracket_len, margin + frame_h)
-        glVertex2f(margin, margin + frame_h)
-        glVertex2f(margin, margin + frame_h - bracket_len)
         glEnd()
 
         panel = self.panels[self.current_panel_index]
         accent = panel["accent_color"]
         alpha = self.fade_alpha
 
-        # 4. Large Header Title
-        title_font = get_glut_font("GLUT_BITMAP_TIMES_ROMAN_24") or get_glut_font("GLUT_BITMAP_HELVETICA_18")
-        title_text = panel["heading"]
-        title_x = width * 0.5 - (len(title_text) * 5.8)
-        title_y = height * 0.78
-        glColor4f(accent[0], accent[1], accent[2], alpha)
-        self.draw_text(title_x, title_y, title_text, font=title_font)
+        # 3. Centered Terminal Card Container
+        card_w = min(940.0, width - 80.0)
+        card_h = min(540.0, height - 130.0)
+        card_x = (width - card_w) * 0.5
+        card_y = (height - card_h) * 0.5 + 20.0
 
-        # Title underline bar
-        bar_len = min(400.0, max(220.0, len(title_text) * 16.0))
-        glColor4f(accent[0], accent[1], accent[2], alpha * 0.6)
-        glBegin(GL_LINES)
-        glVertex2f(width * 0.5 - bar_len * 0.5, title_y - 12.0)
-        glVertex2f(width * 0.5 + bar_len * 0.5, title_y - 12.0)
+        # Translucent Terminal Plate
+        glColor4f(0.04, 0.05, 0.09, 0.92)
+        glBegin(GL_QUADS)
+        glVertex2f(card_x, card_y)
+        glVertex2f(card_x + card_w, card_y)
+        glVertex2f(card_x + card_w, card_y + card_h)
+        glVertex2f(card_x, card_y + card_h)
         glEnd()
 
-        # 5. Narrative Body Lines
+        # Terminal Plate Outer Border
+        glColor4f(accent[0] * 0.5, accent[1] * 0.5, accent[2] * 0.6, 0.55)
+        glLineWidth(1.5)
+        glBegin(GL_LINE_LOOP)
+        glVertex2f(card_x, card_y)
+        glVertex2f(card_x + card_w, card_y)
+        glVertex2f(card_x + card_w, card_y + card_h)
+        glVertex2f(card_x, card_y + card_h)
+        glEnd()
+
+        # Sci-Fi Corner Bracket Accents
+        bracket_len = 24.0
+        glColor4f(accent[0], accent[1], accent[2], 0.9)
+        glLineWidth(2.0)
+        glBegin(GL_LINES)
+        # Bottom-left
+        glVertex2f(card_x, card_y)
+        glVertex2f(card_x + bracket_len, card_y)
+        glVertex2f(card_x, card_y)
+        glVertex2f(card_x, card_y + bracket_len)
+        # Bottom-right
+        glVertex2f(card_x + card_w, card_y)
+        glVertex2f(card_x + card_w - bracket_len, card_y)
+        glVertex2f(card_x + card_w, card_y)
+        glVertex2f(card_x + card_w, card_y + bracket_len)
+        # Top-right
+        glVertex2f(card_x + card_w, card_y + card_h)
+        glVertex2f(card_x + card_w - bracket_len, card_y + card_h)
+        glVertex2f(card_x + card_w, card_y + card_h)
+        glVertex2f(card_x + card_w, card_y + card_h - bracket_len)
+        # Top-left
+        glVertex2f(card_x, card_y + card_h)
+        glVertex2f(card_x + bracket_len, card_y + card_h)
+        glVertex2f(card_x, card_y + card_h)
+        glVertex2f(card_x, card_y + card_h - bracket_len)
+        glEnd()
+
+        # 4. Top Transmission Header Tag
+        badge_font = get_glut_font("GLUT_BITMAP_8_BY_13") or get_glut_font("GLUT_BITMAP_HELVETICA_12")
+        badge_text = f"// RIFTWALKER TRANSMISSION ARCHIVE // ENTRY 0{self.current_panel_index + 1} OF 0{len(self.panels)} //"
+        glColor4f(accent[0] * 0.9, accent[1] * 0.9, accent[2] * 0.9, alpha * 0.8)
+        self.draw_text(card_x + 35.0, card_y + card_h - 32.0, badge_text, font=badge_font)
+
+        # 5. Section Heading (Centered)
+        title_font = get_glut_font("GLUT_BITMAP_TIMES_ROMAN_24") or get_glut_font("GLUT_BITMAP_HELVETICA_18")
+        title_w = get_text_width(title_font, panel["heading"])
+        title_x = card_x + (card_w - title_w) * 0.5
+        title_y = card_y + card_h - 76.0
+        glColor4f(accent[0], accent[1], accent[2], alpha)
+        self.draw_text(title_x, title_y, panel["heading"], font=title_font)
+
+        # Heading Decorative Divider Bar
+        glColor4f(accent[0], accent[1], accent[2], alpha * 0.45)
+        glLineWidth(1.0)
+        glBegin(GL_LINES)
+        glVertex2f(card_x + 45.0, title_y - 14.0)
+        glVertex2f(card_x + card_w - 45.0, title_y - 14.0)
+        glEnd()
+
+        # 6. Narrative Body Text (Left-Aligned with consistent margin)
         body_font = get_glut_font("GLUT_BITMAP_HELVETICA_18") or get_glut_font("GLUT_BITMAP_9_BY_15")
-        start_y = title_y - 50.0
+        text_left_x = card_x + 60.0
+        start_y = title_y - 52.0
         line_spacing = 26.0
 
         for i, line in enumerate(panel["lines"]):
@@ -344,7 +376,7 @@ class StoryIntroManager:
             if not line:
                 continue
 
-            # Special highlight for prominent key phrases
+            # Special highlight phrases
             is_highlight = any(phrase in line for phrase in (
                 "wrong", "something came through", "fractures in space",
                 "THE RIFT-CHRONO SUIT", "YOU.", "\"They found us.\"", "from Earth"
@@ -353,21 +385,24 @@ class StoryIntroManager:
             if is_highlight:
                 glColor4f(accent[0], accent[1], accent[2], alpha)
             else:
-                glColor4f(0.85, 0.90, 0.96, alpha * 0.95)
+                glColor4f(0.86, 0.90, 0.96, alpha * 0.95)
 
-            line_x = width * 0.5 - (len(line) * 4.2)
-            self.draw_text(line_x, cur_y, line, font=body_font)
+            self.draw_text(text_left_x, cur_y, line, font=body_font)
 
-        # 6. Page Indicator (e.g. [ 1 / 6 ])
-        page_str = f"[  {self.current_panel_index + 1}  /  {len(self.panels)}  ]"
-        glColor4f(0.4, 0.7, 0.9, 0.8)
-        self.draw_text(width * 0.5 - 35.0, margin + 42.0, page_str, font=body_font)
+        # 7. Page Indicator (Centered at Bottom of Card)
+        page_str = f"[  PAGE  {self.current_panel_index + 1}  /  {len(self.panels)}  ]"
+        page_w = get_text_width(body_font, page_str)
+        glColor4f(0.45, 0.75, 0.95, alpha * 0.85)
+        self.draw_text(card_x + (card_w - page_w) * 0.5, card_y + 25.0, page_str, font=body_font)
 
-        # 7. Navigation Footer Prompt
+        # 8. Interactive Navigation Footer Prompt (Pulsating)
         pulse = 0.7 + 0.3 * math.sin(self.pulse_timer * 4.0)
-        glColor4f(0.0, 0.95, 1.0, pulse)
         prompt_str = ">> PRESS [ENTER] OR [SPACE] TO CONTINUE    |    [S] TO SKIP <<"
-        self.draw_text(width * 0.5 - 240.0, margin + 18.0, prompt_str, font=body_font)
+        prompt_w = get_text_width(body_font, prompt_str)
+        prompt_x = (width - prompt_w) * 0.5
+        prompt_y = card_y - 32.0
+        glColor4f(0.0, 0.95, 1.0, pulse)
+        self.draw_text(prompt_x, prompt_y, prompt_str, font=body_font)
 
         glDisable(GL_BLEND)
         glEnable(GL_LIGHTING)
@@ -377,3 +412,4 @@ class StoryIntroManager:
         glMatrixMode(GL_PROJECTION)
         glPopMatrix()
         glMatrixMode(GL_MODELVIEW)
+
