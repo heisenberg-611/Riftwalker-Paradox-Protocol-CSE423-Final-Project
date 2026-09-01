@@ -82,8 +82,9 @@ class GameApp:
     def handle_input(self, real_dt: float):
         # 0. Story Introduction Screen Controls
         if self.game_state.current_state == STATE_STORY:
-            # Advance Panel on Enter / Space / Right Arrow
-            if (self.input_mgr.was_key_just_pressed('\r') or
+            # Advance Panel on Left Click / Enter / Space / Right Arrow
+            if (self.input_mgr.was_mouse_button_just_pressed(0) or
+                self.input_mgr.was_key_just_pressed('\r') or
                 self.input_mgr.was_key_just_pressed('\n') or
                 self.input_mgr.was_key_just_pressed(' ') or
                 self.input_mgr.was_special_key_just_pressed(GLUT_KEY_RIGHT)):
@@ -97,6 +98,7 @@ class GameApp:
             if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
                 glutFullScreen()
             return
+
 
         # End-Game (Game Over / Victory) Screen Controls - Freeze Camera & Movement
         if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
@@ -206,12 +208,16 @@ class GameApp:
                         math.cos(rad_yaw) * math.cos(rad_pitch)
                     ).normalized()
 
-                    origin = self.player.position + Vector3(0.0, 1.8, 0.0)
+                    origin = self.player.position + Vector3(0.0, 1.4, 0.0)
+                    self.renderer.particles.spawn_muzzle_flash(origin)
+
                     hit = RaycastSystem.fire_ray(origin, aim_dir, self.enemies, self.player.weapon.range)
                     if hit and hit.hit_enemy:
+                        end_pos = hit.hit_point
+                        self.renderer.particles.spawn_laser_tracer(origin, end_pos)
                         hit.hit_enemy.take_damage(self.player.weapon.damage)
                         self.renderer.hud.crosshair.trigger_hit()
-                        self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=10)
+                        self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=12)
                         if hit.hit_enemy.is_dead:
                             self.score_mgr.add_kill(hit.hit_enemy.enemy_id)
                             self.renderer.particles.spawn_death_burst(hit.hit_enemy.position, count=24)
@@ -226,6 +232,10 @@ class GameApp:
                         else:
                             if hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_BOSS_HIT)
+                    else:
+                        end_pos = origin + aim_dir * self.player.weapon.range
+                        self.renderer.particles.spawn_laser_tracer(origin, end_pos)
+
 
     def update(self):
         real_dt = self.game_time.tick()

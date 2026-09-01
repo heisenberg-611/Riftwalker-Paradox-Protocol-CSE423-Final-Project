@@ -19,9 +19,36 @@ class Particle:
         self.max_life = life
 
 
+class LaserTracer:
+    __slots__ = ('start_pos', 'end_pos', 'color', 'life', 'max_life')
+
+    def __init__(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0), life: float = 0.12):
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.color = color
+        self.life = life
+        self.max_life = life
+
+
 class ParticleSystem:
     def __init__(self):
         self.particles: List[Particle] = []
+        self.tracers: List[LaserTracer] = []
+
+    def spawn_laser_tracer(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0)):
+        """Draws a high-visibility glowing laser tracer line from gun to target."""
+        self.tracers.append(LaserTracer(start_pos, end_pos, color, life=0.14))
+
+    def spawn_muzzle_flash(self, barrel_pos: Vector3):
+        """Spawns bright cyan sparks at weapon muzzle."""
+        for _ in range(8):
+            vel = Vector3(
+                random.uniform(-2.0, 2.0),
+                random.uniform(-2.0, 2.0),
+                random.uniform(-2.0, 2.0)
+            )
+            color = (0.2, 0.95, 1.0)
+            self.particles.append(Particle(barrel_pos, vel, color, 0.10, random.uniform(0.08, 0.16)))
 
     def spawn_teleport_vortex(self, center: Vector3, count: int = 25):
         for _ in range(count):
@@ -96,13 +123,32 @@ class ParticleSystem:
             p.life -= dt
         self.particles = [p for p in self.particles if p.life > 0.0]
 
+        for t in self.tracers:
+            t.life -= dt
+        self.tracers = [t for t in self.tracers if t.life > 0.0]
+
     def draw(self):
         glDisable(GL_LIGHTING)
+
+        # 1. Render glowing 3D Laser Tracer Beams
+        if self.tracers:
+            glLineWidth(3.5)
+            glBegin(GL_LINES)
+            for t in self.tracers:
+                alpha = max(0.0, min(1.0, t.life / t.max_life))
+                glColor3f(t.color[0] * alpha, t.color[1] * alpha, t.color[2] * alpha)
+                glVertex3f(t.start_pos.x, t.start_pos.y, t.start_pos.z)
+                glVertex3f(t.end_pos.x, t.end_pos.y, t.end_pos.z)
+            glEnd()
+
+        # 2. Render Point Particles
         glPointSize(4.0)
         glBegin(GL_POINTS)
         for p in self.particles:
-            alpha = p.life / p.max_life
+            alpha = max(0.0, min(1.0, p.life / p.max_life))
             glColor3f(p.color[0] * alpha, p.color[1] * alpha, p.color[2] * alpha)
             glVertex3f(p.pos.x, p.pos.y, p.pos.z)
         glEnd()
+
         glEnable(GL_LIGHTING)
+

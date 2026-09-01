@@ -397,12 +397,13 @@ class StoryIntroManager:
 
         # 8. Interactive Navigation Footer Prompt (Pulsating)
         pulse = 0.7 + 0.3 * math.sin(self.pulse_timer * 4.0)
-        prompt_str = ">> PRESS [ENTER] OR [SPACE] TO CONTINUE    |    [S] TO SKIP <<"
+        prompt_str = ">> [LEFT CLICK] / [SPACE] / [ENTER] TO ADVANCE    |    [S] TO SKIP STORY <<"
         prompt_w = get_text_width(body_font, prompt_str)
         prompt_x = (width - prompt_w) * 0.5
         prompt_y = card_y - 32.0
         glColor4f(0.0, 0.95, 1.0, pulse)
         self.draw_text(prompt_x, prompt_y, prompt_str, font=body_font)
+
 
         glDisable(GL_BLEND)
         glEnable(GL_LIGHTING)
