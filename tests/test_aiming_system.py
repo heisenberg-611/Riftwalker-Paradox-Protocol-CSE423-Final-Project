@@ -45,9 +45,9 @@ class TestAimingSystem(unittest.TestCase):
         cam_eye = self.player.fp_cam.get_cam_eye(self.player.position)
         fwd, right, up = self.player.fp_cam.get_basis_vectors()
 
-        # Default offsets
+        # Default offsets (Left-side weapon position aligned with left viewmodel)
         muzzle_default = self.weapon.get_fp_muzzle_world(cam_eye, fwd, right, up)
-        self.assertAlmostEqual(muzzle_default.x, 0.26, places=2)
+        self.assertAlmostEqual(muzzle_default.x, 0.28, places=2)
         self.assertAlmostEqual(muzzle_default.y, 2.1 - 0.20, places=2)
         self.assertAlmostEqual(muzzle_default.z, 0.50, places=2)
 
