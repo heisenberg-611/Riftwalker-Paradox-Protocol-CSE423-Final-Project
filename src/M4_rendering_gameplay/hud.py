@@ -74,7 +74,9 @@ class HUD:
         chrono_time_remaining: float,
         can_teleport: bool,
         is_first_person: bool,
-        game_state_str: str
+        game_state_str: str,
+        boss_hp: float = 0.0,
+        boss_max_hp: float = 0.0
     ):
         # Switch to 2D Orthographic projection
         glMatrixMode(GL_PROJECTION)
@@ -166,13 +168,44 @@ class HUD:
                 glVertex2f(x0, y1 + bar_h)
                 glEnd()
                 glColor3f(0.5, 0.8, 1.0)
-                self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [DEFEAT ENEMIES]")
+                self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [KILLS / RIFT PICKUPS]")
 
-        # 3. Score & Info (Top Left)
+        # 3. Boss Health Bar (Top Center)
+        if boss_hp > 0.0 and boss_max_hp > 0.0:
+            boss_w = 340.0
+            boss_h = 16.0
+            bx0 = (width - boss_w) * 0.5
+            by0 = height - 55.0
+
+            # Background
+            glColor4f(0.1, 0.1, 0.15, 0.8)
+            glBegin(GL_QUADS)
+            glVertex2f(bx0, by0)
+            glVertex2f(bx0 + boss_w, by0)
+            glVertex2f(bx0 + boss_w, by0 + boss_h)
+            glVertex2f(bx0, by0 + boss_h)
+            glEnd()
+
+            # Filled Health Bar
+            b_ratio = max(0.0, min(boss_hp / boss_max_hp, 1.0))
+            glColor4f(1.0, 0.15, 0.25, 0.95)
+            glBegin(GL_QUADS)
+            glVertex2f(bx0, by0)
+            glVertex2f(bx0 + boss_w * b_ratio, by0)
+            glVertex2f(bx0 + boss_w * b_ratio, by0 + boss_h)
+            glVertex2f(bx0, by0 + boss_h)
+            glEnd()
+
+            # Boss Name & Phase Text
+            glColor3f(1.0, 0.8, 0.3)
+            phase_str = "PHASE 2" if b_ratio <= 0.5 else "PHASE 1"
+            self.draw_text(bx0, by0 + boss_h + 6, f"RIFT GUARDIAN [{phase_str}]: {int(boss_hp)}/{int(boss_max_hp)}")
+
+        # 4. Score & Info (Top Left)
         glColor3f(1.0, 0.85, 0.2)
         self.draw_text(30.0, height - 35.0, f"SCORE: {score}")
 
-        view_mode_str = "1st Person [V/C to toggle]" if is_first_person else "3rd Person [V/C to toggle]"
+        view_mode_str = "1st Person [V to toggle]" if is_first_person else "3rd Person [V to toggle]"
         glColor3f(0.8, 0.8, 0.9)
         self.draw_text(30.0, height - 60.0, f"CAMERA: {view_mode_str}")
 

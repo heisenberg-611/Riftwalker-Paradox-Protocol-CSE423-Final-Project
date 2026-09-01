@@ -1426,10 +1426,11 @@ M2 consumes:
 ### Main deliverables
 - `world.py` — world manager & arena state switcher
 - `arena_base.py` — abstract arena container
-- `arena_01_kepler_relay.py` — industrial relay station geometry
-- `arena_02_sundered_rift.py` — floating asteroid void geometry
+- `arena_01_kepler_relay.py` — industrial relay station geometry (covered combat space)
+- `arena_02_sundered_rift.py` — floating asteroid void geometry (open boss arena)
 - `environment_generator.py` — modular pillars, crates, crystal spires
 - `rift_beacon.py` — **Rift Beacon Model & Trigger** (spinning torus rings & glow)
+- `rift_energy_pickup.py` — **Rift Energy Collectibles** (floating glowing crystal pickups restoring +25% Chrono Charge)
 - `gravity_zone.py` — *(Optional Stretch)* special low-gravity jump pad
 
 ### Graphics focus
@@ -1484,6 +1485,17 @@ M4 coordinates:
 - arena transition triggers
 - victory / game-over state evaluation
 - delta-time distribution (unscaled `real_dt` vs. scaled `game_dt`)
+
+---
+
+## 27B. The 12 Major Team Features (3 per Member)
+
+| Member / Module | Feature 1 | Feature 2 | Feature 3 |
+|---|---|---|---|
+| **M1: Player & Camera** | **Procedural Hierarchical Astronaut Rig** (`glPushMatrix`/`glPopMatrix`, suit, visor, thruster pack, articulated walking limbs) | **Dual Camera System** (`V` hotkey, 1st-person FPS & 3rd-person orbital TPS view matrix preservation) | **Player Movement & 1P Blaster Viewmodel** (WASD kinematics, velocity damping, foreground 3D rifle viewmodel with firing recoil) |
+| **M2: Enemies & Combat** | **Procedural Crystalline Void Alien Generator** (Obsidian carapaces, glowing rift cores, articulated scythes & rotating shard rings) | **Enemy AI & Hitscan Combat** (Melee Stalker pursuit, Ranged Spitter kiting, 3D raycast laser fire & projectile collisions) | **Rift Guardian Boss Encounter** (Pulsating nexus core, 4 rotating orbital shield obelisks, Phase 1 vs Phase 2 rapid spinning) |
+| **M3: World & Teleportation** | **Kepler Relay Arena** (Industrial space station, metallic floor grid, security walls, pillars, crates, tighter covered combat) | **Sundered Rift Arena** (Floating obsidian asteroid void, neon purple anomaly grid, crystal spires, open boss battleground) | **Tactical Rift Beacon Teleportation & Pickups** (Linked interactive beacons with vortex transitions + glowing collectible Rift Energy crystals) |
+| **M4: Rendering & Gameplay** | **Multi-Source Dynamic Lighting** (`GL_LIGHT0` directional sun + `GL_LIGHT1` dynamic beacon/projectile point light attenuation) | **Procedural Particle & VFX System** (Teleport vortex, hit sparks, collectible sparkle bursts, alien death shatter, Chrono ripples) | **Chrono Slow Dilation & 2D HUD Loop** (100% gate, 0% reset, 5s 30% time dilation, cool-blue screen overlay, health/chrono/boss bars, score & crosshair) |
 
 ---
 

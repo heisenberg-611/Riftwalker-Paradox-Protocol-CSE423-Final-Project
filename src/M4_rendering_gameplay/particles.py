@@ -4,6 +4,7 @@ from typing import List, Tuple
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from src.shared.math3d import Vector3
+import math
 
 
 class Particle:
@@ -40,12 +41,54 @@ class ParticleSystem:
     def spawn_hit_sparks(self, hit_point: Vector3, count: int = 12):
         for _ in range(count):
             vel = Vector3(
-                random.uniform(-3.0, 3.0),
-                random.uniform(1.0, 4.0),
-                random.uniform(-3.0, 3.0)
+                random.uniform(-4.0, 4.0),
+                random.uniform(1.0, 5.0),
+                random.uniform(-4.0, 4.0)
             )
-            color = (1.0, random.uniform(0.4, 0.9), 0.1)
+            color = (1.0, random.uniform(0.5, 0.95), 0.1)
             self.particles.append(Particle(hit_point, vel, color, 0.08, random.uniform(0.3, 0.6)))
+
+    def spawn_pickup_burst(self, center: Vector3, count: int = 18):
+        """Cyan and Magenta energy sparkle burst on collecting Rift Energy."""
+        for _ in range(count):
+            vel = Vector3(
+                random.uniform(-2.5, 2.5),
+                random.uniform(2.0, 6.5),
+                random.uniform(-2.5, 2.5)
+            )
+            color = (
+                random.choice([0.0, 0.9]),
+                random.uniform(0.8, 1.0),
+                1.0
+            )
+            self.particles.append(Particle(center + Vector3(0.0, 1.0, 0.0), vel, color, 0.12, random.uniform(0.5, 0.9)))
+
+    def spawn_death_burst(self, center: Vector3, count: int = 24):
+        """Obsidian shards & glowing violet rift energy burst when alien dies."""
+        for _ in range(count):
+            vel = Vector3(
+                random.uniform(-5.0, 5.0),
+                random.uniform(1.5, 6.0),
+                random.uniform(-5.0, 5.0)
+            )
+            color = (
+                random.uniform(0.4, 0.9),
+                random.uniform(0.0, 0.3),
+                random.uniform(0.7, 1.0)
+            )
+            self.particles.append(Particle(center + Vector3(0.0, 1.0, 0.0), vel, color, 0.15, random.uniform(0.6, 1.1)))
+
+    def spawn_chrono_ripple(self, center: Vector3, count: int = 28):
+        """Radial expanding time distortion wave on Chrono Slow activation."""
+        for i in range(count):
+            angle = (3.14159 * 2.0 / count) * i
+            vel = Vector3(
+                math.cos(angle) * random.uniform(6.0, 10.0),
+                random.uniform(0.2, 1.5),
+                math.sin(angle) * random.uniform(6.0, 10.0)
+            )
+            color = (0.0, random.uniform(0.7, 1.0), 1.0)
+            self.particles.append(Particle(center + Vector3(0.0, 0.8, 0.0), vel, color, 0.14, random.uniform(0.5, 0.8)))
 
     def update(self, dt: float):
         for p in self.particles:

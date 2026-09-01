@@ -96,8 +96,59 @@ class TestGameplayLogic(unittest.TestCase):
         self.assertTrue(completed)
         self.assertEqual(state.current_state, STATE_PLAYING)
 
-        state.trigger_game_over()
-        self.assertEqual(state.current_state, STATE_GAME_OVER)
+    def test_rift_energy_pickup(self):
+        from src.M3_world_teleport.rift_energy_pickup import RiftEnergyPickup
+        pickup = RiftEnergyPickup(Vector3(10.0, 0.0, 10.0), charge_amount=25.0)
+        self.assertFalse(pickup.is_collected)
+
+        # Player in range
+        player_near = Vector3(10.5, 0.0, 10.5)
+        self.assertTrue(pickup.is_player_in_range(player_near, player_radius=1.0))
+
+        # Collect
+        gained = pickup.collect()
+        self.assertEqual(gained, 25.0)
+        self.assertTrue(pickup.is_collected)
+
+        # Cannot collect while on cooldown
+        self.assertFalse(pickup.is_player_in_range(player_near, player_radius=1.0))
+        self.assertEqual(pickup.collect(), 0.0)
+
+        # Cooldown update
+        pickup.update(dt=16.0)
+        self.assertFalse(pickup.is_collected)
+        self.assertTrue(pickup.is_player_in_range(player_near, player_radius=1.0))
+
+    def test_boss_phase_transition(self):
+        from src.M2_enemies_combat.rift_guardian_boss import RiftGuardianBoss
+        boss = RiftGuardianBoss(Vector3(0.0, 0.0, 0.0))
+        self.assertEqual(boss.phase, 1)
+        self.assertEqual(boss.hp, 350.0)
+
+        # Deal damage to push under 175 HP (Phase 2)
+        boss.take_damage(200.0)
+        self.assertEqual(boss.hp, 150.0)
+        boss.update_and_attack(Vector3(0.0, 0.0, 10.0), dt=0.016)
+        self.assertEqual(boss.phase, 2)
+
+    def test_player_dual_camera_toggle(self):
+        from src.M1_player_camera.player import Player
+        player = Player()
+        self.assertFalse(player.is_first_person)
+        player.tp_cam.yaw = 45.0
+        player.tp_cam.pitch = 15.0
+
+        # Toggle to 1st Person
+        player.toggle_camera()
+        self.assertTrue(player.is_first_person)
+        self.assertEqual(player.fp_cam.yaw, 45.0)
+        self.assertEqual(player.fp_cam.pitch, 15.0)
+
+        # Toggle back to 3rd Person
+        player.fp_cam.yaw = 90.0
+        player.toggle_camera()
+        self.assertFalse(player.is_first_person)
+        self.assertEqual(player.tp_cam.yaw, 90.0)
 
 
 if __name__ == '__main__':

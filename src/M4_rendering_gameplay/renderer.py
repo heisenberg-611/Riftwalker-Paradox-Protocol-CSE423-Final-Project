@@ -6,7 +6,8 @@ from src.shared.constants import (
     FOV_DEGREES,
     NEAR_PLANE,
     FAR_PLANE,
-    STATE_TELEPORTING
+    STATE_TELEPORTING,
+    BOSS_RIFT_GUARDIAN
 )
 from src.shared.math3d import Vector3
 from src.M4_rendering_gameplay.lighting import LightingSystem
@@ -79,16 +80,28 @@ class MasterRenderer:
         # 6. Render Player Model (Third person mode)
         player.draw(dt=dt)
 
-        # 7. Render Particle Effects
+        # 7. Render 1st-Person Weapon Viewmodel (First person mode)
+        if player.is_first_person:
+            player.weapon.draw_viewmodel(self.width, self.height, is_moving=player.is_moving)
+
+        # 8. Render Particle Effects
         self.particles.draw()
 
-        # 8. Post-process Screen Flash (during Teleport or Chrono)
+        # 9. Post-process Screen Flash & Chrono Distortion
         if game_state.current_state == STATE_TELEPORTING:
-            Effects.draw_screen_flash(self.width, self.height, color=(0.0, 0.8, 1.0), alpha=0.35)
+            Effects.draw_screen_flash(self.width, self.height, color=(0.0, 0.85, 1.0), alpha=0.35)
         elif chrono_manager.is_active:
-            Effects.draw_screen_flash(self.width, self.height, color=(0.1, 0.3, 0.8), alpha=0.12)
+            Effects.draw_chrono_slow_overlay(self.width, self.height, alpha=0.18)
 
-        # 9. 2D HUD Pass
+        # 10. 2D HUD Pass (Detect active boss HP)
+        boss_hp = 0.0
+        boss_max_hp = 0.0
+        for e in enemies:
+            if getattr(e, 'enemy_id', None) == BOSS_RIFT_GUARDIAN and not e.is_dead:
+                boss_hp = e.hp
+                boss_max_hp = e.max_hp
+                break
+
         self.hud.draw(
             width=self.width,
             height=self.height,
@@ -101,7 +114,9 @@ class MasterRenderer:
             chrono_time_remaining=chrono_manager.active_time_remaining,
             can_teleport=can_teleport,
             is_first_person=player.is_first_person,
-            game_state_str=game_state.current_state
+            game_state_str=game_state.current_state,
+            boss_hp=boss_hp,
+            boss_max_hp=boss_max_hp
         )
 
         glutSwapBuffers()

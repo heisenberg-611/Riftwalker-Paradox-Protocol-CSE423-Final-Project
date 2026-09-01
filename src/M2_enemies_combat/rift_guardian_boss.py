@@ -52,4 +52,4 @@ class RiftGuardianBoss(EnemyBase):
         return projectiles
 
     def render_model(self):
-        AlienGenerator.draw_guardian_boss(self.anim_time)
+        AlienGenerator.draw_guardian_boss(self.anim_time, phase=self.phase)

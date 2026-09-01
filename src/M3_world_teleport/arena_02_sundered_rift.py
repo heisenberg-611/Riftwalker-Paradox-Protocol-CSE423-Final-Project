@@ -5,6 +5,7 @@ from src.shared.constants import ARENA_01_KEPLER_RELAY, ARENA_02_SUNDERED_RIFT
 from src.shared.math3d import Vector3
 from src.M3_world_teleport.arena_base import ArenaBase
 from src.M3_world_teleport.rift_beacon import RiftBeacon
+from src.M3_world_teleport.rift_energy_pickup import RiftEnergyPickup
 from src.M3_world_teleport.environment_generator import EnvironmentGenerator
 
 
@@ -21,6 +22,14 @@ class ArenaSunderedRift(ArenaBase):
             Vector3(20.0, 0.0, 45.0),
             Vector3(-20.0, 0.0, 45.0),
             Vector3(0.0, 0.0, 55.0),
+        ]
+        # Collectible Rift Energy Crystals in Sundered Rift
+        self.energy_pickups = [
+            RiftEnergyPickup(Vector3(25.0, 0.0, 10.0)),
+            RiftEnergyPickup(Vector3(-25.0, 0.0, 10.0)),
+            RiftEnergyPickup(Vector3(0.0, 0.0, 30.0)),
+            RiftEnergyPickup(Vector3(20.0, 0.0, 40.0)),
+            RiftEnergyPickup(Vector3(-20.0, 0.0, 40.0)),
         ]
 
     def draw(self):
@@ -56,3 +65,7 @@ class ArenaSunderedRift(ArenaBase):
         # 3. Rift Beacons
         for beacon in self.rift_beacons:
             beacon.draw()
+
+        # 4. Collectible Rift Energy Crystals
+        for pickup in self.energy_pickups:
+            pickup.draw()

@@ -1,7 +1,7 @@
-"""Abstract Base Class for Arenas."""
 from typing import List
 from src.shared.math3d import Vector3
 from src.M3_world_teleport.rift_beacon import RiftBeacon
+from src.M3_world_teleport.rift_energy_pickup import RiftEnergyPickup
 
 
 class ArenaBase:
@@ -9,10 +9,13 @@ class ArenaBase:
         self.arena_id = arena_id
         self.half_extent = half_extent
         self.rift_beacons: List[RiftBeacon] = []
+        self.energy_pickups: List[RiftEnergyPickup] = []
 
     def update(self, dt: float):
         for beacon in self.rift_beacons:
             beacon.update(dt)
+        for pickup in self.energy_pickups:
+            pickup.update(dt)
 
     def draw(self):
         raise NotImplementedError("Subclasses must implement draw()")

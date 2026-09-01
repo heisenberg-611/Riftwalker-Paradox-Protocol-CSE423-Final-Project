@@ -81,7 +81,8 @@ class GameApp:
         if self.input_mgr.was_key_just_pressed('q'):
             if self.chrono_mgr.activate():
                 self.game_time.set_chrono_slow(True)
-                self.renderer.particles.spawn_teleport_vortex(self.player.position, count=25)
+                self.renderer.particles.spawn_chrono_ripple(self.player.position, count=30)
+                self.renderer.particles.spawn_teleport_vortex(self.player.position, count=20)
 
         # 3. Blink Teleport (Shift / E)
         if self.input_mgr.was_key_just_pressed('e'):
@@ -149,6 +150,7 @@ class GameApp:
                         self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=10)
                         if hit.hit_enemy.is_dead:
                             self.score_mgr.add_kill(hit.hit_enemy.enemy_id)
+                            self.renderer.particles.spawn_death_burst(hit.hit_enemy.position, count=24)
                             # Reward Chrono Charge on enemy kills
                             if hit.hit_enemy.enemy_id == ENEMY_MELEE_RIFT_STALKER:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_STALKER)
@@ -176,6 +178,16 @@ class GameApp:
         self.renderer.particles.update(real_dt)
         self.renderer.hud.crosshair.update(real_dt)
         self.world.update(game_dt)
+
+        # Check Rift Energy Pickups
+        if self.game_state.current_state == STATE_PLAYING:
+            for pickup in self.world.current_arena.energy_pickups:
+                if pickup.is_player_in_range(self.player.position, self.player.radius):
+                    gained = pickup.collect()
+                    if gained > 0.0:
+                        self.chrono_mgr.add_charge(gained)
+                        self.score_mgr.add_score(150)
+                        self.renderer.particles.spawn_pickup_burst(pickup.position, count=18)
 
         # Handle Teleportation Transition
         if self.game_state.current_state == STATE_TELEPORTING:
