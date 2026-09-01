@@ -1,7 +1,7 @@
 """Cinematic Epilogue and Victory Story Presentation System."""
 import math
 import random
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from OpenGL.GL import *
 import OpenGL.GLUT as glut
 
