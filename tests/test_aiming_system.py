@@ -45,22 +45,28 @@ class TestAimingSystem(unittest.TestCase):
         cam_eye = self.player.fp_cam.get_cam_eye(self.player.position)
         fwd, right, up = self.player.fp_cam.get_basis_vectors()
 
-        muzzle_world = self.weapon.get_fp_muzzle_world(
+        # Default offsets
+        muzzle_default = self.weapon.get_fp_muzzle_world(cam_eye, fwd, right, up)
+        self.assertAlmostEqual(muzzle_default.x, 0.26, places=2)
+        self.assertAlmostEqual(muzzle_default.y, 2.1 - 0.20, places=2)
+        self.assertAlmostEqual(muzzle_default.z, 0.50, places=2)
+
+        # Custom offsets
+        muzzle_custom = self.weapon.get_fp_muzzle_world(
             cam_eye, fwd, right, up,
             offset_right=0.35, offset_up=-0.28, offset_forward=0.68
         )
-
-        # Muzzle should be offset to the right, slightly down, and forward from eye
-        self.assertAlmostEqual(muzzle_world.x, 0.35, places=2)
-        self.assertAlmostEqual(muzzle_world.y, 2.1 - 0.28, places=2)
-        self.assertAlmostEqual(muzzle_world.z, 0.68, places=2)
+        self.assertAlmostEqual(muzzle_custom.x, 0.35, places=2)
+        self.assertAlmostEqual(muzzle_custom.y, 2.1 - 0.28, places=2)
+        self.assertAlmostEqual(muzzle_custom.z, 0.68, places=2)
 
     def test_third_person_muzzle_world(self):
         """TP muzzle position must originate from astronaut right hand."""
         muzzle_tp = self.rig.get_tp_muzzle_world(self.player.position, yaw=0.0, pitch=0.0)
-        self.assertGreater(muzzle_tp.x, 0.3)  # On the right side
-        self.assertGreater(muzzle_tp.y, 1.0)  # At weapon height
-        self.assertGreater(muzzle_tp.z, 0.2)  # In front of player body
+        self.assertGreater(muzzle_tp.x, 0.4)  # On the right side
+        self.assertGreater(muzzle_tp.y, 1.2)  # At weapon height
+        self.assertGreater(muzzle_tp.z, 0.5)  # In front of player body
+
 
     def test_aim_result_structure_and_miss_hit_point(self):
         """When no enemy is hit, raycast returns AimResult pointing to max range."""
