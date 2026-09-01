@@ -58,14 +58,16 @@ class PlayerWeapon:
     def draw_viewmodel(self, width: int, height: int, is_moving: bool = False):
         """
         Renders the First-Person Sci-Fi Laser Rifle Viewmodel in the bottom-right foreground.
-        Uses a dedicated camera projection so it never clips into arena walls.
+        Uses an isolated camera projection so it never clips into arena walls or alters world matrices.
         """
         glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
         glLoadIdentity()
         aspect = float(max(1, width)) / float(max(1, height))
         gluPerspective(52.0, aspect, 0.05, 50.0)
 
         glMatrixMode(GL_MODELVIEW)
+        glPushMatrix()
         glLoadIdentity()
 
         glDisable(GL_DEPTH_TEST)
@@ -157,6 +159,10 @@ class PlayerWeapon:
 
         finally:
             glEnable(GL_DEPTH_TEST)
+            glMatrixMode(GL_MODELVIEW)
+            glPopMatrix()
+            glMatrixMode(GL_PROJECTION)
+            glPopMatrix()
             glMatrixMode(GL_MODELVIEW)
 
 

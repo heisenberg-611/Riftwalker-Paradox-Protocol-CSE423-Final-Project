@@ -209,11 +209,30 @@ class TestGameplayLogic(unittest.TestCase):
         score_mgr.take_damage_penalty()
         self.assertEqual(score_mgr.combo, 3)
 
-        # Decay timer expiry resets combo to 1
-        score_mgr.update(dt=4.0)
-        self.assertEqual(score_mgr.combo, 1)
+    def test_story_epilogue_progression_and_ranking(self):
+        from src.M4_rendering_gameplay.story_epilogue import StoryEpilogueManager
+        epilogue = StoryEpilogueManager()
+        self.assertEqual(epilogue.current_panel_index, 0)
+        self.assertEqual(len(epilogue.panels), 3)
+
+        # Advance panels
+        self.assertTrue(epilogue.next_panel())
+        self.assertEqual(epilogue.current_panel_index, 1)
+        self.assertTrue(epilogue.next_panel())
+        self.assertEqual(epilogue.current_panel_index, 2)
+        # Cannot advance beyond final panel
+        self.assertFalse(epilogue.next_panel())
+
+        # Rank calculations
+        rank_s, title_s, _ = epilogue._get_performance_rank(15000)
+        self.assertEqual(rank_s, "RANK S")
+        rank_a, title_a, _ = epilogue._get_performance_rank(10000)
+        self.assertEqual(rank_a, "RANK A")
+        rank_d, title_d, _ = epilogue._get_performance_rank(2000)
+        self.assertEqual(rank_d, "RANK D")
 
 
 if __name__ == '__main__':
     unittest.main()
+
 

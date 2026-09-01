@@ -56,12 +56,22 @@ class MasterRenderer:
         can_teleport: bool,
         dt: float,
         story_intro=None,
+        story_epilogue=None,
         level_manager=None
     ):
+        # 0A. Story Introduction Screen
         if game_state.current_state == STATE_STORY and story_intro is not None:
             glClearColor(0.03, 0.03, 0.06, 1.0)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             story_intro.draw(self.width, self.height)
+            glutSwapBuffers()
+            return
+
+        # 0B. Cinematic Victory Epilogue Screen
+        if game_state.current_state == STATE_VICTORY and story_epilogue is not None:
+            glClearColor(0.02, 0.02, 0.05, 1.0)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            story_epilogue.draw(self.width, self.height, final_score=score_manager.score)
             glutSwapBuffers()
             return
 
@@ -95,12 +105,12 @@ class MasterRenderer:
         # 6. Render Player Model (Third person mode)
         player.draw(dt=dt)
 
-        # 7. Render 1st-Person Weapon Viewmodel (First person mode)
+        # 7. Render 3D Particle Effects & Laser Tracers (In full 3D world space)
+        self.particles.draw()
+
+        # 8. Render 1st-Person Weapon Viewmodel (First person mode foreground)
         if player.is_first_person:
             player.weapon.draw_viewmodel(self.width, self.height, is_moving=player.is_moving)
-
-        # 8. Render Particle Effects
-        self.particles.draw()
 
         # 9. Post-process Screen Flash & Chrono Distortion
         if game_state.current_state == STATE_TELEPORTING:
