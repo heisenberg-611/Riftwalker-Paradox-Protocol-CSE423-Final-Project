@@ -149,6 +149,7 @@ class MasterRenderer:
             boss_hp=boss_hp,
             boss_max_hp=boss_max_hp,
             weapon_cooldown_ratio=player.weapon.get_cooldown_ratio(),
+            weapon_charge_ratio=player.weapon.get_charge_ratio(),
             objective_title=obj_title,
             objective_subtitle=obj_sub,
             combo_multiplier=score_manager.combo,

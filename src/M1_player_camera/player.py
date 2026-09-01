@@ -28,8 +28,8 @@ class Player:
         self.tp_cam = ThirdPersonCamera()
         self.is_moving = False
 
-    def update(self, dt: float):
-        self.weapon.update(dt)
+    def update(self, dt: float, is_holding_fire: bool = False):
+        self.weapon.update(dt, is_holding_fire=is_holding_fire)
         self.blink.update(dt)
 
     def toggle_camera(self):

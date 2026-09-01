@@ -51,9 +51,11 @@ TELEPORT_ACTIVATION_RADIUS = 3.5
 TELEPORT_DURATION = 1.8  # seconds for vortex effect
 
 # Weapons & Combat
-PRIMARY_FIRE_COOLDOWN = 0.15  # seconds
+PRIMARY_FIRE_COOLDOWN = 0.30  # seconds (visible deliberate cooldown cycling)
 PRIMARY_FIRE_DAMAGE = 25.0
 PRIMARY_FIRE_RANGE = 120.0
+OVERCHARGE_FIRE_TIME = 0.55   # seconds to charge heavy laser
+OVERCHARGE_DAMAGE = 70.0      # 2.8x damage on overcharged shot
 
 # Camera Parameters
 FOV_DEGREES = 60.0

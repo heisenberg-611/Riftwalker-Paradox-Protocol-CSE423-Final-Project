@@ -20,14 +20,15 @@ class Particle:
 
 
 class LaserTracer:
-    __slots__ = ('start_pos', 'end_pos', 'color', 'life', 'max_life')
+    __slots__ = ('start_pos', 'end_pos', 'color', 'life', 'max_life', 'is_overcharged')
 
-    def __init__(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0), life: float = 0.22):
+    def __init__(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0), life: float = 0.22, is_overcharged: bool = False):
         self.start_pos = start_pos
         self.end_pos = end_pos
         self.color = color
         self.life = life
         self.max_life = life
+        self.is_overcharged = is_overcharged
 
 
 class ParticleSystem:
@@ -35,20 +36,34 @@ class ParticleSystem:
         self.particles: List[Particle] = []
         self.tracers: List[LaserTracer] = []
 
-    def spawn_laser_tracer(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0)):
+    def spawn_laser_tracer(
+        self,
+        start_pos: Vector3,
+        end_pos: Vector3,
+        color: Tuple[float, float, float] = (0.0, 0.95, 1.0),
+        is_overcharged: bool = False
+    ):
         """Draws an intensely glowing neon laser tracer line from gun to target."""
-        self.tracers.append(LaserTracer(start_pos, end_pos, color, life=0.22))
+        if is_overcharged:
+            tracer_color = (1.0, 0.85, 0.25)
+            self.tracers.append(LaserTracer(start_pos, end_pos, tracer_color, life=0.32, is_overcharged=True))
+        else:
+            self.tracers.append(LaserTracer(start_pos, end_pos, color, life=0.22, is_overcharged=False))
 
-    def spawn_muzzle_flash(self, barrel_pos: Vector3):
-        """Spawns bright cyan sparks and flash burst at weapon muzzle."""
-        for _ in range(10):
+    def spawn_muzzle_flash(self, barrel_pos: Vector3, is_overcharged: bool = False):
+        """Spawns bright sparks and flash burst at weapon muzzle."""
+        count = 22 if is_overcharged else 10
+        for _ in range(count):
             vel = Vector3(
-                random.uniform(-3.0, 3.0),
-                random.uniform(-3.0, 3.0),
-                random.uniform(-3.0, 3.0)
+                random.uniform(-4.5, 4.5),
+                random.uniform(-4.5, 4.5),
+                random.uniform(-4.5, 4.5)
             )
-            color = (0.3, 0.95, 1.0)
-            self.particles.append(Particle(barrel_pos, vel, color, 0.12, random.uniform(0.10, 0.20)))
+            if is_overcharged:
+                color = random.choice([(1.0, 0.85, 0.2), (1.0, 0.3, 0.8), (1.0, 1.0, 1.0)])
+            else:
+                color = (0.3, 0.95, 1.0)
+            self.particles.append(Particle(barrel_pos, vel, color, 0.14 if is_overcharged else 0.12, random.uniform(0.12, 0.25)))
 
     def spawn_teleport_vortex(self, center: Vector3, count: int = 25):
         for _ in range(count):
@@ -134,25 +149,28 @@ class ParticleSystem:
 
         # 1. Render glowing 3D Laser Tracer Beams (Dual-pass glow and intense core)
         if self.tracers:
-            # Pass A: Outer neon glow beam
-            glLineWidth(6.0)
-            glBegin(GL_LINES)
-            for t in self.tracers:
-                alpha = max(0.0, min(1.0, t.life / t.max_life)) * 0.75
-                glColor4f(t.color[0], t.color[1], t.color[2], alpha)
-                glVertex3f(t.start_pos.x, t.start_pos.y, t.start_pos.z)
-                glVertex3f(t.end_pos.x, t.end_pos.y, t.end_pos.z)
-            glEnd()
-
-            # Pass B: Inner intense white-hot core
-            glLineWidth(2.5)
-            glBegin(GL_LINES)
             for t in self.tracers:
                 alpha = max(0.0, min(1.0, t.life / t.max_life))
-                glColor4f(0.85, 1.0, 1.0, alpha)
+                # Pass A: Outer glow beam
+                outer_w = 11.0 if t.is_overcharged else 6.0
+                glLineWidth(outer_w)
+                glBegin(GL_LINES)
+                glColor4f(t.color[0], t.color[1], t.color[2], alpha * 0.85)
                 glVertex3f(t.start_pos.x, t.start_pos.y, t.start_pos.z)
                 glVertex3f(t.end_pos.x, t.end_pos.y, t.end_pos.z)
-            glEnd()
+                glEnd()
+
+                # Pass B: Inner intense core
+                inner_w = 4.5 if t.is_overcharged else 2.5
+                glLineWidth(inner_w)
+                glBegin(GL_LINES)
+                if t.is_overcharged:
+                    glColor4f(1.0, 1.0, 0.85, alpha)
+                else:
+                    glColor4f(0.85, 1.0, 1.0, alpha)
+                glVertex3f(t.start_pos.x, t.start_pos.y, t.start_pos.z)
+                glVertex3f(t.end_pos.x, t.end_pos.y, t.end_pos.z)
+                glEnd()
 
         # 2. Render Point Particles
         glPointSize(5.0)

@@ -219,9 +219,21 @@ class GameApp:
             )
             self.player.is_moving = delta_pos.length_squared() > 1e-6
 
-            # 7. Shooting (Left Click / Space)
-            if self.input_mgr.is_mouse_button_down(0) or self.input_mgr.is_key_down(' '):
+            # 7. Shooting (Hold to Charge / Tap to Fire)
+            is_fire_down = self.input_mgr.is_mouse_button_down(0) or self.input_mgr.is_key_down(' ')
+            was_fire_released = self.input_mgr.was_mouse_button_just_released(0) or self.input_mgr.was_key_just_released(' ')
+
+            should_discharge = (
+                was_fire_released and self.player.weapon.can_fire()
+            ) or (
+                is_fire_down and self.player.weapon.is_fully_charged()
+            )
+
+            if should_discharge:
                 if self.player.weapon.trigger_shot():
+                    is_overcharged = self.player.weapon.is_overcharged
+                    shot_damage = self.player.weapon.last_shot_damage
+
                     active_cam = self.player.fp_cam if self.player.is_first_person else self.player.tp_cam
                     cam_eye = active_cam.get_cam_eye(self.player.position)
                     cam_forward, cam_right, cam_up = active_cam.get_basis_vectors()
@@ -237,19 +249,20 @@ class GameApp:
                         )
 
                     # Spawn muzzle flash sparks at the visual weapon tip
-                    self.renderer.particles.spawn_muzzle_flash(muzzle_world)
+                    self.renderer.particles.spawn_muzzle_flash(muzzle_world, is_overcharged=is_overcharged)
 
                     # Authoritative crosshair-driven gameplay raycast from camera eye
                     aim_result = RaycastSystem.fire_ray(cam_eye, cam_forward, self.enemies, self.player.weapon.range)
 
                     # Visual 3D laser tracer connects weapon muzzle directly to aim_point
-                    self.renderer.particles.spawn_laser_tracer(muzzle_world, aim_result.hit_point)
+                    self.renderer.particles.spawn_laser_tracer(muzzle_world, aim_result.hit_point, is_overcharged=is_overcharged)
 
                     if aim_result.hit_enemy:
                         enemy = aim_result.hit_enemy
-                        enemy.take_damage(self.player.weapon.damage)
+                        enemy.take_damage(shot_damage)
                         self.renderer.hud.crosshair.trigger_hit()
-                        self.renderer.particles.spawn_hit_sparks(aim_result.hit_point, count=14)
+                        spark_count = 28 if is_overcharged else 14
+                        self.renderer.particles.spawn_hit_sparks(aim_result.hit_point, count=spark_count)
                         if enemy.is_dead:
                             self.score_mgr.add_kill(enemy.enemy_id)
                             self.renderer.particles.spawn_death_burst(enemy.position, count=24)
@@ -299,7 +312,11 @@ class GameApp:
 
 
         # Update player & camera
-        self.player.update(real_dt)
+        is_fire_down = (
+            self.game_state.current_state == STATE_PLAYING and
+            (self.input_mgr.is_mouse_button_down(0) or self.input_mgr.is_key_down(' '))
+        )
+        self.player.update(real_dt, is_holding_fire=is_fire_down)
         self.chrono_mgr.update(real_dt)
         self.game_time.set_chrono_slow(self.chrono_mgr.is_active)
         self.score_mgr.update(real_dt)
