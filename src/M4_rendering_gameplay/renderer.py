@@ -55,7 +55,8 @@ class MasterRenderer:
         score_manager,
         can_teleport: bool,
         dt: float,
-        story_intro=None
+        story_intro=None,
+        level_manager=None
     ):
         if game_state.current_state == STATE_STORY and story_intro is not None:
             glClearColor(0.03, 0.03, 0.06, 1.0)
@@ -71,9 +72,13 @@ class MasterRenderer:
         player.apply_camera()
 
         # 2. Lighting Updates
+        is_beacon_active = True
+        if world.current_arena.rift_beacons:
+            is_beacon_active = world.current_arena.rift_beacons[0].is_active
+
         LightingSystem.update_point_lights(
             beacon_pos=world.current_arena.rift_beacons[0].position if world.current_arena.rift_beacons else Vector3(0, 0, 0),
-            is_beacon_active=True
+            is_beacon_active=is_beacon_active
         )
 
         # 3. Render 3D World Geometry
@@ -112,6 +117,11 @@ class MasterRenderer:
                 boss_max_hp = e.max_hp
                 break
 
+        # Level objective text
+        obj_title = level_manager.get_objective_title() if level_manager else ""
+        obj_sub = level_manager.get_objective_subtitle() if level_manager else ""
+        is_intermission = (level_manager.wave_state == level_manager.STATE_INTERMISSION) if level_manager else False
+
         self.hud.draw(
             width=self.width,
             height=self.height,
@@ -127,7 +137,12 @@ class MasterRenderer:
             game_state_str=game_state.current_state,
             boss_hp=boss_hp,
             boss_max_hp=boss_max_hp,
-            weapon_cooldown_ratio=player.weapon.get_cooldown_ratio()
+            weapon_cooldown_ratio=player.weapon.get_cooldown_ratio(),
+            objective_title=obj_title,
+            objective_subtitle=obj_sub,
+            combo_multiplier=score_manager.combo,
+            combo_ratio=score_manager.combo_ratio,
+            is_intermission=is_intermission
         )
 
 

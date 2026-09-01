@@ -44,8 +44,12 @@ class RiftBeacon:
         Materials.unbind_all()
 
 
-        # 3. Rotating Dual Concentric Torus Rings (Cyan Glow)
-        glColor3f(0.0, 0.85, 1.0)
+        # 3. Rotating Dual Concentric Torus Rings (Cyan when active, Amber when locked)
+        if self.is_active:
+            glColor3f(0.0, 0.90, 1.0)
+        else:
+            glColor3f(0.85, 0.45, 0.1)
+
         glPushMatrix()
         glTranslatef(0.0, 2.2, 0.0)
         glRotatef(self.rotation_angle, 0.0, 1.0, 0.0)
@@ -61,7 +65,11 @@ class RiftBeacon:
         glPopMatrix()
 
         # 4. Floating Pulsing Energy Orb in center
-        glColor3f(0.2, 0.9, 1.0)
+        if self.is_active:
+            glColor3f(0.2, 0.95, 1.0)
+        else:
+            glColor3f(1.0, 0.55, 0.1)
+
         glPushMatrix()
         glTranslatef(0.0, 2.2, 0.0)
         glutSolidSphere(0.35, 14, 14)

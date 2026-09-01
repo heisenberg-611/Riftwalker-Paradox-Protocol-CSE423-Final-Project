@@ -65,7 +65,8 @@ class GameApp:
         self.score_mgr = ScoreManager()
 
         self.level_mgr = LevelManager()
-        self.enemies = self.level_mgr.init_arena_enemies(self.world.active_arena_id)
+        active_beacon = self.world.current_arena.rift_beacons[0] if self.world.current_arena.rift_beacons else None
+        self.enemies = self.level_mgr.start_arena(self.world.active_arena_id, beacon=active_beacon)
         self.destination_arena = None
 
 
@@ -76,7 +77,9 @@ class GameApp:
         self.weapons = WeaponSystem()
         self.chrono_mgr = ChronoSlowManager()
         self.score_mgr = ScoreManager()
-        self.enemies = self.level_mgr.init_arena_enemies(ARENA_01_KEPLER_RELAY)
+        self.level_mgr = LevelManager()
+        active_beacon = self.world.current_arena.rift_beacons[0] if self.world.current_arena.rift_beacons else None
+        self.enemies = self.level_mgr.start_arena(ARENA_01_KEPLER_RELAY, beacon=active_beacon)
         self.input_mgr.first_mouse = True
 
     def handle_input(self, real_dt: float):
@@ -294,12 +297,22 @@ class GameApp:
                 if self.destination_arena:
                     new_pos = self.world.switch_arena(self.destination_arena)
                     self.player.position = new_pos
-                    self.enemies = self.level_mgr.init_arena_enemies(self.world.active_arena_id)
+                    active_beacon = self.world.current_arena.rift_beacons[0] if self.world.current_arena.rift_beacons else None
+                    self.enemies = self.level_mgr.start_arena(self.world.active_arena_id, beacon=active_beacon)
                     self.destination_arena = None
                     self.renderer.particles.spawn_teleport_vortex(self.player.position, count=30)
 
         # Update Enemies & Projectiles (Scaled by Chrono Slow dt)
         if self.game_state.current_state == STATE_PLAYING:
+            # Wave Progression Update
+            active_beacon = self.world.current_arena.rift_beacons[0] if self.world.current_arena.rift_beacons else None
+            self.enemies = self.level_mgr.update(
+                dt=game_dt,
+                enemies=self.enemies,
+                score_manager=self.score_mgr,
+                beacon=active_beacon
+            )
+
             for enemy in self.enemies:
                 if isinstance(enemy, RangedRiftSpitter):
                     proj = enemy.update_and_shoot(self.player.position, game_dt)
@@ -317,7 +330,6 @@ class GameApp:
                         enemy.position, self.world.current_arena.half_extent
                     )
 
-
                 # Melee contact damage
                 if not enemy.is_dead and hasattr(enemy, 'attack_damage'):
                     if CollisionSystem.check_sphere_sphere(
@@ -326,6 +338,7 @@ class GameApp:
                     ):
                         if getattr(enemy, 'attack_timer', 0.0) <= 0.0:
                             self.player.take_damage(enemy.attack_damage)
+                            self.score_mgr.take_damage_penalty()
                             enemy.attack_timer = enemy.attack_cooldown
                             if not self.player.is_alive():
                                 self.game_state.trigger_game_over()
@@ -340,6 +353,7 @@ class GameApp:
                 ):
                     p.is_alive = False
                     self.player.take_damage(p.damage)
+                    self.score_mgr.take_damage_penalty()
                     self.renderer.particles.spawn_hit_sparks(p.position, count=8)
                     if not self.player.is_alive():
                         self.game_state.trigger_game_over()
@@ -359,7 +373,8 @@ class GameApp:
             score_manager=self.score_mgr,
             can_teleport=can_teleport,
             dt=self.game_time.real_dt,
-            story_intro=self.story_intro
+            story_intro=self.story_intro,
+            level_manager=self.level_mgr
         )
 
 
