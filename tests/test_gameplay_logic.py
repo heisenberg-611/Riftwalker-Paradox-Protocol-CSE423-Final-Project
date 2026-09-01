@@ -231,6 +231,12 @@ class TestGameplayLogic(unittest.TestCase):
         rank_d, title_d, _ = epilogue._get_performance_rank(2000)
         self.assertEqual(rank_d, "RANK D")
 
+    def test_renderer_state_symbols(self):
+        import src.M4_rendering_gameplay.renderer as rend
+        self.assertTrue(hasattr(rend, 'STATE_VICTORY'))
+        self.assertTrue(hasattr(rend, 'STATE_STORY'))
+        self.assertTrue(hasattr(rend, 'STATE_TELEPORTING'))
+
 
 if __name__ == '__main__':
     unittest.main()
