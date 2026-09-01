@@ -363,10 +363,9 @@ TARGET_FRAME_DURATION: float = 1.0 / 60.0
 
 def display_callback():
     if app:
-        try:
-            app.render()
-        except Exception as e:
-            print(f"[Render Error]: {e}")
+        app.render()
+
+
 
 
 

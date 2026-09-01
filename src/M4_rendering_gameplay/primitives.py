@@ -95,6 +95,12 @@ class Primitives:
         gluCylinder(q, base_rad, top_rad, height, slices, stacks)
 
     @classmethod
+    def draw_textured_cylinder(cls, base_rad: float, top_rad: float, height: float, slices: int = 16, stacks: int = 1):
+        q = cls.get_quadric()
+        gluCylinder(q, base_rad, top_rad, height, slices, stacks)
+
+    @classmethod
     def draw_torus(cls, inner_radius: float, outer_radius: float, nsides: int = 12, rings: int = 24):
         glutSolidTorus(inner_radius, outer_radius, nsides, rings)
+
 
