@@ -6,6 +6,7 @@ from src.shared.constants import (
     FOV_DEGREES,
     NEAR_PLANE,
     FAR_PLANE,
+    STATE_STORY,
     STATE_TELEPORTING,
     BOSS_RIFT_GUARDIAN
 )
@@ -53,9 +54,18 @@ class MasterRenderer:
         game_state,
         score_manager,
         can_teleport: bool,
-        dt: float
+        dt: float,
+        story_intro=None
     ):
+        if game_state.current_state == STATE_STORY and story_intro is not None:
+            glClearColor(0.03, 0.03, 0.06, 1.0)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+            story_intro.draw(self.width, self.height)
+            glutSwapBuffers()
+            return
+
         self.begin_frame()
+
 
         # 1. Camera View Matrix
         player.apply_camera()

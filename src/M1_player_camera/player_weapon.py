@@ -29,7 +29,28 @@ class PlayerWeapon:
         self.is_firing_effect_active = True
         return True
 
+    def get_fp_muzzle_world(
+        self,
+        camera_eye,
+        camera_forward,
+        camera_right,
+        camera_up,
+        offset_right: float = 0.35,
+        offset_up: float = -0.28,
+        offset_forward: float = 0.68
+    ):
+        """
+        Converts the camera-space weapon viewmodel muzzle position into world coordinates.
+        """
+        return (
+            camera_eye
+            + camera_right * offset_right
+            + camera_up * offset_up
+            + camera_forward * offset_forward
+        )
+
     def draw_viewmodel(self, width: int, height: int, is_moving: bool = False):
+
         """
         Renders the First-Person Sci-Fi Laser Rifle Viewmodel in the bottom-right foreground.
         Uses a dedicated camera projection so it never clips into arena walls.

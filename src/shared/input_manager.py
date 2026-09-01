@@ -17,9 +17,11 @@ class InputManager:
         self.mouse_pos: Tuple[int, int] = (self.center_x, self.center_y)
         self.mouse_delta: Tuple[float, float] = (0.0, 0.0)
         self.mouse_buttons: Set[int] = set()
+        self.just_pressed_mouse_buttons: Set[int] = set()
         self.just_pressed_keys: Set[str] = set()
         self.just_pressed_special_keys: Set[int] = set()
         self.first_mouse: bool = True
+
 
     def set_window_size(self, width: int, height: int):
         """Update window dimensions and recalculate center point."""
@@ -89,6 +91,8 @@ class InputManager:
     def on_mouse_button(self, button: int, state: int, x: int, y: int):
         # state == 0 is GLUT_DOWN, state == 1 is GLUT_UP
         if state == 0:
+            if button not in self.mouse_buttons:
+                self.just_pressed_mouse_buttons.add(button)
             self.mouse_buttons.add(button)
         else:
             self.mouse_buttons.discard(button)
@@ -105,11 +109,16 @@ class InputManager:
     def is_mouse_button_down(self, button: int) -> bool:
         return button in self.mouse_buttons
 
+    def was_mouse_button_just_pressed(self, button: int) -> bool:
+        return button in self.just_pressed_mouse_buttons
+
     def end_frame(self):
         """Clear single-frame trigger buffers at the end of the frame."""
         self.just_pressed_keys.clear()
         self.just_pressed_special_keys.clear()
+        self.just_pressed_mouse_buttons.clear()
         self.mouse_delta = (0.0, 0.0)
+
 
 
 

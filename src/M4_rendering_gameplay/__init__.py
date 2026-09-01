@@ -10,4 +10,6 @@ from src.M4_rendering_gameplay.crosshair import Crosshair
 from src.M4_rendering_gameplay.scoring import ScoreManager
 from src.M4_rendering_gameplay.game_state import GameState
 from src.M4_rendering_gameplay.level_manager import LevelManager
+from src.M4_rendering_gameplay.story_intro import StoryIntroManager
 from src.M4_rendering_gameplay.renderer import MasterRenderer
+

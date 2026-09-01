@@ -53,8 +53,9 @@ class Player:
             glPushMatrix()
             glTranslatef(self.position.x, self.position.y, self.position.z)
             glRotatef(self.tp_cam.yaw, 0.0, 1.0, 0.0)
-            self.rig.draw(is_moving=self.is_moving, dt=dt)
+            self.rig.draw(is_moving=self.is_moving, dt=dt, aim_pitch=self.tp_cam.pitch)
             glPopMatrix()
+
 
     def take_damage(self, amount: float):
         self.hp = max(0.0, self.hp - amount)

@@ -100,6 +100,26 @@ class TestCameraInput(unittest.TestCase):
         score_mgr.add_score(250)
         self.assertEqual(score_mgr.score, 400)
 
+    def test_game_over_state_freezes_controls(self):
+        from src.M4_rendering_gameplay.game_state import GameState
+        from src.shared.constants import STATE_GAME_OVER, STATE_PLAYING, STATE_VICTORY
+
+        game_state = GameState()
+        self.assertEqual(game_state.current_state, STATE_PLAYING)
+
+        # Trigger game over
+        game_state.trigger_game_over()
+        self.assertEqual(game_state.current_state, STATE_GAME_OVER)
+
+        # State check that controls should be locked
+        is_gameplay_active = game_state.current_state in (STATE_PLAYING,)
+        self.assertFalse(is_gameplay_active)
+
+        # Restarting unfreezes game state
+        game_state.restart()
+        self.assertEqual(game_state.current_state, STATE_PLAYING)
+
 
 if __name__ == '__main__':
     unittest.main()
+

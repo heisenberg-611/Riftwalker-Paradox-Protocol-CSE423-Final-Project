@@ -18,6 +18,7 @@ from src.shared.constants import (
     WINDOW_TITLE,
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
+    STATE_STORY,
     STATE_PLAYING,
     STATE_TELEPORTING,
     STATE_GAME_OVER,
@@ -47,6 +48,7 @@ from src.M4_rendering_gameplay.chrono_slow import ChronoSlowManager
 from src.M4_rendering_gameplay.game_state import GameState
 from src.M4_rendering_gameplay.scoring import ScoreManager
 from src.M4_rendering_gameplay.level_manager import LevelManager
+from src.M4_rendering_gameplay.story_intro import StoryIntroManager
 
 
 class GameApp:
@@ -58,11 +60,14 @@ class GameApp:
         self.player = Player(Vector3(0.0, 0.0, -35.0))
         self.weapons = WeaponSystem()
         self.chrono_mgr = ChronoSlowManager()
-        self.game_state = GameState()
+        self.story_intro = StoryIntroManager()
+        self.game_state = GameState(initial_state=STATE_STORY)
         self.score_mgr = ScoreManager()
+
         self.level_mgr = LevelManager()
         self.enemies = self.level_mgr.init_arena_enemies(self.world.active_arena_id)
         self.destination_arena = None
+
 
     def reset_game(self):
         self.game_state.restart()
@@ -75,6 +80,39 @@ class GameApp:
         self.input_mgr.first_mouse = True
 
     def handle_input(self, real_dt: float):
+        # 0. Story Introduction Screen Controls
+        if self.game_state.current_state == STATE_STORY:
+            # Advance Panel on Left Click / Enter / Space / Right Arrow
+            if (self.input_mgr.was_mouse_button_just_pressed(0) or
+                self.input_mgr.was_key_just_pressed('\r') or
+                self.input_mgr.was_key_just_pressed('\n') or
+                self.input_mgr.was_key_just_pressed(' ') or
+                self.input_mgr.was_special_key_just_pressed(GLUT_KEY_RIGHT)):
+                if not self.story_intro.next_panel():
+                    self.game_state.current_state = STATE_PLAYING
+            # Skip Story on 'S'
+            elif self.input_mgr.was_key_just_pressed('s'):
+                self.story_intro.skip_story()
+                self.game_state.current_state = STATE_PLAYING
+            # Fullscreen Toggle on F11 during Story
+            if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+                glutFullScreen()
+            return
+
+
+        # End-Game (Game Over / Victory) Screen Controls - Freeze Camera & Movement
+        if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
+            # Restart on 'R'
+            if self.input_mgr.was_key_just_pressed('r'):
+                self.reset_game()
+            # Fullscreen Toggle on F11
+            if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+                glutFullScreen()
+            return
+
+        # Fullscreen Toggle (F11)
+        if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+            glutFullScreen()
 
         # 1. View Switching (V / C)
         if self.input_mgr.was_key_just_pressed('v') or self.input_mgr.was_key_just_pressed('c'):
@@ -105,6 +143,7 @@ class GameApp:
                 self.destination_arena = dest
                 self.game_state.start_teleport(duration=1.8)
                 self.renderer.particles.spawn_teleport_vortex(self.player.position, count=35)
+
 
         # 5. Restart (R)
         if self.input_mgr.was_key_just_pressed('r'):
@@ -159,43 +198,74 @@ class GameApp:
             # 7. Shooting (Left Click / Space)
             if self.input_mgr.is_mouse_button_down(0) or self.input_mgr.is_key_down(' '):
                 if self.player.weapon.trigger_shot():
-                    # Calculate aim direction
-                    rad_yaw = math.radians(current_yaw)
-                    pitch = self.player.fp_cam.pitch if self.player.is_first_person else self.player.tp_cam.pitch
-                    rad_pitch = math.radians(pitch)
-                    aim_dir = Vector3(
-                        math.sin(rad_yaw) * math.cos(rad_pitch),
-                        math.sin(rad_pitch),
-                        math.cos(rad_yaw) * math.cos(rad_pitch)
-                    ).normalized()
+                    active_cam = self.player.fp_cam if self.player.is_first_person else self.player.tp_cam
+                    cam_eye = active_cam.get_cam_eye(self.player.position)
+                    cam_forward, cam_right, cam_up = active_cam.get_basis_vectors()
 
-                    origin = self.player.position + Vector3(0.0, 1.8, 0.0)
-                    hit = RaycastSystem.fire_ray(origin, aim_dir, self.enemies, self.player.weapon.range)
-                    if hit and hit.hit_enemy:
-                        hit.hit_enemy.take_damage(self.player.weapon.damage)
+                    # Calculate visual weapon muzzle in world space
+                    if self.player.is_first_person:
+                        muzzle_world = self.player.weapon.get_fp_muzzle_world(
+                            cam_eye, cam_forward, cam_right, cam_up
+                        )
+                    else:
+                        muzzle_world = self.player.rig.get_tp_muzzle_world(
+                            self.player.position, self.player.tp_cam.yaw, self.player.tp_cam.pitch
+                        )
+
+                    # Spawn muzzle flash sparks at the visual weapon tip
+                    self.renderer.particles.spawn_muzzle_flash(muzzle_world)
+
+                    # Authoritative crosshair-driven gameplay raycast from camera eye
+                    aim_result = RaycastSystem.fire_ray(cam_eye, cam_forward, self.enemies, self.player.weapon.range)
+
+                    # Visual 3D laser tracer connects weapon muzzle directly to aim_point
+                    self.renderer.particles.spawn_laser_tracer(muzzle_world, aim_result.hit_point)
+
+                    if aim_result.hit_enemy:
+                        enemy = aim_result.hit_enemy
+                        enemy.take_damage(self.player.weapon.damage)
                         self.renderer.hud.crosshair.trigger_hit()
-                        self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=10)
-                        if hit.hit_enemy.is_dead:
-                            self.score_mgr.add_kill(hit.hit_enemy.enemy_id)
-                            self.renderer.particles.spawn_death_burst(hit.hit_enemy.position, count=24)
+                        self.renderer.particles.spawn_hit_sparks(aim_result.hit_point, count=14)
+                        if enemy.is_dead:
+                            self.score_mgr.add_kill(enemy.enemy_id)
+                            self.renderer.particles.spawn_death_burst(enemy.position, count=24)
                             # Reward Chrono Charge on enemy kills
-                            if hit.hit_enemy.enemy_id == ENEMY_MELEE_RIFT_STALKER:
+                            if enemy.enemy_id == ENEMY_MELEE_RIFT_STALKER:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_STALKER)
-                            elif hit.hit_enemy.enemy_id == ENEMY_RANGED_RIFT_SPITTER:
+                            elif enemy.enemy_id == ENEMY_RANGED_RIFT_SPITTER:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_KILL_SPITTER)
-                            elif hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
+                            elif enemy.enemy_id == BOSS_RIFT_GUARDIAN:
                                 self.chrono_mgr.add_charge(50.0)
                                 self.game_state.trigger_victory()
                         else:
-                            if hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
+                            if enemy.enemy_id == BOSS_RIFT_GUARDIAN:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_BOSS_HIT)
+
+
+
 
     def update(self):
         real_dt = self.game_time.tick()
         game_dt = self.game_time.dt
 
+        # If in story introduction mode, update story and skip world physics
+        if self.game_state.current_state == STATE_STORY:
+            self.handle_input(real_dt)
+            self.story_intro.update(real_dt)
+            self.input_mgr.end_frame()
+            return
+
+        # If in Game Over or Victory, freeze world simulation, player, and enemies
+        if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
+            self.handle_input(real_dt)
+            self.renderer.particles.update(real_dt)
+            self.renderer.hud.crosshair.update(real_dt)
+            self.input_mgr.end_frame()
+            return
+
         # Update input
         self.handle_input(real_dt)
+
 
         # Update player & camera
         self.player.update(real_dt)
@@ -279,8 +349,10 @@ class GameApp:
             game_state=self.game_state,
             score_manager=self.score_mgr,
             can_teleport=can_teleport,
-            dt=self.game_time.real_dt
+            dt=self.game_time.real_dt,
+            story_intro=self.story_intro
         )
+
 
 
 # Global Application Instance for GLUT Callbacks
@@ -345,12 +417,14 @@ def special_up_callback(key, x, y):
 def mouse_motion_callback(x, y):
     if app:
         app.input_mgr.on_mouse_motion(x, y)
-        dx, dy = app.input_mgr.mouse_delta
-        if dx != 0 or dy != 0:
-            if app.player.is_first_person:
-                app.player.fp_cam.update_orientation(dx, dy)
-            else:
-                app.player.tp_cam.update_orientation(dx, dy)
+        if app.game_state.current_state in (STATE_PLAYING, STATE_TELEPORTING):
+            dx, dy = app.input_mgr.mouse_delta
+            if dx != 0 or dy != 0:
+                if app.player.is_first_person:
+                    app.player.fp_cam.update_orientation(dx, dy)
+                else:
+                    app.player.tp_cam.update_orientation(dx, dy)
+
 
 
 def mouse_button_callback(button, state, x, y):
