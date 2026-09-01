@@ -61,9 +61,9 @@ class GameApp:
         self.weapons = WeaponSystem()
         self.chrono_mgr = ChronoSlowManager()
         self.story_intro = StoryIntroManager()
-        initial_state = STATE_STORY if not self.story_intro.is_story_seen() else STATE_PLAYING
-        self.game_state = GameState(initial_state=initial_state)
+        self.game_state = GameState(initial_state=STATE_STORY)
         self.score_mgr = ScoreManager()
+
         self.level_mgr = LevelManager()
         self.enemies = self.level_mgr.init_arena_enemies(self.world.active_arena_id)
         self.destination_arena = None
