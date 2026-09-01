@@ -23,28 +23,31 @@ class ThirdPersonCamera:
         self.pitch -= mouse_dy * sensitivity
         self.pitch = clamp(self.pitch, TP_CAM_PITCH_MIN, TP_CAM_PITCH_MAX)
 
-    def apply(self, player_pos: Vector3):
+    def get_aim_direction(self) -> Vector3:
         rad_yaw = math.radians(self.yaw)
         rad_pitch = math.radians(self.pitch)
-
-        # Forward look direction vector (identical to first-person and raycast aim)
-        forward = Vector3(
+        return Vector3(
             math.sin(rad_yaw) * math.cos(rad_pitch),
             math.sin(rad_pitch),
             math.cos(rad_yaw) * math.cos(rad_pitch)
-        )
+        ).normalized()
 
-        # Target point on player (upper torso / head)
+    def get_cam_eye(self, player_pos: Vector3) -> Vector3:
+        forward = self.get_aim_direction()
+        target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
+        cam_x = target.x - forward.x * self.distance
+        cam_y = max(0.4, target.y - forward.y * self.distance)
+        cam_z = target.z - forward.z * self.distance
+        return Vector3(cam_x, cam_y, cam_z)
+
+    def apply(self, player_pos: Vector3):
+        eye = self.get_cam_eye(player_pos)
         target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
 
-        # Calculate camera eye position along reverse look direction
-        cam_x = target.x - forward.x * self.distance
-        cam_y = max(0.4, target.y - forward.y * self.distance)  # Prevent floor clipping
-        cam_z = target.z - forward.z * self.distance
-
         gluLookAt(
-            cam_x, cam_y, cam_z,
+            eye.x, eye.y, eye.z,
             target.x, target.y, target.z,
             0.0, 1.0, 0.0
         )
+
 

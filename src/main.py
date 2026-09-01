@@ -198,26 +198,27 @@ class GameApp:
             # 7. Shooting (Left Click / Space)
             if self.input_mgr.is_mouse_button_down(0) or self.input_mgr.is_key_down(' '):
                 if self.player.weapon.trigger_shot():
-                    # Calculate aim direction
-                    rad_yaw = math.radians(current_yaw)
-                    pitch = self.player.fp_cam.pitch if self.player.is_first_person else self.player.tp_cam.pitch
-                    rad_pitch = math.radians(pitch)
-                    aim_dir = Vector3(
-                        math.sin(rad_yaw) * math.cos(rad_pitch),
-                        math.sin(rad_pitch),
-                        math.cos(rad_yaw) * math.cos(rad_pitch)
-                    ).normalized()
+                    active_cam = self.player.fp_cam if self.player.is_first_person else self.player.tp_cam
+                    cam_eye = active_cam.get_cam_eye(self.player.position)
+                    aim_dir = active_cam.get_aim_direction()
 
-                    origin = self.player.position + Vector3(0.0, 1.4, 0.0)
-                    self.renderer.particles.spawn_muzzle_flash(origin)
+                    # Gun muzzle position in 3D world
+                    if self.player.is_first_person:
+                        gun_muzzle = self.player.position + Vector3(0.18, 1.5, 0.2)
+                    else:
+                        gun_muzzle = self.player.position + Vector3(0.35, 1.35, 0.25)
 
-                    hit = RaycastSystem.fire_ray(origin, aim_dir, self.enemies, self.player.weapon.range)
+                    # Spawn muzzle flash sparks
+                    self.renderer.particles.spawn_muzzle_flash(gun_muzzle)
+
+                    # Raycast from camera eye directly through crosshair
+                    hit = RaycastSystem.fire_ray(cam_eye, aim_dir, self.enemies, self.player.weapon.range)
                     if hit and hit.hit_enemy:
                         end_pos = hit.hit_point
-                        self.renderer.particles.spawn_laser_tracer(origin, end_pos)
+                        self.renderer.particles.spawn_laser_tracer(gun_muzzle, end_pos)
                         hit.hit_enemy.take_damage(self.player.weapon.damage)
                         self.renderer.hud.crosshair.trigger_hit()
-                        self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=12)
+                        self.renderer.particles.spawn_hit_sparks(hit.hit_point, count=14)
                         if hit.hit_enemy.is_dead:
                             self.score_mgr.add_kill(hit.hit_enemy.enemy_id)
                             self.renderer.particles.spawn_death_burst(hit.hit_enemy.position, count=24)
@@ -233,8 +234,9 @@ class GameApp:
                             if hit.hit_enemy.enemy_id == BOSS_RIFT_GUARDIAN:
                                 self.chrono_mgr.add_charge(CHRONO_CHARGE_BOSS_HIT)
                     else:
-                        end_pos = origin + aim_dir * self.player.weapon.range
-                        self.renderer.particles.spawn_laser_tracer(origin, end_pos)
+                        end_pos = cam_eye + aim_dir * self.player.weapon.range
+                        self.renderer.particles.spawn_laser_tracer(gun_muzzle, end_pos)
+
 
 
     def update(self):

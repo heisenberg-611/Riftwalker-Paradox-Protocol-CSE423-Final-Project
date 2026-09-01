@@ -22,7 +22,7 @@ class Particle:
 class LaserTracer:
     __slots__ = ('start_pos', 'end_pos', 'color', 'life', 'max_life')
 
-    def __init__(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0), life: float = 0.12):
+    def __init__(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0), life: float = 0.22):
         self.start_pos = start_pos
         self.end_pos = end_pos
         self.color = color
@@ -36,19 +36,19 @@ class ParticleSystem:
         self.tracers: List[LaserTracer] = []
 
     def spawn_laser_tracer(self, start_pos: Vector3, end_pos: Vector3, color: Tuple[float, float, float] = (0.0, 0.95, 1.0)):
-        """Draws a high-visibility glowing laser tracer line from gun to target."""
-        self.tracers.append(LaserTracer(start_pos, end_pos, color, life=0.14))
+        """Draws an intensely glowing neon laser tracer line from gun to target."""
+        self.tracers.append(LaserTracer(start_pos, end_pos, color, life=0.22))
 
     def spawn_muzzle_flash(self, barrel_pos: Vector3):
-        """Spawns bright cyan sparks at weapon muzzle."""
-        for _ in range(8):
+        """Spawns bright cyan sparks and flash burst at weapon muzzle."""
+        for _ in range(10):
             vel = Vector3(
-                random.uniform(-2.0, 2.0),
-                random.uniform(-2.0, 2.0),
-                random.uniform(-2.0, 2.0)
+                random.uniform(-3.0, 3.0),
+                random.uniform(-3.0, 3.0),
+                random.uniform(-3.0, 3.0)
             )
-            color = (0.2, 0.95, 1.0)
-            self.particles.append(Particle(barrel_pos, vel, color, 0.10, random.uniform(0.08, 0.16)))
+            color = (0.3, 0.95, 1.0)
+            self.particles.append(Particle(barrel_pos, vel, color, 0.12, random.uniform(0.10, 0.20)))
 
     def spawn_teleport_vortex(self, center: Vector3, count: int = 25):
         for _ in range(count):
@@ -129,26 +129,42 @@ class ParticleSystem:
 
     def draw(self):
         glDisable(GL_LIGHTING)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE)
 
-        # 1. Render glowing 3D Laser Tracer Beams
+        # 1. Render glowing 3D Laser Tracer Beams (Dual-pass glow and intense core)
         if self.tracers:
-            glLineWidth(3.5)
+            # Pass A: Outer neon glow beam
+            glLineWidth(6.0)
+            glBegin(GL_LINES)
+            for t in self.tracers:
+                alpha = max(0.0, min(1.0, t.life / t.max_life)) * 0.75
+                glColor4f(t.color[0], t.color[1], t.color[2], alpha)
+                glVertex3f(t.start_pos.x, t.start_pos.y, t.start_pos.z)
+                glVertex3f(t.end_pos.x, t.end_pos.y, t.end_pos.z)
+            glEnd()
+
+            # Pass B: Inner intense white-hot core
+            glLineWidth(2.5)
             glBegin(GL_LINES)
             for t in self.tracers:
                 alpha = max(0.0, min(1.0, t.life / t.max_life))
-                glColor3f(t.color[0] * alpha, t.color[1] * alpha, t.color[2] * alpha)
+                glColor4f(0.85, 1.0, 1.0, alpha)
                 glVertex3f(t.start_pos.x, t.start_pos.y, t.start_pos.z)
                 glVertex3f(t.end_pos.x, t.end_pos.y, t.end_pos.z)
             glEnd()
 
         # 2. Render Point Particles
-        glPointSize(4.0)
+        glPointSize(5.0)
         glBegin(GL_POINTS)
         for p in self.particles:
             alpha = max(0.0, min(1.0, p.life / p.max_life))
-            glColor3f(p.color[0] * alpha, p.color[1] * alpha, p.color[2] * alpha)
+            glColor4f(p.color[0], p.color[1], p.color[2], alpha)
             glVertex3f(p.pos.x, p.pos.y, p.pos.z)
         glEnd()
 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glDisable(GL_BLEND)
         glEnable(GL_LIGHTING)
+
 

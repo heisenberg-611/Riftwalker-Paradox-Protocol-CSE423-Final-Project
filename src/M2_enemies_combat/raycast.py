@@ -28,11 +28,13 @@ class RaycastSystem:
         for enemy in enemies:
             if enemy.is_dead:
                 continue
+            effective_radius = enemy.radius * 1.35
+            center_y = max(1.0, enemy.radius)
             dist = ray_intersects_sphere(
                 ray_origin=origin,
                 ray_dir=norm_dir,
-                sphere_center=enemy.position + Vector3(0.0, enemy.radius, 0.0),
-                radius=enemy.radius
+                sphere_center=enemy.position + Vector3(0.0, center_y, 0.0),
+                radius=effective_radius
             )
             if dist is not None and dist < min_dist:
                 min_dist = dist
@@ -42,5 +44,6 @@ class RaycastSystem:
                     distance=dist,
                     hit_point=hit_point
                 )
+
 
         return closest_hit

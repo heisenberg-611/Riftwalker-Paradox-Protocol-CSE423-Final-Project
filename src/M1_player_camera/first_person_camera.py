@@ -17,17 +17,21 @@ class FirstPersonCamera:
         self.pitch = clamp(self.pitch, FP_CAM_PITCH_MIN, FP_CAM_PITCH_MAX)
 
 
-    def apply(self, player_pos: Vector3):
+    def get_cam_eye(self, player_pos: Vector3) -> Vector3:
+        return Vector3(player_pos.x, player_pos.y + self.eye_height, player_pos.z)
+
+    def get_aim_direction(self) -> Vector3:
         rad_yaw = math.radians(self.yaw)
         rad_pitch = math.radians(self.pitch)
-
-        forward = Vector3(
+        return Vector3(
             math.sin(rad_yaw) * math.cos(rad_pitch),
             math.sin(rad_pitch),
             math.cos(rad_yaw) * math.cos(rad_pitch)
-        )
+        ).normalized()
 
-        eye = Vector3(player_pos.x, player_pos.y + self.eye_height, player_pos.z)
+    def apply(self, player_pos: Vector3):
+        forward = self.get_aim_direction()
+        eye = self.get_cam_eye(player_pos)
         target = eye + forward
 
         gluLookAt(
@@ -35,3 +39,4 @@ class FirstPersonCamera:
             target.x, target.y, target.z,
             0.0, 1.0, 0.0
         )
+
