@@ -1,4 +1,4 @@
-"""Procedural 3D Geometric Primitive Helpers."""
+import math
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -102,5 +102,43 @@ class Primitives:
     @classmethod
     def draw_torus(cls, inner_radius: float, outer_radius: float, nsides: int = 12, rings: int = 24):
         glutSolidTorus(inner_radius, outer_radius, nsides, rings)
+
+    @classmethod
+    def draw_textured_octahedron(cls, size: float = 1.0):
+        """Renders an octahedron with explicit UV texture coordinates and face normals."""
+        top = (0.0, size, 0.0)
+        bot = (0.0, -size, 0.0)
+        p1 = (size, 0.0, 0.0)
+        p2 = (0.0, 0.0, size)
+        p3 = (-size, 0.0, 0.0)
+        p4 = (0.0, 0.0, -size)
+
+        faces = [
+            (top, p1, p2),
+            (top, p2, p3),
+            (top, p3, p4),
+            (top, p4, p1),
+            (bot, p2, p1),
+            (bot, p3, p2),
+            (bot, p4, p3),
+            (bot, p1, p4),
+        ]
+
+        glBegin(GL_TRIANGLES)
+        for v0, v1, v2 in faces:
+            ax, ay, az = v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]
+            bx, by, bz = v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]
+            nx = ay * bz - az * by
+            ny = az * bx - ax * bz
+            nz = ax * by - ay * bx
+            length = math.sqrt(nx * nx + ny * ny + nz * nz)
+            if length > 1e-6:
+                nx, ny, nz = nx / length, ny / length, nz / length
+            glNormal3f(nx, ny, nz)
+            glTexCoord2f(0.5, 1.0); glVertex3f(*v0)
+            glTexCoord2f(0.0, 0.0); glVertex3f(*v1)
+            glTexCoord2f(1.0, 0.0); glVertex3f(*v2)
+        glEnd()
+
 
 

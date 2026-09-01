@@ -45,15 +45,17 @@ class EnvironmentGenerator:
     @staticmethod
     def draw_crystal_spire(pos: Vector3, height: float = 7.0):
         from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
         glPushMatrix()
         glTranslatef(pos.x, pos.y, pos.z)
         Materials.bind_crystal_material()
-        glColor3f(0.9, 0.3, 1.0)  # Glowing Purple Void Crystal
+        glColor3f(0.9, 0.4, 1.0)  # Glowing Purple Void Crystal
         glPushMatrix()
         glTranslatef(0.0, height * 0.5, 0.0)
-        glScalef(1.2, height, 1.2)
-        glutSolidOctahedron()
+        glScalef(1.2, height * 0.5, 1.2)
+        Primitives.draw_textured_octahedron(1.0)
         glPopMatrix()
         Materials.unbind_all()
         glPopMatrix()
+
 

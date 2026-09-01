@@ -24,32 +24,36 @@ class AstronautRig:
         leg_swing = math.sin(self.walk_phase) * 28.0
         arm_swing = -leg_swing
 
+        from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
+
         glPushMatrix()
         # Scale to standard player height
         glScalef(1.2, 1.2, 1.2)
 
-        # 1. Torso
-        glColor3f(0.85, 0.88, 0.92)  # White/Grey Suit
+        # 1. Torso (Textured Hex-Weave Suit)
+        Materials.bind_suit_material()
+        glColor3f(0.95, 0.98, 1.0)
         glPushMatrix()
         glTranslatef(0.0, 1.4, 0.0)
         glScalef(0.6, 0.8, 0.4)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
 
         # 2. Chest Armor Plate
-        glColor3f(0.2, 0.3, 0.4)
+        glColor3f(0.3, 0.4, 0.55)
         glPushMatrix()
         glTranslatef(0.0, 1.5, 0.22)
         glScalef(0.45, 0.4, 0.1)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
 
         # 3. Backpack / Life Support & Thrusters
-        glColor3f(0.3, 0.35, 0.4)
+        glColor3f(0.35, 0.4, 0.48)
         glPushMatrix()
         glTranslatef(0.0, 1.45, -0.3)
         glScalef(0.5, 0.7, 0.25)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         # Thruster Nozzles
         glColor3f(0.1, 0.8, 1.0)  # Cyan glowing thruster nozzles
         glTranslatef(-0.15, -0.35, 0.0)
@@ -59,79 +63,89 @@ class AstronautRig:
         glPopMatrix()
 
         # 4. Helmet & Visor
+        glColor3f(0.92, 0.95, 1.0)
         glPushMatrix()
         glTranslatef(0.0, 2.0, 0.0)
-        glColor3f(0.9, 0.92, 0.95)
-        glutSolidSphere(0.28, 16, 16)
-        # Gold/Cyan Visor
-        glColor3f(0.0, 0.8, 0.95)
+        Primitives.draw_textured_sphere(0.28, 16, 16)
+        Materials.unbind_all()
+
+        # Gold/Cyan Visor (Textured polarized horizon glare)
+        Materials.bind_visor_material()
+        glColor3f(0.2, 0.9, 1.0)
         glTranslatef(0.0, 0.02, 0.14)
         glScalef(0.22, 0.16, 0.18)
-        glutSolidSphere(1.0, 14, 14)
+        Primitives.draw_textured_sphere(1.0, 14, 14)
+        Materials.unbind_all()
         glPopMatrix()
 
         # 5. Left Arm
+        Materials.bind_suit_material()
         glPushMatrix()
         glTranslatef(-0.42, 1.7, 0.0)
         glRotatef(arm_swing, 1.0, 0.0, 0.0)
-        glColor3f(0.8, 0.82, 0.85)
+        glColor3f(0.9, 0.92, 0.96)
         # Shoulder
-        glutSolidSphere(0.12, 10, 10)
+        Primitives.draw_textured_sphere(0.12, 10, 10)
         # Upper arm
         glTranslatef(0.0, -0.25, 0.0)
         glPushMatrix()
         glScalef(0.15, 0.35, 0.15)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
         # Forearm & Hand
         glTranslatef(0.0, -0.25, 0.0)
-        glColor3f(0.25, 0.25, 0.3)
-        glutSolidSphere(0.1, 8, 8)
+        glColor3f(0.3, 0.35, 0.42)
+        Primitives.draw_textured_sphere(0.1, 8, 8)
         glPopMatrix()
 
         # 6. Right Arm & Weapon (Articulated with vertical aim pitch)
         glPushMatrix()
         glTranslatef(0.42, 1.7, 0.0)
         glRotatef(-arm_swing + aim_pitch, 1.0, 0.0, 0.0)
-        glColor3f(0.8, 0.82, 0.85)
+        glColor3f(0.9, 0.92, 0.96)
         # Shoulder
-        glutSolidSphere(0.12, 10, 10)
+        Primitives.draw_textured_sphere(0.12, 10, 10)
         # Upper arm
         glTranslatef(0.0, -0.25, 0.0)
         glPushMatrix()
         glScalef(0.15, 0.35, 0.15)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
         # Forearm
         glTranslatef(0.0, -0.25, 0.0)
-        glColor3f(0.25, 0.25, 0.3)
-        glutSolidSphere(0.1, 8, 8)
-        # Weapon in right hand
-        glColor3f(0.15, 0.15, 0.2)
+        glColor3f(0.3, 0.35, 0.42)
+        Primitives.draw_textured_sphere(0.1, 8, 8)
+        Materials.unbind_all()
+
+        # Weapon in right hand (Textured gunmetal alloy)
+        Materials.bind_metal_wall_material()
+        glColor3f(0.7, 0.75, 0.85)
         glTranslatef(0.0, 0.0, 0.2)
         glScalef(0.1, 0.12, 0.45)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
+        Materials.unbind_all()
         glPopMatrix()
 
         # 7. Left Leg
+        Materials.bind_suit_material()
         glPushMatrix()
         glTranslatef(-0.2, 0.95, 0.0)
         glRotatef(leg_swing, 1.0, 0.0, 0.0)
-        glColor3f(0.75, 0.78, 0.82)
+        glColor3f(0.85, 0.88, 0.92)
         # Hip
-        glutSolidSphere(0.12, 10, 10)
+        Primitives.draw_textured_sphere(0.12, 10, 10)
         # Thigh
         glTranslatef(0.0, -0.3, 0.0)
         glPushMatrix()
         glScalef(0.18, 0.45, 0.18)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
         # Shin & Boot
         glTranslatef(0.0, -0.35, 0.0)
-        glColor3f(0.2, 0.22, 0.28)
+        glColor3f(0.3, 0.32, 0.38)
         glPushMatrix()
         glScalef(0.2, 0.35, 0.25)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
         glPopMatrix()
 
@@ -139,25 +153,27 @@ class AstronautRig:
         glPushMatrix()
         glTranslatef(0.2, 0.95, 0.0)
         glRotatef(-leg_swing, 1.0, 0.0, 0.0)
-        glColor3f(0.75, 0.78, 0.82)
+        glColor3f(0.85, 0.88, 0.92)
         # Hip
-        glutSolidSphere(0.12, 10, 10)
+        Primitives.draw_textured_sphere(0.12, 10, 10)
         # Thigh
         glTranslatef(0.0, -0.3, 0.0)
         glPushMatrix()
         glScalef(0.18, 0.45, 0.18)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
         # Shin & Boot
         glTranslatef(0.0, -0.35, 0.0)
-        glColor3f(0.2, 0.22, 0.28)
+        glColor3f(0.3, 0.32, 0.38)
         glPushMatrix()
         glScalef(0.2, 0.35, 0.25)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0)
         glPopMatrix()
         glPopMatrix()
+        Materials.unbind_all()
 
         glPopMatrix()
+
 
     def get_tp_muzzle_world(self, player_pos, yaw: float, pitch: float = 0.0):
         """

@@ -42,26 +42,11 @@ class ArenaKeplerRelay(ArenaBase):
         from src.M4_rendering_gameplay.materials import Materials
         from src.M4_rendering_gameplay.primitives import Primitives
         Materials.bind_floor_panel_material()
-        glColor3f(0.85, 0.90, 0.95)
-        Primitives.draw_textured_plane(self.half_extent * 2, self.half_extent * 2, u_repeat=14.0, v_repeat=14.0)
+        glColor3f(1.0, 1.0, 1.0)
+        Primitives.draw_textured_plane(self.half_extent * 2, self.half_extent * 2, u_repeat=12.0, v_repeat=12.0)
         Materials.unbind_all()
-
-        # Floor grid accent lines
-        glColor3f(0.0, 0.5, 0.7)
-        glBegin(GL_LINES)
-        step = 5.0
-        x = -self.half_extent
-        while x <= self.half_extent:
-            glVertex3f(x, 0.02, -self.half_extent)
-            glVertex3f(x, 0.02, self.half_extent)
-            x += step
-        z = -self.half_extent
-        while z <= self.half_extent:
-            glVertex3f(-self.half_extent, 0.02, z)
-            glVertex3f(self.half_extent, 0.02, z)
-            z += step
-        glEnd()
         glPopMatrix()
+
 
         # 2. Outer Perimeter Barrier Walls (Textured)
         Materials.bind_metal_wall_material()

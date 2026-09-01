@@ -7,9 +7,17 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image, ImageDraw
 
+# Ensure PyOpenGL array handler is initialized with ctypes
+try:
+    import OpenGL.arrays.arraydatatype as _arr_dt
+    _arr_dt.ArrayDatatype.preferredOutput = 'ctypesarrays'
+except Exception:
+    pass
+
 
 # Base Assets Directory
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "assets", "textures")
+
 
 
 class TextureManager:
@@ -90,10 +98,16 @@ class TextureManager:
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_s)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
-            # Build Mipmaps for optimal texture filtering at various distances
+            # Upload base texture level 0
+            glTexImage2D(
+                GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, img_data
+            )
+
+            # Try generating mipmaps if supported
             try:
                 gluBuild2DMipmaps(
                     GL_TEXTURE_2D,
@@ -104,11 +118,9 @@ class TextureManager:
                     GL_UNSIGNED_BYTE,
                     img_data
                 )
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
             except Exception:
-                glTexImage2D(
-                    GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, img_data
-                )
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
             glBindTexture(GL_TEXTURE_2D, 0)
         except Exception:
@@ -117,6 +129,7 @@ class TextureManager:
 
         cls._textures[filepath] = tex_id
         return tex_id
+
 
 
     @classmethod
