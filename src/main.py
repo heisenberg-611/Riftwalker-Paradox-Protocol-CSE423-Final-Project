@@ -442,9 +442,11 @@ def main():
     glutCreateWindow(WINDOW_TITLE)
 
     LightingSystem.init_lighting()
-
+    from src.shared.texture_loader import init_textures
+    init_textures()
 
     app = GameApp()
+
 
     glutDisplayFunc(display_callback)
     glutIdleFunc(idle_callback)

@@ -46,6 +46,7 @@ Any AI assistant executing git commands, creating code, or collaborating with a 
    - Linked Rift Beacon Teleportation (Required)
    - Dual Camera (1st-person & 3rd-person)
    - Procedural Astronaut & Alien Generator
+   - Texture Mapping across procedural geometry (`texture_loader.py`, `assets/textures/`)
    - Hitscan Combat & Projectiles
    - Chrono Slow (5-second 30% time dilation, activated only at 100% charge, resets to 0%)
    - 2D Orthographic HUD (Health, Chrono bar, Crosshair, Score, Objective)
@@ -66,5 +67,6 @@ Any AI assistant executing git commands, creating code, or collaborating with a 
 | **M1** | `src/M1_player_camera/` | Astronaut rig, 1P/3P cameras, movement kinematics, weapon 3D mesh & viewmodel, Blink (stretch) |
 | **M2** | `src/M2_enemies_combat/` | Alien generator, melee/ranged AI, boss, weapon gameplay logic, raycasting, damage |
 | **M3** | `src/M3_world_teleport/` | Kepler Relay, Sundered Rift, environment generator, Rift Beacon platform (REQUIRED) |
-| **M4** | `src/M4_rendering_gameplay/` | Master renderer, lighting, particles, effects, Chrono Slow manager, HUD overlay, game state |
-| **Shared** | `src/shared/` | Constants, math3d, collision geometry (`src/shared/collision.py`), input manager, game time |
+| **M4** | `src/M4_rendering_gameplay/` | Master renderer, texture mapping & UV primitives, lighting, particles, effects, Chrono Slow, HUD overlay, game state |
+| **Shared** | `src/shared/` | Constants, math3d, collision geometry (`src/shared/collision.py`), texture loader (`src/shared/texture_loader.py`), input manager, game time |
+

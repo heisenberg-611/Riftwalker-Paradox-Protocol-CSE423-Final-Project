@@ -45,7 +45,13 @@
 ## Phase 4: M4 — Rendering, Effects, HUD & Final Integration
 
 - [x] Implement dynamic lighting (directional light + beacon/enemy/muzzle lighting where supported)
+- [x] Implement Texture Mapping & Material System (`texture_loader.py`, `materials.py`)
+    - [x] Reusable PIL texture loader with mipmapping and caching
+    - [x] High-detail 512x512 tileable PBR-style PNG textures (`environment`, `characters`, `weapons`, `rift`, `background`)
+    - [x] UV texture coordinate mapping across procedural 3D geometric primitives (`primitives.py`)
+    - [x] Texture-to-material binding presets for Kepler Relay, Sundered Rift, astronaut suit, alien carapaces, and rift beacons
 - [x] Implement particle systems
+
     - [x] Rift Beacon vortex
     - [x] Teleport flash
     - [x] Muzzle flash

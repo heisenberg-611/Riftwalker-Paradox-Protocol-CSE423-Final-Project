@@ -37,18 +37,16 @@ class ArenaKeplerRelay(ArenaBase):
         ]
 
     def draw(self):
-        # 1. Floor Grid / Metallic Platform
+        # 1. Floor Grid / Textured Metallic Platform
         glPushMatrix()
-        glColor3f(0.18, 0.22, 0.26)
-        glBegin(GL_QUADS)
-        glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-self.half_extent, 0.0, -self.half_extent)
-        glVertex3f(-self.half_extent, 0.0, self.half_extent)
-        glVertex3f(self.half_extent, 0.0, self.half_extent)
-        glVertex3f(self.half_extent, 0.0, -self.half_extent)
-        glEnd()
+        from src.M4_rendering_gameplay.materials import Materials
+        from src.M4_rendering_gameplay.primitives import Primitives
+        Materials.bind_floor_panel_material()
+        glColor3f(0.85, 0.90, 0.95)
+        Primitives.draw_textured_plane(self.half_extent * 2, self.half_extent * 2, u_repeat=14.0, v_repeat=14.0)
+        Materials.unbind_all()
 
-        # Floor grid lines
+        # Floor grid accent lines
         glColor3f(0.0, 0.5, 0.7)
         glBegin(GL_LINES)
         step = 5.0
@@ -65,36 +63,39 @@ class ArenaKeplerRelay(ArenaBase):
         glEnd()
         glPopMatrix()
 
-        # 2. Outer Perimeter Barrier Walls
-        glColor3f(0.25, 0.28, 0.32)
+        # 2. Outer Perimeter Barrier Walls (Textured)
+        Materials.bind_metal_wall_material()
+        glColor3f(0.8, 0.85, 0.9)
         wall_h = 6.0
         glPushMatrix()
         # North wall
         glTranslatef(0.0, wall_h * 0.5, self.half_extent)
         glScalef(self.half_extent * 2, wall_h, 1.5)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0, u_repeat=8.0, v_repeat=1.0)
         glPopMatrix()
 
         glPushMatrix()
         # South wall
         glTranslatef(0.0, wall_h * 0.5, -self.half_extent)
         glScalef(self.half_extent * 2, wall_h, 1.5)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0, u_repeat=8.0, v_repeat=1.0)
         glPopMatrix()
 
         glPushMatrix()
         # East wall
         glTranslatef(self.half_extent, wall_h * 0.5, 0.0)
         glScalef(1.5, wall_h, self.half_extent * 2)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0, u_repeat=8.0, v_repeat=1.0)
         glPopMatrix()
 
         glPushMatrix()
         # West wall
         glTranslatef(-self.half_extent, wall_h * 0.5, 0.0)
         glScalef(1.5, wall_h, self.half_extent * 2)
-        glutSolidCube(1.0)
+        Primitives.draw_textured_cube(1.0, u_repeat=8.0, v_repeat=1.0)
         glPopMatrix()
+        Materials.unbind_all()
+
 
         # 3. Modular Obstacles
         for p in self.pillars:

@@ -33,18 +33,21 @@ class ArenaSunderedRift(ArenaBase):
         ]
 
     def draw(self):
-        # 1. Main Obsidian Island
+        # 1. Main Obsidian Island (Textured Rock)
+        from src.M4_rendering_gameplay.materials import Materials
         glPushMatrix()
-        glColor3f(0.12, 0.08, 0.16)
+        Materials.bind_rock_material()
+        glColor3f(0.85, 0.8, 0.9)
         glBegin(GL_POLYGON)
         glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-45.0, 0.0, -55.0)
-        glVertex3f(45.0, 0.0, -55.0)
-        glVertex3f(60.0, 0.0, 20.0)
-        glVertex3f(40.0, 0.0, 65.0)
-        glVertex3f(-40.0, 0.0, 65.0)
-        glVertex3f(-60.0, 0.0, 20.0)
+        glTexCoord2f(0.0, 0.0); glVertex3f(-45.0, 0.0, -55.0)
+        glTexCoord2f(8.0, 0.0); glVertex3f(45.0, 0.0, -55.0)
+        glTexCoord2f(10.0, 6.0); glVertex3f(60.0, 0.0, 20.0)
+        glTexCoord2f(8.0, 10.0); glVertex3f(40.0, 0.0, 65.0)
+        glTexCoord2f(2.0, 10.0); glVertex3f(-40.0, 0.0, 65.0)
+        glTexCoord2f(0.0, 6.0); glVertex3f(-60.0, 0.0, 20.0)
         glEnd()
+        Materials.unbind_all()
 
         # Neon Purple Anomaly Grid
         glColor3f(0.6, 0.1, 0.7)
@@ -57,6 +60,7 @@ class ArenaSunderedRift(ArenaBase):
         glVertex3f(-60.0, 0.02, 20.0)
         glEnd()
         glPopMatrix()
+
 
         # 2. Floating Void Crystal Spires
         for spire in self.crystal_spires:
