@@ -22,6 +22,11 @@ class PlayerWeapon:
     def can_fire(self) -> bool:
         return self.time_since_last_shot >= self.cooldown
 
+    def get_cooldown_ratio(self) -> float:
+        """Returns 0.0 (just fired) to 1.0 (ready to fire)."""
+        return min(1.0, self.time_since_last_shot / self.cooldown)
+
+
     def trigger_shot(self) -> bool:
         if not self.can_fire():
             return False

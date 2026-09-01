@@ -12,9 +12,10 @@ from src.shared.math3d import Vector3, clamp
 
 
 class ThirdPersonCamera:
-    def __init__(self, distance: float = TP_CAM_DISTANCE, height: float = TP_CAM_HEIGHT):
+    def __init__(self, distance: float = TP_CAM_DISTANCE, height: float = TP_CAM_HEIGHT, shoulder_offset: float = 0.95):
         self.distance = distance
         self.height = height
+        self.shoulder_offset = shoulder_offset
         self.yaw = 0.0
         self.pitch = 0.0
 
@@ -32,14 +33,6 @@ class ThirdPersonCamera:
             math.cos(rad_yaw) * math.cos(rad_pitch)
         ).normalized()
 
-    def get_cam_eye(self, player_pos: Vector3) -> Vector3:
-        forward = self.get_aim_direction()
-        target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
-        cam_x = target.x - forward.x * self.distance
-        cam_y = max(0.4, target.y - forward.y * self.distance)
-        cam_z = target.z - forward.z * self.distance
-        return Vector3(cam_x, cam_y, cam_z)
-
     def get_basis_vectors(self):
         forward = self.get_aim_direction()
         world_up = Vector3(0.0, 1.0, 0.0)
@@ -51,16 +44,25 @@ class ThirdPersonCamera:
         up = forward.cross(right).normalized()
         return forward, right, up
 
+    def get_cam_eye(self, player_pos: Vector3) -> Vector3:
+        forward, right, up = self.get_basis_vectors()
+        target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
+        cam_x = target.x - forward.x * self.distance + right.x * self.shoulder_offset
+        cam_y = max(0.4, target.y - forward.y * self.distance + right.y * self.shoulder_offset)
+        cam_z = target.z - forward.z * self.distance + right.z * self.shoulder_offset
+        return Vector3(cam_x, cam_y, cam_z)
 
     def apply(self, player_pos: Vector3):
         eye = self.get_cam_eye(player_pos)
-        target = Vector3(player_pos.x, player_pos.y + self.height, player_pos.z)
+        forward = self.get_aim_direction()
+        target = eye + forward * 30.0
 
         gluLookAt(
             eye.x, eye.y, eye.z,
             target.x, target.y, target.z,
             0.0, 1.0, 0.0
         )
+
 
 
 

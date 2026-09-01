@@ -27,14 +27,15 @@ class TestAimingSystem(unittest.TestCase):
         self.assertAlmostEqual(cam_eye.z, 0.0)
 
     def test_third_person_aim_origin_is_camera_eye(self):
-        """TP gameplay ray origin must be camera eye behind/above the player."""
+        """TP gameplay ray origin must be camera eye behind/above the player with OTS offset."""
         self.player.tp_cam.yaw = 0.0
         self.player.tp_cam.pitch = 0.0
         cam_eye = self.player.tp_cam.get_cam_eye(self.player.position)
-        # In third-person at yaw=0, pitch=0, forward is (0, 0, 1), eye is target - forward*dist
-        self.assertAlmostEqual(cam_eye.x, 0.0)
+        # In OTS third-person at yaw=0, pitch=0, eye is (shoulder_offset, height, -distance)
+        self.assertAlmostEqual(cam_eye.x, self.player.tp_cam.shoulder_offset)
         self.assertAlmostEqual(cam_eye.y, self.player.tp_cam.height)
         self.assertAlmostEqual(cam_eye.z, -self.player.tp_cam.distance)
+
 
 
 
@@ -111,5 +112,49 @@ class TestAimingSystem(unittest.TestCase):
         self.assertAlmostEqual(self.player.tp_cam.pitch, -15.0)
 
 
+    def test_weapon_cooldown_ratio(self):
+        """Weapon cooldown ratio must transition from 0.0 to 1.0."""
+        self.weapon.time_since_last_shot = 999.0
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 1.0)
+        self.assertTrue(self.weapon.can_fire())
+
+        # Fire weapon
+        self.assertTrue(self.weapon.trigger_shot())
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 0.0)
+        self.assertFalse(self.weapon.can_fire())
+
+        # Advance time halfway through cooldown
+        half_cd = self.weapon.cooldown * 0.5
+        self.weapon.update(half_cd)
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 0.5)
+
+        # Complete cooldown
+        self.weapon.update(half_cd + 0.01)
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 1.0)
+        self.assertTrue(self.weapon.can_fire())
+
+    def test_spacebar_input_parsing(self):
+        """InputManager must parse Space key from bytes, int, or str reliably."""
+        from src.shared.input_manager import InputManager
+        mgr = InputManager()
+
+        # Bytes format from GLUT
+        mgr.on_key_down(b' ', 0, 0)
+        self.assertTrue(mgr.is_key_down(' '))
+        self.assertTrue(mgr.was_key_just_pressed(' '))
+        mgr.end_frame()
+        self.assertFalse(mgr.was_key_just_pressed(' '))
+        self.assertTrue(mgr.is_key_down(' '))
+        mgr.on_key_up(b' ', 0, 0)
+        self.assertFalse(mgr.is_key_down(' '))
+
+        # Integer ASCII 32 format
+        mgr.on_key_down(32, 0, 0)
+        self.assertTrue(mgr.is_key_down(' '))
+        mgr.on_key_up(32, 0, 0)
+        self.assertFalse(mgr.is_key_down(' '))
+
+
 if __name__ == '__main__':
     unittest.main()
+
