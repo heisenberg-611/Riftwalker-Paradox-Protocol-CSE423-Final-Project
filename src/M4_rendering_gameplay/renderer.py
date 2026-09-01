@@ -8,6 +8,7 @@ from src.shared.constants import (
     FAR_PLANE,
     STATE_STORY,
     STATE_TELEPORTING,
+    STATE_VICTORY,
     BOSS_RIFT_GUARDIAN
 )
 from src.shared.math3d import Vector3

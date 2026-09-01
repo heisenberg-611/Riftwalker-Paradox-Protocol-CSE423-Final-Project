@@ -29,6 +29,53 @@ In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental 
 
 ---
 
+## 🔄 Complete Game Flow & Mission Progression
+
+The game follows a structured narrative and wave-progression combat loop with state-machine coordination across both tactical arenas:
+
+```mermaid
+flowchart TD
+    A["🎬 Cinematic Story Intro<br>(STATE_STORY)"] -->|Space / Enter / Click / S| B["🛰️ Arena 1: Kepler Relay<br>(STATE_PLAYING)"]
+    
+    subgraph Kepler_Relay ["Kepler Relay Wave Combat"]
+        B --> W1["Wave 1: 3 Melee Stalkers"]
+        W1 -->|Intermission (3.5s)| W2["Wave 2: 2 Stalkers + 2 Spitters"]
+        W2 -->|Intermission (3.5s)| W3["Wave 3: 3 Stalkers + 2 Spitters"]
+        W3 -->|All Waves Defeated| B_UNLOCK["🔓 Rift Beacon Online<br>(Amber -> Cyan Glow)"]
+    end
+    
+    B_UNLOCK -->|Stand Near Beacon + Press [F]| C["🌀 Dimensional Teleportation<br>(STATE_TELEPORTING)"]
+    C -->|Vortex Transition| D["🌌 Arena 2: Sundered Rift<br>(STATE_PLAYING)"]
+    
+    subgraph Sundered_Rift ["Sundered Rift Wave Combat & Boss"]
+        D --> SW1["Wave 1: 3 Stalkers + 2 Spitters"]
+        SW1 -->|Intermission (3.5s)| SW2["Wave 2: 4 Stalkers + 3 Spitters"]
+        SW2 -->|Intermission (3.5s)| SW3["Wave 3: 2 Stalkers + 4 Spitters"]
+        SW3 -->|Intermission (3.5s)| BOSS["👑 Wave 4: Rift Guardian Boss<br>Phase 1 (Shields) -> Phase 2 (Rage)"]
+    end
+    
+    BOSS -->|Boss Eliminated| E["🏆 Cinematic Victory Epilogue<br>(STATE_VICTORY)"]
+    E --> RANK["📊 Performance Rank S / A / B / C / D<br>(Final Score & Accuracy)"]
+    RANK -->|Press [R]| A
+    
+    B & D -.->|Player HP = 0| F["💀 Game Over (STATE_GAME_OVER)"]
+    F -->|Press [R] to Restart| B
+```
+
+### 📋 Mission Progression Breakdown
+
+| Phase | Game State | Environment / Level | Wave Composition | Beacon Status & Objectives |
+|---|---|---|---|---|
+| **0. Mission Briefing** | `STATE_STORY` | Terminal Screen | N/A | Typewriter intro establishing Rift-Chrono lore. Advance with `Enter`/`Space`/`Click` or skip with `S`. |
+| **1. Kepler Relay Outpost** | `STATE_PLAYING` | **Arena 1**<br>Industrial Metallic Outpost | **Wave 1:** 3 Melee Stalkers<br>**Wave 2:** 2 Stalkers + 2 Spitters<br>**Wave 3:** 3 Stalkers + 2 Spitters | 🔒 **Beacon Locked (Amber Rings)** during combat.<br>Defeating all 3 waves triggers `"ARENA 1 CLEARED — RIFT BEACON ONLINE"`. |
+| **2. Dimensional Warp** | `STATE_TELEPORTING` | Inter-dimensional Rift | N/A | Step into central beacon ($R \le 3.5\text{m}$) and press **`F`**. Plays cyan vortex particle swirl, screen flash, and repositions player into Arena 2. |
+| **3. Sundered Rift Void** | `STATE_PLAYING` | **Arena 2**<br>Floating Obsidian Asteroid | **Wave 1:** 3 Stalkers + 2 Spitters<br>**Wave 2:** 4 Stalkers + 3 Spitters<br>**Wave 3:** 2 Stalkers + 4 Spitters | ⚡ Collect glowing Rift Energy Pickups (+25% Chrono charge). Top HUD banner tracks incoming threat waves. |
+| **4. Final Boss Encounter** | `STATE_PLAYING` | **Arena 2**<br>Deep Asteroid Core | **Wave 4 (Boss):**<br>• **Rift Guardian Boss**<br>• 2 Elite Stalker guards | **Phase 1 (100%–51% HP):** 4 orbiting shield obelisks block lasers.<br>**Phase 2 ($\le$ 50% HP):** Destabilized crimson core, rapid spinning, radial shockwaves. |
+| **5. Victory Epilogue** | `STATE_VICTORY` | 3-Panel Cinematic Story | N/A | 3 cinematic narrative panels unravel the paradox, culminating in a final mission score summary & performance grade (**Rank S, A, B, C, D**). Press **`R`** to replay. |
+| **Failure State** | `STATE_GAME_OVER` | Any Arena | N/A | Triggered on player death ($\text{HP} \le 0$). Displays red Game Over overlay with instant restart on **`R`**. |
+
+---
+
 ## 👥 Team Work Breakdown (The 12 Major Features)
 
 | Module | Member Responsibility | Core Deliverables (3 Major Features per Member) |
