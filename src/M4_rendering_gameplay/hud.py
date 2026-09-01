@@ -78,6 +78,11 @@ class HUD:
         boss_hp: float = 0.0,
         boss_max_hp: float = 0.0,
         weapon_cooldown_ratio: float = 1.0,
+        objective_title: str = "",
+        objective_subtitle: str = "",
+        combo_multiplier: int = 1,
+        combo_ratio: float = 0.0,
+        is_intermission: bool = False,
         **kwargs
     ):
         # Switch to 2D Orthographic projection
@@ -92,7 +97,6 @@ class HUD:
         glDisable(GL_LIGHTING)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
 
         try:
             # 1. Health Bar (Bottom Left)
@@ -235,23 +239,59 @@ class HUD:
                 phase_str = "PHASE 2" if b_ratio <= 0.5 else "PHASE 1"
                 self.draw_text(bx0, by0 + boss_h + 6, f"RIFT GUARDIAN [{phase_str}]: {int(boss_hp)}/{int(boss_max_hp)}")
 
-            # 4. Score & Info (Top Left)
+            # 5. Score & Combo Multiplier (Top Left)
             glColor3f(1.0, 0.85, 0.2)
             self.draw_text(30.0, height - 35.0, f"SCORE: {score}")
 
+            if combo_multiplier > 1:
+                glColor3f(1.0, 0.70, 0.1)
+                self.draw_text(30.0, height - 58.0, f"COMBO: x{combo_multiplier}")
+                # Combo decay mini bar
+                glColor4f(1.0, 0.65, 0.1, 0.85)
+                glBegin(GL_QUADS)
+                glVertex2f(30.0, height - 68.0)
+                glVertex2f(30.0 + 80.0 * combo_ratio, height - 68.0)
+                glVertex2f(30.0 + 80.0 * combo_ratio, height - 64.0)
+                glVertex2f(30.0, height - 64.0)
+                glEnd()
+                view_y = height - 90.0
+            else:
+                view_y = height - 60.0
+
             view_mode_str = "1st Person [V to toggle]" if is_first_person else "3rd Person [V to toggle]"
             glColor3f(0.8, 0.8, 0.9)
-            self.draw_text(30.0, height - 60.0, f"CAMERA: {view_mode_str}")
+            self.draw_text(30.0, view_y, f"CAMERA: {view_mode_str}")
 
-            # 4. Teleport Prompt (Center Screen)
+            # 6. Live Wave Objectives & Banners (Upper Center)
+            if objective_title:
+                if is_intermission:
+                    # Prominent yellow/orange banner during wave intermission
+                    glColor3f(1.0, 0.85, 0.1)
+                    title_x = width * 0.5 - (len(objective_title) * 4.8)
+                    self.draw_text(title_x, height - 35.0, objective_title)
+                    if objective_subtitle:
+                        glColor3f(0.9, 0.9, 1.0)
+                        sub_x = width * 0.5 - (len(objective_subtitle) * 4.0)
+                        self.draw_text(sub_x, height - 58.0, objective_subtitle)
+                else:
+                    # Standard active wave objective
+                    glColor3f(0.2, 0.95, 1.0)
+                    title_x = width * 0.5 - (len(objective_title) * 4.4)
+                    self.draw_text(title_x, height - 35.0, objective_title)
+                    if objective_subtitle:
+                        glColor3f(1.0, 0.8, 0.3)
+                        sub_x = width * 0.5 - (len(objective_subtitle) * 4.0)
+                        self.draw_text(sub_x, height - 58.0, objective_subtitle)
+
+            # 7. Teleport Prompt (Center Screen)
             if can_teleport:
                 glColor3f(0.0, 1.0, 0.9)
                 self.draw_text(width * 0.5 - 130.0, height * 0.4, ">> PRESS 'F' TO RIFT TELEPORT <<")
 
-            # 5. Crosshair (Center Screen)
+            # 8. Crosshair (Center Screen)
             self.crosshair.draw(width * 0.5, height * 0.5)
 
-            # 6. End-Game States
+            # 9. End-Game States
             if game_state_str == "GAME_OVER":
                 glColor3f(1.0, 0.1, 0.2)
                 self.draw_text(width * 0.5 - 75.0, height * 0.55, "GAME OVER", font=self.font_title)
@@ -268,5 +308,3 @@ class HUD:
             glEnable(GL_LIGHTING)
             glEnable(GL_DEPTH_TEST)
             glMatrixMode(GL_MODELVIEW)
-
-

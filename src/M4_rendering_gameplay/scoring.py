@@ -7,17 +7,19 @@ from src.shared.constants import (
 
 
 class ScoreManager:
+    COMBO_MAX_DURATION = 3.5
+
     def __init__(self):
         self.score = 0
         self.combo = 1
         self.combo_timer = 0.0
 
     def add_score(self, amount: int):
-        """Add arbitrary score (e.g. from picking up Rift Energy crystals)."""
+        """Add arbitrary score (e.g. from picking up Rift Energy crystals or clearing waves)."""
         self.score += max(0, int(amount))
 
     def add_kill(self, enemy_id: str):
-
+        """Awards points scaled by active combo multiplier and advances combo tier."""
         points = 100
         if enemy_id == ENEMY_MELEE_RIFT_STALKER:
             points = 150
@@ -27,11 +29,23 @@ class ScoreManager:
             points = 2000
 
         self.score += points * self.combo
-        self.combo = min(8, self.combo + 1)
-        self.combo_timer = 4.0
+        self.combo = min(4, self.combo + 1)
+        self.combo_timer = self.COMBO_MAX_DURATION
+
+    def take_damage_penalty(self):
+        """Taking damage drops the active combo multiplier by 1 step."""
+        if self.combo > 1:
+            self.combo -= 1
+            self.combo_timer = min(self.combo_timer, 2.0)
 
     def update(self, dt: float):
         if self.combo_timer > 0.0:
             self.combo_timer -= dt
             if self.combo_timer <= 0.0:
                 self.combo = 1
+                self.combo_timer = 0.0
+
+    @property
+    def combo_ratio(self) -> float:
+        """Returns 0.0 to 1.0 fraction of remaining combo window."""
+        return max(0.0, min(1.0, self.combo_timer / self.COMBO_MAX_DURATION))

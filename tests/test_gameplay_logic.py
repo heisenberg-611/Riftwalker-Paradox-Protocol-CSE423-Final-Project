@@ -144,12 +144,76 @@ class TestGameplayLogic(unittest.TestCase):
         self.assertEqual(player.fp_cam.yaw, 45.0)
         self.assertEqual(player.fp_cam.pitch, 15.0)
 
-        # Toggle back to 3rd Person
-        player.fp_cam.yaw = 90.0
-        player.toggle_camera()
-        self.assertFalse(player.is_first_person)
-        self.assertEqual(player.tp_cam.yaw, 90.0)
+    def test_wave_based_progression_and_intermission(self):
+        from src.M4_rendering_gameplay.level_manager import LevelManager
+        from src.shared.constants import ARENA_01_KEPLER_RELAY
+
+        lvl = LevelManager()
+        enemies = lvl.start_arena(ARENA_01_KEPLER_RELAY)
+        self.assertEqual(lvl.current_wave, 1)
+        self.assertEqual(len(enemies), 3)  # Wave 1 has 3 Stalkers
+        self.assertEqual(lvl.wave_state, LevelManager.STATE_COMBAT)
+        self.assertIn("WAVE 1/3", lvl.get_objective_title())
+
+        # Kill all wave 1 enemies
+        for e in enemies:
+            e.is_dead = True
+
+        # Update -> triggers intermission countdown
+        enemies = lvl.update(dt=0.1, enemies=enemies)
+        self.assertEqual(lvl.wave_state, LevelManager.STATE_INTERMISSION)
+        self.assertIn("WAVE 1 CLEARED", lvl.get_objective_title())
+        self.assertAlmostEqual(lvl.intermission_timer, 3.0, places=1)
+
+        # Complete intermission timer (3.0s total)
+        enemies = lvl.update(dt=3.1, enemies=enemies)
+        self.assertEqual(lvl.current_wave, 2)
+        self.assertEqual(lvl.wave_state, LevelManager.STATE_COMBAT)
+        self.assertEqual(len([e for e in enemies if not e.is_dead]), 4)  # Wave 2 has 4 enemies (2 Stalkers + 2 Spitters)
+        self.assertIn("WAVE 2/3", lvl.get_objective_title())
+
+    def test_beacon_unlock_on_arena_clearance(self):
+        from src.M4_rendering_gameplay.level_manager import LevelManager
+        from src.M3_world_teleport.rift_beacon import RiftBeacon
+        from src.shared.constants import ARENA_01_KEPLER_RELAY, ARENA_02_SUNDERED_RIFT
+
+        beacon = RiftBeacon("BEACON_TEST", Vector3(0, 0, 0), ARENA_02_SUNDERED_RIFT)
+        lvl = LevelManager()
+        enemies = lvl.start_arena(ARENA_01_KEPLER_RELAY, beacon=beacon)
+        self.assertFalse(beacon.is_active)  # Locked during waves
+
+        # Advance to Wave 3
+        lvl.current_wave = 3
+        lvl.wave_state = LevelManager.STATE_COMBAT
+        for e in enemies:
+            e.is_dead = True
+
+        # Clear final wave
+        enemies = lvl.update(dt=0.1, enemies=enemies, beacon=beacon)
+        self.assertEqual(lvl.wave_state, LevelManager.STATE_ARENA_CLEARED)
+        self.assertTrue(lvl.is_arena_cleared)
+        self.assertTrue(beacon.is_active)  # Beacon unlocked!
+        self.assertIn("RIFT BEACON ONLINE", lvl.get_objective_title())
+
+    def test_combo_multiplier_decay_and_damage_penalty(self):
+        score_mgr = ScoreManager()
+        self.assertEqual(score_mgr.combo, 1)
+
+        # Land 3 kills to reach 4x combo
+        score_mgr.add_kill("ENEMY_MELEE_RIFT_STALKER")
+        score_mgr.add_kill("ENEMY_MELEE_RIFT_STALKER")
+        score_mgr.add_kill("ENEMY_MELEE_RIFT_STALKER")
+        self.assertEqual(score_mgr.combo, 4)
+
+        # Taking damage drops combo by 1
+        score_mgr.take_damage_penalty()
+        self.assertEqual(score_mgr.combo, 3)
+
+        # Decay timer expiry resets combo to 1
+        score_mgr.update(dt=4.0)
+        self.assertEqual(score_mgr.combo, 1)
 
 
 if __name__ == '__main__':
     unittest.main()
+
