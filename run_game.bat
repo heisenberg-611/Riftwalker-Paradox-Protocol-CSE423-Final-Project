@@ -7,12 +7,16 @@ echo    RIFTWALKER: PARADOX PROTOCOL — WINDOWS LAUNCHER
 echo ========================================================================
 echo.
 
+set "PROJECT_ROOT=%~dp0"
+set "SCRIPT_PATH=%~dp0scripts\check_requirements.py"
+if not exist "%SCRIPT_PATH%" set "SCRIPT_PATH=%~dp0check_requirements.py"
+
 :: 1. Detect Python executable
 set "PYTHON_EXE="
 
 :: Check virtual environment first if present
-if exist "%~dp0.venv\Scripts\python.exe" (
-    set "PYTHON_EXE=%~dp0.venv\Scripts\python.exe"
+if exist "%PROJECT_ROOT%.venv\Scripts\python.exe" (
+    set "PYTHON_EXE=%PROJECT_ROOT%.venv\Scripts\python.exe"
     echo [INFO] Detected active virtual environment in .venv\
     goto :found_python
 )
@@ -56,7 +60,7 @@ echo [OK] Using Python: %PYTHON_EXE%
 echo.
 
 :: 2. Run automated check, missing dependencies installation, and launch game
-"%PYTHON_EXE%" "%~dp0check_requirements.py" --run
+"%PYTHON_EXE%" "%SCRIPT_PATH%" --run
 
 if %errorlevel% neq 0 (
     echo.

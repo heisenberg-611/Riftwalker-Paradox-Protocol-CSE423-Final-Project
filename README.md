@@ -1,6 +1,6 @@
 # Riftwalker: Paradox Protocol
 
-> 📄 **Instructor & Evaluator Project Summary:** See [PROJECT_BRIEF.md](PROJECT_BRIEF.md) and [Riftwalker-Paradox-protocol.md](Riftwalker-Paradox-protocol.md) for a concise, all-in-one technical brief designed for course evaluators and lab instructors.
+> 📄 **Instructor & Evaluator Project Summary:** See [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) and [docs/Riftwalker-Paradox-protocol.md](docs/Riftwalker-Paradox-protocol.md) for a concise, all-in-one technical brief designed for course evaluators and lab instructors.
 
 **Course Context:** Computer Graphics 423 (CSE423 / CG423)
 
@@ -94,6 +94,16 @@ The project follows a clean, modular architecture dividing gameplay, rendering, 
 
 ```text
 CSE423_LAB_Project/
+├── run_game.bat                          # ⚡ 1-Click Windows Launcher (auto-installs & launches)
+├── run_game.ps1                          # ⚡ PowerShell Launcher
+├── run_game.sh                           # ⚡ macOS / Linux Launcher
+├── check_requirements.py                 # Dependency verification forwarder
+├── requirements.txt                      # Python runtime dependencies
+├── README.md                             # Primary project documentation & workflow guide
+├── PROJECT_SPEC.md                       # Comprehensive single source of truth specifications
+├── AGENTS.md                             # Mandatory AI directives & Git safety rules
+├── GEMINI.md                             # AI workspace directives
+│
 ├── assets/textures/                      # PNG textures & visual assets
 │   ├── background/                       # Space skybox textures
 │   ├── characters/                       # Suit, visor, & alien textures
@@ -101,8 +111,30 @@ CSE423_LAB_Project/
 │   ├── rift/                             # Teleportation beacon runes & energy textures
 │   └── weapons/                          # Plasma rifle & blaster textures
 │
-├── docs/                                 # Architecture & design documentation
-│   └── architecture.md                   # Complete architectural specification & diagrams
+├── docs/                                 # Complete documentation & course guides
+│   ├── PROJECT_BRIEF.md                  # High-level technical summary for instructors/evaluators
+│   ├── Riftwalker-Paradox-protocol.md    # Course lab overview document
+│   ├── architecture.md                   # Complete architectural specification & diagrams
+│   ├── graphics_techniques.md            # Comprehensive graphics pipeline breakdown
+│   ├── controls.md                       # Complete input bindings & control schemes
+│   ├── team_tasks.md                     # Module ownership & feature delivery matrix
+│   ├── implementation_notes.md           # Subsystem engineering notes
+│   ├── integration_audit.md              # System integration audit
+│   ├── TODO.md                           # Team task tracking
+│   ├── CHANGELOG.md                      # Version release notes
+│   └── specs/                            # Historical & archival specification documents
+│       └── Riftwalker_Paradox_Protocol_Project_Spec_v2.md
+│
+├── scripts/                              # Automated setup, installer & diagnostic scripts
+│   ├── check_requirements.py             # Dependency validation & automatic pip installer
+│   ├── setup_environment.py              # Setup runner wrapper
+│   └── install_requirements.bat          # Windows batch installer with unit test run
+│
+├── scenes/                               # Scene layout definitions
+│   ├── arena_01_kepler_relay/            # Arena 1 spawn & obstacle configurations
+│   └── arena_02_sundered_rift/           # Arena 2 spawn & crystal layout configurations
+│
+├── screenshots/                          # Gameplay captures & evaluation screenshots
 │
 ├── src/                                  # Core application source code
 │   ├── main.py                           # Master application entry point & GLUT loop

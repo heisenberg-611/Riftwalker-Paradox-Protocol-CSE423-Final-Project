@@ -7,11 +7,14 @@ echo    RIFTWALKER: PARADOX PROTOCOL — DEPENDENCY INSTALLER
 echo ========================================================================
 echo.
 
+set "SCRIPT_DIR=%~dp0"
+set "PROJECT_ROOT=%~dp0..\"
+
 :: 1. Detect Python executable
 set "PYTHON_EXE="
 
-if exist "%~dp0.venv\Scripts\python.exe" (
-    set "PYTHON_EXE=%~dp0.venv\Scripts\python.exe"
+if exist "%PROJECT_ROOT%.venv\Scripts\python.exe" (
+    set "PYTHON_EXE=%PROJECT_ROOT%.venv\Scripts\python.exe"
     echo [INFO] Detected virtual environment in .venv\
     goto :found_python
 )
@@ -53,7 +56,7 @@ echo.
 
 :: 2. Upgrade pip (optional) and install all requirements with test verification
 echo [INFO] Verifying and installing requirements...
-"%PYTHON_EXE%" "%~dp0check_requirements.py" --install --test
+"%PYTHON_EXE%" "%SCRIPT_DIR%check_requirements.py" --install --test
 
 echo.
 echo ========================================================================
