@@ -1,7 +1,8 @@
-"""First-Person Perspective Camera."""
 import math
 from OpenGL.GLU import gluLookAt
+from src.shared.constants import MOUSE_SENSITIVITY, FP_CAM_PITCH_MIN, FP_CAM_PITCH_MAX
 from src.shared.math3d import Vector3, clamp
+
 
 
 class FirstPersonCamera:
@@ -10,10 +11,11 @@ class FirstPersonCamera:
         self.yaw = 0.0
         self.eye_height = 2.1
 
-    def update_orientation(self, mouse_dx: float, mouse_dy: float, sensitivity: float = 0.2):
+    def update_orientation(self, mouse_dx: float, mouse_dy: float, sensitivity: float = MOUSE_SENSITIVITY):
         self.yaw -= mouse_dx * sensitivity
         self.pitch -= mouse_dy * sensitivity
-        self.pitch = clamp(self.pitch, -85.0, 85.0)
+        self.pitch = clamp(self.pitch, FP_CAM_PITCH_MIN, FP_CAM_PITCH_MAX)
+
 
     def apply(self, player_pos: Vector3):
         rad_yaw = math.radians(self.yaw)

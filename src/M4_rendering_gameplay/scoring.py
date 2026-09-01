@@ -12,7 +12,12 @@ class ScoreManager:
         self.combo = 1
         self.combo_timer = 0.0
 
+    def add_score(self, amount: int):
+        """Add arbitrary score (e.g. from picking up Rift Energy crystals)."""
+        self.score += max(0, int(amount))
+
     def add_kill(self, enemy_id: str):
+
         points = 100
         if enemy_id == ENEMY_MELEE_RIFT_STALKER:
             points = 150
