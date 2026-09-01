@@ -39,6 +39,7 @@ class TestAimingSystem(unittest.TestCase):
 
 
 
+
     def test_first_person_muzzle_world_basis(self):
         """FP viewmodel muzzle position must transform correctly into world space using camera basis."""
         cam_eye = self.player.fp_cam.get_cam_eye(self.player.position)
@@ -112,5 +113,49 @@ class TestAimingSystem(unittest.TestCase):
         self.assertAlmostEqual(self.player.tp_cam.pitch, -15.0)
 
 
+    def test_weapon_cooldown_ratio(self):
+        """Weapon cooldown ratio must transition from 0.0 to 1.0."""
+        self.weapon.time_since_last_shot = 999.0
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 1.0)
+        self.assertTrue(self.weapon.can_fire())
+
+        # Fire weapon
+        self.assertTrue(self.weapon.trigger_shot())
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 0.0)
+        self.assertFalse(self.weapon.can_fire())
+
+        # Advance time halfway through cooldown
+        half_cd = self.weapon.cooldown * 0.5
+        self.weapon.update(half_cd)
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 0.5)
+
+        # Complete cooldown
+        self.weapon.update(half_cd + 0.01)
+        self.assertAlmostEqual(self.weapon.get_cooldown_ratio(), 1.0)
+        self.assertTrue(self.weapon.can_fire())
+
+    def test_spacebar_input_parsing(self):
+        """InputManager must parse Space key from bytes, int, or str reliably."""
+        from src.shared.input_manager import InputManager
+        mgr = InputManager()
+
+        # Bytes format from GLUT
+        mgr.on_key_down(b' ', 0, 0)
+        self.assertTrue(mgr.is_key_down(' '))
+        self.assertTrue(mgr.was_key_just_pressed(' '))
+        mgr.end_frame()
+        self.assertFalse(mgr.was_key_just_pressed(' '))
+        self.assertTrue(mgr.is_key_down(' '))
+        mgr.on_key_up(b' ', 0, 0)
+        self.assertFalse(mgr.is_key_down(' '))
+
+        # Integer ASCII 32 format
+        mgr.on_key_down(32, 0, 0)
+        self.assertTrue(mgr.is_key_down(' '))
+        mgr.on_key_up(32, 0, 0)
+        self.assertFalse(mgr.is_key_down(' '))
+
+
 if __name__ == '__main__':
     unittest.main()
+

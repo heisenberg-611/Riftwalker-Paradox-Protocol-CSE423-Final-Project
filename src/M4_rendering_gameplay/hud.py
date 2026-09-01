@@ -77,6 +77,7 @@ class HUD:
         game_state_str: str,
         boss_hp: float = 0.0,
         boss_max_hp: float = 0.0,
+        weapon_cooldown_ratio: float = 1.0,
         **kwargs
     ):
         # Switch to 2D Orthographic projection
@@ -171,7 +172,39 @@ class HUD:
                     glColor3f(0.5, 0.8, 1.0)
                     self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [KILLS / RIFT PICKUPS]")
 
-            # 3. Boss Health Bar (Top Center)
+            # 3. Weapon Cooldown Bar (Bottom Left)
+            y2 = y1 + 40.0
+            glColor4f(0.1, 0.1, 0.15, 0.7)
+            glBegin(GL_QUADS)
+            glVertex2f(x0, y2)
+            glVertex2f(x0 + bar_w, y2)
+            glVertex2f(x0 + bar_w, y2 + bar_h)
+            glVertex2f(x0, y2 + bar_h)
+            glEnd()
+
+            w_ratio = max(0.0, min(weapon_cooldown_ratio, 1.0))
+            if w_ratio >= 1.0:
+                glColor4f(0.0, 0.95, 1.0, 0.95)  # Bright Cyan
+                glBegin(GL_QUADS)
+                glVertex2f(x0, y2)
+                glVertex2f(x0 + bar_w, y2)
+                glVertex2f(x0 + bar_w, y2 + bar_h)
+                glVertex2f(x0, y2 + bar_h)
+                glEnd()
+                glColor3f(0.3, 1.0, 1.0)
+                self.draw_text(x0, y2 + bar_h + 6, "LASER RIFLE: [READY - CLICK / SPACE]")
+            else:
+                glColor4f(1.0, 0.65, 0.1, 0.85)  # Amber charging
+                glBegin(GL_QUADS)
+                glVertex2f(x0, y2)
+                glVertex2f(x0 + bar_w * w_ratio, y2)
+                glVertex2f(x0 + bar_w * w_ratio, y2 + bar_h)
+                glVertex2f(x0, y2 + bar_h)
+                glEnd()
+                glColor3f(1.0, 0.75, 0.2)
+                self.draw_text(x0, y2 + bar_h + 6, f"RIFLE CYCLING: {int(w_ratio * 100)}%")
+
+            # 4. Boss Health Bar (Top Center)
             if boss_hp > 0.0 and boss_max_hp > 0.0:
                 boss_w = 340.0
                 boss_h = 16.0

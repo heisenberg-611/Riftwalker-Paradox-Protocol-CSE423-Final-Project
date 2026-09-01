@@ -12,9 +12,10 @@ from src.shared.math3d import Vector3, clamp
 
 
 class ThirdPersonCamera:
-    def __init__(self, distance: float = TP_CAM_DISTANCE, height: float = TP_CAM_HEIGHT):
+    def __init__(self, distance: float = TP_CAM_DISTANCE, height: float = TP_CAM_HEIGHT, shoulder_offset: float = 0.95):
         self.distance = distance
         self.height = height
+        self.shoulder_offset = shoulder_offset
         self.yaw = 0.0
         self.pitch = 0.0
         self.shoulder_offset = 1.15  # Offset to the right of the astronaut
