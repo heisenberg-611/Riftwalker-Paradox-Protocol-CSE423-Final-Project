@@ -68,14 +68,17 @@ The project demonstrates fundamental and advanced principles of the CSE423 curri
 | Key / Input | Action |
 |---|---|
 | **`W`, `A`, `S`, `D`** | Move Forward / Strafe Left / Move Backward / Strafe Right |
-| **Mouse Movement** | Look / Aim (Pitch & Yaw) |
+| **Mouse Movement** | Look / Aim (Pitch & Yaw Precision Aim) |
+| **Arrow Keys (`←`, `→`, `↑`, `↓`)** | Continuous Smooth Camera Turn & Pitch |
 | **Left Click** / **`Space`** | Fire Hitscan Laser Weapon |
 | **`V`** / **`C`** | Toggle First-Person (1P) / Third-Person (3P) Camera |
 | **`Q`** | Activate Chrono Slow (Requires 100% Charge) |
 | **`F`** | Interact / Activate Rift Beacon Teleportation |
 | **`E`** | Evasive Combat Blink Dash |
+| **`F11`** | Toggle Fullscreen Mode (Fit Display) |
 | **`R`** | Restart Game (Game Over / Victory screen) |
 | **`Esc`** | Exit Game |
+
 
 ---
 

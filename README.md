@@ -75,14 +75,17 @@ python3 src/main.py
 | Input | Action |
 |---|---|
 | **`W`, `A`, `S`, `D`** | Move (Forward, Strafe Left, Backward, Strafe Right) |
-| **Mouse Movement** | Look / Aim (Pitch and Yaw) |
+| **Mouse Movement** | Look / Aim (Pitch and Yaw Precision Aim) |
+| **Arrow Keys (`←`, `→`, `↑`, `↓`)** | Continuous Smooth Camera Turn & Pitch |
 | **`Left Click` / `Space`** | Fire Hitscan Laser Rifle (with Muzzle Flare & Recoil) |
 | **`V` / `C`** | Toggle 1st-Person (FPS Viewmodel) / 3rd-Person (Astronaut Rig) |
 | **`Q`** | Activate Chrono Slow (Requires 100% Charge, lasts 5.0s) |
 | **`F`** | Interact / Teleport near Linked Rift Beacon Platform |
 | **`E` / `Shift`** | Blink Dash (Evasive Teleport) |
+| **`F11`** | Toggle Fullscreen Mode (Fit Display) |
 | **`R`** | Restart Mission (Game Over / Victory screen) |
 | **`Esc`** | Exit Game |
+
 
 ---
 

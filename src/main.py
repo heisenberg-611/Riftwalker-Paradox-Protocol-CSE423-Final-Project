@@ -5,6 +5,7 @@ CSE423 Final Project — Main Entry Point
 import sys
 import os
 import math
+import time
 
 # Ensure project root is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -71,8 +72,10 @@ class GameApp:
         self.chrono_mgr = ChronoSlowManager()
         self.score_mgr = ScoreManager()
         self.enemies = self.level_mgr.init_arena_enemies(ARENA_01_KEPLER_RELAY)
+        self.input_mgr.first_mouse = True
 
     def handle_input(self, real_dt: float):
+
         # 1. View Switching (V / C)
         if self.input_mgr.was_key_just_pressed('v') or self.input_mgr.was_key_just_pressed('c'):
             self.player.toggle_camera()
@@ -108,8 +111,32 @@ class GameApp:
             if self.game_state.current_state in (STATE_GAME_OVER, STATE_VICTORY):
                 self.reset_game()
 
+        # Fullscreen Toggle (F11)
+        if self.input_mgr.was_special_key_just_pressed(GLUT_KEY_F11):
+            glutFullScreen()
+
+        # Smooth Keyboard Camera Aiming (Arrow Keys)
+        rot_speed = 120.0 * real_dt
+        if self.input_mgr.is_special_key_down(GLUT_KEY_LEFT):
+            if self.player.is_first_person:
+                self.player.fp_cam.yaw += rot_speed
+            else:
+                self.player.tp_cam.yaw += rot_speed
+        if self.input_mgr.is_special_key_down(GLUT_KEY_RIGHT):
+            if self.player.is_first_person:
+                self.player.fp_cam.yaw -= rot_speed
+            else:
+                self.player.tp_cam.yaw -= rot_speed
+        if self.input_mgr.is_special_key_down(GLUT_KEY_UP):
+            cam = self.player.fp_cam if self.player.is_first_person else self.player.tp_cam
+            cam.pitch = min(cam.pitch + rot_speed, 85.0 if self.player.is_first_person else 65.0)
+        if self.input_mgr.is_special_key_down(GLUT_KEY_DOWN):
+            cam = self.player.fp_cam if self.player.is_first_person else self.player.tp_cam
+            cam.pitch = max(cam.pitch - rot_speed, -85.0 if self.player.is_first_person else -60.0)
+
         # 6. Player Movement (WASD)
         if self.game_state.current_state == STATE_PLAYING:
+
             fwd = 0.0
             strafe = 0.0
             if self.input_mgr.is_key_down('w'):
@@ -258,6 +285,8 @@ class GameApp:
 
 # Global Application Instance for GLUT Callbacks
 app: GameApp = None
+last_frame_time: float = 0.0
+TARGET_FRAME_DURATION: float = 1.0 / 60.0
 
 
 def display_callback():
@@ -266,14 +295,29 @@ def display_callback():
 
 
 def idle_callback():
+    global last_frame_time
     if app:
-        app.update()
-        glutPostRedisplay()
+        now = time.time()
+        elapsed = now - last_frame_time
+        if elapsed >= TARGET_FRAME_DURATION:
+            last_frame_time = now
+            app.update()
+            glutPostRedisplay()
+        else:
+            # Yield CPU to prevent core starvation and frame drops
+            time.sleep(0.001)
+
 
 
 def reshape_callback(w, h):
     if app:
         app.renderer.reshape(w, h)
+        app.input_mgr.set_window_size(w, h)
+
+
+def entry_callback(state):
+    if app:
+        app.input_mgr.on_mouse_enter(state)
 
 
 def keyboard_down_callback(key, x, y):
@@ -325,6 +369,7 @@ def main():
 
     LightingSystem.init_lighting()
 
+
     app = GameApp()
 
     glutDisplayFunc(display_callback)
@@ -337,17 +382,20 @@ def main():
     glutPassiveMotionFunc(mouse_motion_callback)
     glutMotionFunc(mouse_motion_callback)
     glutMouseFunc(mouse_button_callback)
+    glutEntryFunc(entry_callback)
 
     print("==================================================")
     print(" Riftwalker: Paradox Protocol [CSE423 Game Lab] ")
     print(" Controls:")
-    print("   WASD         - Move")
+    print("   WASD         - Move Player")
     print("   Mouse        - Look / Aim")
-    print("   Left Click   - Fire Hitscan Weapon")
+    print("   Arrow Keys   - Continuous Smooth Camera Turn")
+    print("   Left Click   - Fire Hitscan Laser (or Space)")
     print("   V / C        - Toggle 1st / 3rd Person Camera")
     print("   Q            - Chrono Slow (Time Dilation)")
     print("   F            - Interact / Rift Beacon Teleport")
     print("   E            - Blink Combat Dash")
+    print("   F11          - Toggle Fullscreen")
     print("   R            - Restart Game")
     print("   Esc          - Exit")
     print("==================================================")
@@ -355,5 +403,7 @@ def main():
     glutMainLoop()
 
 
+
 if __name__ == '__main__':
     main()
+
