@@ -76,7 +76,8 @@ class HUD:
         is_first_person: bool,
         game_state_str: str,
         boss_hp: float = 0.0,
-        boss_max_hp: float = 0.0
+        boss_max_hp: float = 0.0,
+        **kwargs
     ):
         # Switch to 2D Orthographic projection
         glMatrixMode(GL_PROJECTION)
@@ -93,147 +94,150 @@ class HUD:
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-        # 1. Health Bar (Bottom Left)
-        bar_w = 200.0
-        bar_h = 16.0
-        x0 = 30.0
-        y0 = 30.0
+        try:
+            # 1. Health Bar (Bottom Left)
+            bar_w = 200.0
+            bar_h = 16.0
+            x0 = 30.0
+            y0 = 30.0
 
-        # HP Background
-        glColor4f(0.1, 0.1, 0.15, 0.7)
-        glBegin(GL_QUADS)
-        glVertex2f(x0, y0)
-        glVertex2f(x0 + bar_w, y0)
-        glVertex2f(x0 + bar_w, y0 + bar_h)
-        glVertex2f(x0, y0 + bar_h)
-        glEnd()
+            # HP Background
+            glColor4f(0.1, 0.1, 0.15, 0.7)
+            glBegin(GL_QUADS)
+            glVertex2f(x0, y0)
+            glVertex2f(x0 + bar_w, y0)
+            glVertex2f(x0 + bar_w, y0 + bar_h)
+            glVertex2f(x0, y0 + bar_h)
+            glEnd()
 
-        # HP Filled Portion
-        hp_ratio = max(0.0, min(hp / max_hp, 1.0))
-        glColor4f(0.1, 0.9, 0.3, 0.9)
-        glBegin(GL_QUADS)
-        glVertex2f(x0, y0)
-        glVertex2f(x0 + bar_w * hp_ratio, y0)
-        glVertex2f(x0 + bar_w * hp_ratio, y0 + bar_h)
-        glVertex2f(x0, y0 + bar_h)
-        glEnd()
+            # HP Filled Portion
+            hp_ratio = max(0.0, min(hp / max_hp, 1.0))
+            glColor4f(0.1, 0.9, 0.3, 0.9)
+            glBegin(GL_QUADS)
+            glVertex2f(x0, y0)
+            glVertex2f(x0 + bar_w * hp_ratio, y0)
+            glVertex2f(x0 + bar_w * hp_ratio, y0 + bar_h)
+            glVertex2f(x0, y0 + bar_h)
+            glEnd()
 
-        # HP Text
-        glColor3f(1.0, 1.0, 1.0)
-        self.draw_text(x0, y0 + bar_h + 6, f"SUIT INTEGRITY: {int(hp)}/{int(max_hp)}")
+            # HP Text
+            glColor3f(1.0, 1.0, 1.0)
+            self.draw_text(x0, y0 + bar_h + 6, f"SUIT INTEGRITY: {int(hp)}/{int(max_hp)}")
 
-        # 2. Chrono Charge Bar
-        y1 = y0 + 40.0
-        # Chrono Background
-        glColor4f(0.1, 0.1, 0.15, 0.7)
-        glBegin(GL_QUADS)
-        glVertex2f(x0, y1)
-        glVertex2f(x0 + bar_w, y1)
-        glVertex2f(x0 + bar_w, y1 + bar_h)
-        glVertex2f(x0, y1 + bar_h)
-        glEnd()
-
-        # Chrono Filled Portion
-        if is_chrono_active:
-            # Active 5.0s countdown bar
-            countdown_ratio = max(0.0, min(chrono_time_remaining / 5.0, 1.0))
-            glColor4f(0.0, 0.9, 1.0, 1.0)  # Bright Cyan
+            # 2. Chrono Charge Bar
+            y1 = y0 + 40.0
+            # Chrono Background
+            glColor4f(0.1, 0.1, 0.15, 0.7)
             glBegin(GL_QUADS)
             glVertex2f(x0, y1)
-            glVertex2f(x0 + bar_w * countdown_ratio, y1)
-            glVertex2f(x0 + bar_w * countdown_ratio, y1 + bar_h)
+            glVertex2f(x0 + bar_w, y1)
+            glVertex2f(x0 + bar_w, y1 + bar_h)
             glVertex2f(x0, y1 + bar_h)
             glEnd()
-            glColor3f(0.2, 1.0, 1.0)
-            self.draw_text(x0, y1 + bar_h + 6, f"CHRONO SLOW: {chrono_time_remaining:.1f}s REMAINING")
-        else:
-            # Charging bar (0% to 100%)
-            chrono_ratio = max(0.0, min(chrono_charge / max_chrono, 1.0))
-            if chrono_charge >= max_chrono:
-                glColor4f(0.0, 1.0, 0.9, 1.0)  # Full 100% Glow
+
+            # Chrono Filled Portion
+            if is_chrono_active:
+                # Active 5.0s countdown bar
+                countdown_ratio = max(0.0, min(chrono_time_remaining / 5.0, 1.0))
+                glColor4f(0.0, 0.9, 1.0, 1.0)  # Bright Cyan
                 glBegin(GL_QUADS)
                 glVertex2f(x0, y1)
-                glVertex2f(x0 + bar_w * chrono_ratio, y1)
-                glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
+                glVertex2f(x0 + bar_w * countdown_ratio, y1)
+                glVertex2f(x0 + bar_w * countdown_ratio, y1 + bar_h)
                 glVertex2f(x0, y1 + bar_h)
                 glEnd()
-                glColor3f(0.0, 1.0, 0.9)
-                self.draw_text(x0, y1 + bar_h + 6, "CHRONO CHARGE: [100% READY - PRESS 'Q']")
+                glColor3f(0.2, 1.0, 1.0)
+                self.draw_text(x0, y1 + bar_h + 6, f"CHRONO SLOW: {chrono_time_remaining:.1f}s REMAINING")
             else:
-                glColor4f(0.0, 0.45, 0.75, 0.8)
+                # Charging bar (0% to 100%)
+                chrono_ratio = max(0.0, min(chrono_charge / max_chrono, 1.0))
+                if chrono_charge >= max_chrono:
+                    glColor4f(0.0, 1.0, 0.9, 1.0)  # Full 100% Glow
+                    glBegin(GL_QUADS)
+                    glVertex2f(x0, y1)
+                    glVertex2f(x0 + bar_w * chrono_ratio, y1)
+                    glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
+                    glVertex2f(x0, y1 + bar_h)
+                    glEnd()
+                    glColor3f(0.0, 1.0, 0.9)
+                    self.draw_text(x0, y1 + bar_h + 6, "CHRONO CHARGE: [100% READY - PRESS 'Q']")
+                else:
+                    glColor4f(0.0, 0.45, 0.75, 0.8)
+                    glBegin(GL_QUADS)
+                    glVertex2f(x0, y1)
+                    glVertex2f(x0 + bar_w * chrono_ratio, y1)
+                    glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
+                    glVertex2f(x0, y1 + bar_h)
+                    glEnd()
+                    glColor3f(0.5, 0.8, 1.0)
+                    self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [KILLS / RIFT PICKUPS]")
+
+            # 3. Boss Health Bar (Top Center)
+            if boss_hp > 0.0 and boss_max_hp > 0.0:
+                boss_w = 340.0
+                boss_h = 16.0
+                bx0 = (width - boss_w) * 0.5
+                by0 = height - 55.0
+
+                # Background
+                glColor4f(0.1, 0.1, 0.15, 0.8)
                 glBegin(GL_QUADS)
-                glVertex2f(x0, y1)
-                glVertex2f(x0 + bar_w * chrono_ratio, y1)
-                glVertex2f(x0 + bar_w * chrono_ratio, y1 + bar_h)
-                glVertex2f(x0, y1 + bar_h)
+                glVertex2f(bx0, by0)
+                glVertex2f(bx0 + boss_w, by0)
+                glVertex2f(bx0 + boss_w, by0 + boss_h)
+                glVertex2f(bx0, by0 + boss_h)
                 glEnd()
-                glColor3f(0.5, 0.8, 1.0)
-                self.draw_text(x0, y1 + bar_h + 6, f"CHRONO CHARGE: {int(chrono_charge)}% [KILLS / RIFT PICKUPS]")
 
-        # 3. Boss Health Bar (Top Center)
-        if boss_hp > 0.0 and boss_max_hp > 0.0:
-            boss_w = 340.0
-            boss_h = 16.0
-            bx0 = (width - boss_w) * 0.5
-            by0 = height - 55.0
+                # Filled Health Bar
+                b_ratio = max(0.0, min(boss_hp / boss_max_hp, 1.0))
+                glColor4f(1.0, 0.15, 0.25, 0.95)
+                glBegin(GL_QUADS)
+                glVertex2f(bx0, by0)
+                glVertex2f(bx0 + boss_w * b_ratio, by0)
+                glVertex2f(bx0 + boss_w * b_ratio, by0 + boss_h)
+                glVertex2f(bx0, by0 + boss_h)
+                glEnd()
 
-            # Background
-            glColor4f(0.1, 0.1, 0.15, 0.8)
-            glBegin(GL_QUADS)
-            glVertex2f(bx0, by0)
-            glVertex2f(bx0 + boss_w, by0)
-            glVertex2f(bx0 + boss_w, by0 + boss_h)
-            glVertex2f(bx0, by0 + boss_h)
-            glEnd()
+                # Boss Name & Phase Text
+                glColor3f(1.0, 0.8, 0.3)
+                phase_str = "PHASE 2" if b_ratio <= 0.5 else "PHASE 1"
+                self.draw_text(bx0, by0 + boss_h + 6, f"RIFT GUARDIAN [{phase_str}]: {int(boss_hp)}/{int(boss_max_hp)}")
 
-            # Filled Health Bar
-            b_ratio = max(0.0, min(boss_hp / boss_max_hp, 1.0))
-            glColor4f(1.0, 0.15, 0.25, 0.95)
-            glBegin(GL_QUADS)
-            glVertex2f(bx0, by0)
-            glVertex2f(bx0 + boss_w * b_ratio, by0)
-            glVertex2f(bx0 + boss_w * b_ratio, by0 + boss_h)
-            glVertex2f(bx0, by0 + boss_h)
-            glEnd()
+            # 4. Score & Info (Top Left)
+            glColor3f(1.0, 0.85, 0.2)
+            self.draw_text(30.0, height - 35.0, f"SCORE: {score}")
 
-            # Boss Name & Phase Text
-            glColor3f(1.0, 0.8, 0.3)
-            phase_str = "PHASE 2" if b_ratio <= 0.5 else "PHASE 1"
-            self.draw_text(bx0, by0 + boss_h + 6, f"RIFT GUARDIAN [{phase_str}]: {int(boss_hp)}/{int(boss_max_hp)}")
+            view_mode_str = "1st Person [V to toggle]" if is_first_person else "3rd Person [V to toggle]"
+            glColor3f(0.8, 0.8, 0.9)
+            self.draw_text(30.0, height - 60.0, f"CAMERA: {view_mode_str}")
 
-        # 4. Score & Info (Top Left)
-        glColor3f(1.0, 0.85, 0.2)
-        self.draw_text(30.0, height - 35.0, f"SCORE: {score}")
+            # 4. Teleport Prompt (Center Screen)
+            if can_teleport:
+                glColor3f(0.0, 1.0, 0.9)
+                self.draw_text(width * 0.5 - 130.0, height * 0.4, ">> PRESS 'F' TO RIFT TELEPORT <<")
 
-        view_mode_str = "1st Person [V to toggle]" if is_first_person else "3rd Person [V to toggle]"
-        glColor3f(0.8, 0.8, 0.9)
-        self.draw_text(30.0, height - 60.0, f"CAMERA: {view_mode_str}")
+            # 5. Crosshair (Center Screen)
+            self.crosshair.draw(width * 0.5, height * 0.5)
 
-        # 4. Teleport Prompt (Center Screen)
-        if can_teleport:
-            glColor3f(0.0, 1.0, 0.9)
-            self.draw_text(width * 0.5 - 130.0, height * 0.4, ">> PRESS 'F' TO RIFT TELEPORT <<")
+            # 6. End-Game States
+            if game_state_str == "GAME_OVER":
+                glColor3f(1.0, 0.1, 0.2)
+                self.draw_text(width * 0.5 - 75.0, height * 0.55, "GAME OVER", font=self.font_title)
+                glColor3f(1.0, 1.0, 1.0)
+                self.draw_text(width * 0.5 - 105.0, height * 0.48, "Press 'R' to Restart Mission")
+            elif game_state_str == "VICTORY":
+                glColor3f(0.2, 1.0, 0.4)
+                self.draw_text(width * 0.5 - 140.0, height * 0.55, "MISSION ACCOMPLISHED!", font=self.font_title)
+                glColor3f(1.0, 1.0, 1.0)
+                self.draw_text(width * 0.5 - 105.0, height * 0.48, "Press 'R' to Play Again")
 
-        # 5. Crosshair (Center Screen)
-        self.crosshair.draw(width * 0.5, height * 0.5)
+        finally:
+            glDisable(GL_BLEND)
+            glEnable(GL_LIGHTING)
+            glEnable(GL_DEPTH_TEST)
 
-        # 6. End-Game States
-        if game_state_str == "GAME_OVER":
-            glColor3f(1.0, 0.1, 0.2)
-            self.draw_text(width * 0.5 - 75.0, height * 0.55, "GAME OVER", font=self.font_title)
-            glColor3f(1.0, 1.0, 1.0)
-            self.draw_text(width * 0.5 - 105.0, height * 0.48, "Press 'R' to Restart Mission")
-        elif game_state_str == "VICTORY":
-            glColor3f(0.2, 1.0, 0.4)
-            self.draw_text(width * 0.5 - 140.0, height * 0.55, "MISSION ACCOMPLISHED!", font=self.font_title)
-            glColor3f(1.0, 1.0, 1.0)
-            self.draw_text(width * 0.5 - 105.0, height * 0.48, "Press 'R' to Play Again")
+            glPopMatrix()
+            glMatrixMode(GL_PROJECTION)
+            glPopMatrix()
+            glMatrixMode(GL_MODELVIEW)
 
-        glDisable(GL_BLEND)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_DEPTH_TEST)
-
-        glPopMatrix()
-        glMatrixMode(GL_PROJECTION)
-        glPopMatrix()
-        glMatrixMode(GL_MODELVIEW)
