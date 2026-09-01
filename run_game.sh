@@ -21,4 +21,9 @@ if [ -z "$PYTHON_EXE" ]; then
     exit 1
 fi
 
-"$PYTHON_EXE" "$SCRIPT_DIR/check_requirements.py" --run "$@"
+TARGET_SCRIPT="$SCRIPT_DIR/scripts/check_requirements.py"
+if [ ! -f "$TARGET_SCRIPT" ]; then
+    TARGET_SCRIPT="$SCRIPT_DIR/check_requirements.py"
+fi
+
+"$PYTHON_EXE" "$TARGET_SCRIPT" --run "$@"

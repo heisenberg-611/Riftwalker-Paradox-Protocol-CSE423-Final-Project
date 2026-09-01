@@ -10,6 +10,16 @@
 
 ```text
 CSE423_LAB_Project/
+├── run_game.bat                          # ⚡ 1-Click Windows Launcher (auto-installs & launches)
+├── run_game.ps1                          # ⚡ PowerShell Launcher
+├── run_game.sh                           # ⚡ macOS / Linux Launcher
+├── check_requirements.py                 # Dependency verification forwarder
+├── requirements.txt                      # Python runtime dependencies
+├── README.md                             # Project documentation, controls, & workflow guide
+├── PROJECT_SPEC.md                       # Comprehensive single source of truth specifications
+├── AGENTS.md                             # Mandatory AI directives & Git branch protection rules
+├── GEMINI.md                             # AI workspace directives
+│
 ├── assets/                               # Static textures and visual assets
 │   └── textures/
 │       ├── background/                   # Space skybox & celestial backgrounds
@@ -35,8 +45,30 @@ CSE423_LAB_Project/
 │       └── weapons/                      # Plasma rifle & blaster textures
 │           └── plasma_rifle.png
 │
-├── docs/                                 # Architectural documentation & manuals
-│   └── architecture.md                   # System design, modular boundaries, & execution flow
+├── docs/                                 # Complete documentation & course guides
+│   ├── PROJECT_BRIEF.md                  # High-level technical summary for instructors/evaluators
+│   ├── Riftwalker-Paradox-protocol.md    # Course lab overview document
+│   ├── architecture.md                   # Complete architectural specification & diagrams
+│   ├── graphics_techniques.md            # Comprehensive graphics pipeline breakdown
+│   ├── controls.md                       # Complete input bindings & control schemes
+│   ├── team_tasks.md                     # Module ownership & feature delivery matrix
+│   ├── implementation_notes.md           # Subsystem engineering notes
+│   ├── integration_audit.md              # System integration audit
+│   ├── TODO.md                           # Team task tracking
+│   ├── CHANGELOG.md                      # Version release notes
+│   └── specs/                            # Historical specification archives
+│       └── Riftwalker_Paradox_Protocol_Project_Spec_v2.md
+│
+├── scripts/                              # Automated setup, installer & diagnostic scripts
+│   ├── check_requirements.py             # Dependency validation & automatic pip installer
+│   ├── setup_environment.py              # Setup runner wrapper
+│   └── install_requirements.bat          # Windows batch installer with unit test run
+│
+├── scenes/                               # Scene layout definitions
+│   ├── arena_01_kepler_relay/            # Arena 1 spawn & obstacle configurations
+│   └── arena_02_sundered_rift/           # Arena 2 spawn & crystal layout configurations
+│
+├── screenshots/                          # Gameplay captures & evaluation screenshots
 │
 ├── src/                                  # Application source code
 │   ├── main.py                           # Master application entry point, GLUT setup & main loop
@@ -98,22 +130,15 @@ CSE423_LAB_Project/
 │       ├── scoring.py                    # Score evaluation, combo multipliers, & kill tracking
 │       └── story_intro.py                # Terminal story intro with typewriter text & audio waveform
 │
-├── tests/                                # Automated Unit Test Suite
-│   ├── __init__.py
-│   ├── test_aiming_system.py             # Precision raycasting & muzzle alignment tests
-│   ├── test_camera_input.py              # Camera yaw/pitch clamping & view switching tests
-│   ├── test_collision.py                 # Sphere, AABB, cylinder sliding, & arena collision tests
-│   ├── test_gameplay_logic.py            # Scoring, state transitions, & chrono charge tests
-│   ├── test_math3d.py                    # Vector3 math, transformations, & ray tests
-│   ├── test_story_intro.py               # Story mode state machine & typing tests
-│   └── test_texture_loader.py            # Texture loading & procedural generator fallback tests
-│
-├── AGENTS.md                             # Mandatory AI directives & Git branch protection rules
-├── GEMINI.md                             # AI workspace directives
-├── PROJECT_BRIEF.md                      # High-level technical summary for instructors/evaluators
-├── PROJECT_SPEC.md                       # Comprehensive single source of truth specifications
-├── README.md                             # Project documentation, controls, & workflow guide
-└── requirements.txt                      # Python runtime dependencies
+└── tests/                                # Automated Unit Test Suite
+    ├── __init__.py
+    ├── test_aiming_system.py             # Precision raycasting & muzzle alignment tests
+    ├── test_camera_input.py              # Camera yaw/pitch clamping & view switching tests
+    ├── test_collision.py                 # Sphere, AABB, cylinder sliding, & arena collision tests
+    ├── test_gameplay_logic.py            # Scoring, state transitions, & chrono charge tests
+    ├── test_math3d.py                    # Vector3 math, transformations, & ray tests
+    ├── test_story_intro.py               # Story mode state machine & typing tests
+    └── test_texture_loader.py            # Texture loading & procedural generator fallback tests
 ```
 
 ---

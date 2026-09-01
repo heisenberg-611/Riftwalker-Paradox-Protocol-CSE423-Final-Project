@@ -33,8 +33,13 @@ if (-not $pythonCmd) {
     Exit 1
 }
 
+$scriptPath = "$scriptDir\scripts\check_requirements.py"
+if (-not (Test-Path $scriptPath)) {
+    $scriptPath = "$scriptDir\check_requirements.py"
+}
+
 Write-Host "[OK] Using Python: $pythonCmd" -ForegroundColor Green
 Write-Host ""
 
 # Run requirements checker and start the game
-& $pythonCmd "$scriptDir\check_requirements.py" --run
+& $pythonCmd "$scriptPath" --run
