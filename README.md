@@ -1,43 +1,42 @@
 # Riftwalker: Paradox Protocol
 
-> 📄 **Instructor & Evaluator Project Summary:** See [PROJECT_BRIEF.md](PROJECT_BRIEF.md) for a concise, all-in-one technical brief designed for course evaluators and lab instructors.
+> 📄 **Instructor & Evaluator Project Summary:** See [PROJECT_BRIEF.md](PROJECT_BRIEF.md) and [Riftwalker-Paradox-protocol.md](Riftwalker-Paradox-protocol.md) for a concise, all-in-one technical brief designed for course evaluators and lab instructors.
 
 **Course Context:** Computer Graphics 423 (CSE423 / CG423)
 
-**Project Goal:** A polished PyOpenGL/GLUT sci-fi first/third-person combat game demonstrating computer graphics techniques (hierarchical modeling, procedural generation, camera systems, lighting, particles, raycasting, and Chrono Slow time dilation).
+**Project Goal:** A real-time 3D PyOpenGL/GLUT sci-fi combat game demonstrating advanced computer graphics techniques (hierarchical matrix modeling, procedural geometry generation, dual-camera projections, multi-source dynamic lighting, particle systems, 3D raycasting, and Chrono Slow time dilation).
 
 ---
 
 ## 🎮 Overview
 
-In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental **Rift-Chrono Suit** fights alien invaders across two distinct arenas:
+In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental **Rift-Chrono Suit** fights otherworldly *Crystalline Void* invaders across two distinct tactical arenas:
 
-1. **Kepler Relay** (Arena 1) - High-tech industrial relay station
-
-2. **Sundered Rift** (Arena 2) - Floating cosmic asteroid wasteland
+1. **Kepler Relay (Arena 1):** High-tech industrial relay outpost with a metallic floor grid, perimeter security walls, server pillars, crates, and covered combat walkways.
+2. **Sundered Rift (Arena 2):** Floating cosmic asteroid void with an obsidian ground plateau, neon purple anomaly grid, and glowing crystal spires (open boss arena).
 
 ### Signature Mechanics
 
-* **Rift Teleportation:** Teleport between arenas via linked Rift Beacons, with a short visual transition and player repositioning.
-
-* **Chrono Slow:** 5-second time dilation ability. Enemies and projectiles move at approximately 30% speed while the player remains at normal speed. The ability requires 100% Chrono Charge and resets to 0% after activation.
-
-* **Blink Teleport (Stretch):** Optional short-range combat evasion dash.
-
-* **Dual Camera System:** Toggle smoothly between 3rd-Person exploration and 1st-Person precision aiming.
-
-* **Procedural Modeling:** Hierarchically articulated astronaut rig and procedurally generated multi-legged alien variants.
+* **Tactical Rift Beacon Teleportation (REQUIRED):** Teleport between arenas via linked interactive Rift Beacons (`Arena 1 Beacon` $\leftrightarrow$ `Arena 2 Beacon`) featuring animated spinning torus rings, a cyan vortex particle swirl, and a screen flash. Teleportation can be used tactically during combat to reposition or retreat.
+* **Chrono Slow (Time Dilation):** Signature time-manipulation ability. The charge bar fills from 0% to **100%** via combat kills and collectible pickups. Pressing **`Q`** consumes the full 100% charge, resets the meter to **0%**, and triggers **5.0 seconds of 30% time dilation** (`game_dt = real_dt * 0.30`). Enemies and plasma projectiles slow down to 30% speed while the player moves, aims, and fires at 100% normal speed. Enhanced by a cool-blue screen overlay and radial Chrono ripple particles.
+* **Collectible Rift Energy Pickups:** Floating, spinning cyan/magenta crystal octahedrons with rotating halo rings placed across both arenas. Collecting one awards **+25% Chrono Charge**, +150 score, and spawns sparkling particle bursts (15-second respawn timer).
+* **Dual Camera & 1P Weapon Viewmodel:** Pressing **`V`** toggles between First-Person (FPS) and Third-Person (TPS) while preserving pitch and yaw. In 1P mode, renders a dedicated 3D blaster rifle viewmodel in the bottom-right foreground with firing recoil and cyan energy rails. In 3P mode, renders the full articulated astronaut rig with walking limb swings.
+* **Procedural Crystalline Void Enemies:** Faceted obsidian shard carapaces, glowing cyan/purple rift cores, and rotating orbital shard rings:
+  * **Rift Stalker (Melee):** Fast quadrupedal shadow-hound with swinging scythe blades.
+  * **Rift Spitter (Ranged):** Floating crystal prism with dual counter-rotating orbital shard rings launching plasma bolts.
+  * **Rift Guardian (Boss):** Multi-phase final boss with 4 rotating orbital shield obelisks (rapid spinning and radial shockwaves in Phase 2) and a dedicated top-center Boss Health Bar.
+* **Blink Teleport (Stretch Feature):** Optional short-range evasive combat dash (`E` / `Shift`).
 
 ---
 
-## 👥 Team Work Breakdown (M1–M4)
+## 👥 Team Work Breakdown (The 12 Major Features)
 
-| Module | Member Responsibility    | Core Deliverables                                                                                  |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------- |
-| **M1** | Player & Camera          | Astronaut rig, movement, FP/TP camera systems, weapon viewmodel, Blink teleport (stretch)          |
-| **M2** | Enemies & Combat         | Alien generator, melee/ranged AI, boss (Rift Guardian), raycast shooting, combat and hit detection |
-| **M3** | World, Arenas & Teleport | Kepler Relay, Sundered Rift, environment generation, Rift Beacons, arena teleportation             |
-| **M4** | Rendering & Integration  | Graphics pipeline, lighting, particle systems, Chrono Slow, HUD, score/rank, game state            |
+| Module | Member Responsibility | Core Deliverables (3 Major Features per Member) |
+|---|---|---|
+| **M1** | **Player & Camera Systems** | **1.** Procedural Hierarchical Astronaut Rig (`glPushMatrix`/`glPopMatrix`, suit, visor, thruster pack, articulated walking limbs)<br>**2.** Dual Camera System (`V` toggle for 1P FPS & 3P orbital TPS)<br>**3.** Player Movement & 1P Blaster 3D Viewmodel (WASD kinematics, velocity damping, foreground 3D rifle viewmodel with firing recoil) |
+| **M2** | **Enemies & Combat Systems** | **1.** Procedural Crystalline Void Alien Generator (Obsidian carapaces, glowing rift cores, articulated scythes & rotating shard rings)<br>**2.** Enemy AI & Hitscan Combat (Melee Stalker pursuit, Ranged Spitter kiting, 3D raycast laser fire & projectile collisions)<br>**3.** Rift Guardian Boss Encounter (Pulsating nexus core, 4 rotating orbital shield obelisks, Phase 1 vs Phase 2 rapid spinning) |
+| **M3** | **World, Arenas & Teleportation** | **1.** Kepler Relay Arena (Industrial space station, metallic floor grid, security walls, pillars, crates, tighter covered combat)<br>**2.** Sundered Rift Arena (Floating obsidian asteroid void, neon purple anomaly grid, crystal spires, open boss battleground)<br>**3.** Tactical Rift Beacon Teleportation & Pickups (Linked interactive beacons with vortex transitions + glowing collectible Rift Energy crystals) |
+| **M4** | **Rendering, Chrono & HUD Integration** | **1.** Multi-Source Dynamic Lighting (`GL_LIGHT0` directional sun + `GL_LIGHT1` dynamic beacon/projectile point light attenuation)<br>**2.** Procedural Particle & VFX System (Teleport vortex, hit sparks, collectible sparkle bursts, alien death shatter, Chrono ripples)<br>**3.** Chrono Slow Dilation & 2D HUD Loop (100% gate, 0% reset, 5s 30% time dilation, cool-blue screen overlay, health/chrono/boss bars, score & crosshair) |
 
 ---
 
@@ -55,25 +54,35 @@ In **Riftwalker: Paradox Protocol**, an astronaut equipped with an experimental 
 pip install -r requirements.txt
 ```
 
-### Running the Game / Sandbox
+### Running Automated Unit Tests
+
+All 15 automated test suites verify game math, physics, collision detection, Chrono Slow resource management, scoring, and state machines:
 
 ```bash
-python -m src.main
+python3 -m unittest discover -s tests
 ```
 
-### Controls
+### Running the Game
 
-| Input                  | Action                                                |
-| ---------------------- | ----------------------------------------------------- |
-| `W`, `A`, `S`, `D`     | Move (Forward, Left, Backward, Right)                 |
-| `Mouse Movement`       | Look / Aim (Pitch and Yaw)                            |
-| `Left Click` / `Space` | Fire Hitscan Weapon                                   |
-| `V`                    | Toggle 1st Person / 3rd Person Camera                 |
-| `Q`                    | Activate Chrono Slow (Requires 100% Charge, lasts 5s) |
-| `F`                    | Interact / Teleport near Rift Beacon                  |
-| `Shift`                | Blink Teleport (Stretch Feature)                      |
-| `R`                    | Restart Game                                          |
-| `Esc`                  | Exit Game                                             |
+```bash
+python3 src/main.py
+```
+
+---
+
+## ⌨️ Controls
+
+| Input | Action |
+|---|---|
+| **`W`, `A`, `S`, `D`** | Move (Forward, Strafe Left, Backward, Strafe Right) |
+| **Mouse Movement** | Look / Aim (Pitch and Yaw) |
+| **`Left Click` / `Space`** | Fire Hitscan Laser Rifle (with Muzzle Flare & Recoil) |
+| **`V` / `C`** | Toggle 1st-Person (FPS Viewmodel) / 3rd-Person (Astronaut Rig) |
+| **`Q`** | Activate Chrono Slow (Requires 100% Charge, lasts 5.0s) |
+| **`F`** | Interact / Teleport near Linked Rift Beacon Platform |
+| **`E` / `Shift`** | Blink Dash (Evasive Teleport) |
+| **`R`** | Restart Mission (Game Over / Victory screen) |
+| **`Esc`** | Exit Game |
 
 ---
 
@@ -86,18 +95,18 @@ All development by team members and AI assistants must follow the **Feature Bran
 ### 📌 Core Rules for Everyone (Members & AI Assistants)
 
 1. **Never commit or push directly to `main`**:
-   - Always create a new descriptive branch for each feature or bugfix (e.g., `feature/m1-astronaut-rig`, `feature/m2-alien-generator`, `feature/m3-arena-kepler`, `feature/m4-chrono-hud`, `fix/hud-font-fallback`).
+   * Always create a new descriptive branch for each feature or bugfix (e.g., `feature/m1-astronaut-rig`, `feature/m2-crystalline-aliens`, `feature/m3-energy-pickups`, `feature/m4-chrono-vfx`).
 2. **One Feature, One Branch**:
-   - Keep branch changes focused strictly on your module's assigned tasks.
+   * Keep branch changes focused strictly on your module's assigned tasks.
 3. **Pull Request (PR) Requirement**:
-   - Push your feature branch to GitHub and open a Pull Request targeting `main`.
+   * Push your feature branch to GitHub and open a Pull Request targeting `main`.
 4. **Clean Merge Condition**:
-   - A PR may only be merged into `main` if:
-     - ✅ **No merge conflicts** exist with `main`.
-     - ✅ **All unit tests pass** (`python3 -m unittest discover -s tests`).
-     - ✅ The code runs cleanly without breaking the PyOpenGL game loop.
+   * A PR may only be merged into `main` if:
+     * ✅ **No merge conflicts** exist with `main`.
+     * ✅ **All unit tests pass** (`python3 -m unittest discover -s tests`).
+     * ✅ The code runs cleanly without breaking the PyOpenGL game loop.
 5. **Mandate for AI Assistants**:
-   - Any AI assistant executing changes must work within an isolated feature branch and prepare commits for PR review rather than pushing straight to `main`.
+   * Any AI assistant executing changes must work within an isolated feature branch and prepare commits for PR review rather than pushing straight to `main`.
 
 ---
 
@@ -121,7 +130,7 @@ git checkout -b feature/m1-astronaut-rig
 python3 -m unittest discover -s tests
 
 # Test the game loop
-python -m src.main
+python3 src/main.py
 ```
 
 #### 4. Stage and commit your changes
@@ -136,10 +145,10 @@ git push -u origin feature/m1-astronaut-rig
 ```
 
 #### 6. Open Pull Request on GitHub
-- Go to the repository on GitHub: [heisenberg-611/Riftwalker--Paradox-Protocol-CSE423-Final-Project-](https://github.com/heisenberg-611/Riftwalker--Paradox-Protocol-CSE423-Final-Project-)
-- Click **"Compare & pull request"**.
-- Confirm base is `main` and compare is your feature branch.
-- If **"Able to merge"** (no conflicts) and tests pass, merge the PR into `main`.
+* Go to the repository on GitHub: [heisenberg-611/Riftwalker--Paradox-Protocol-CSE423-Final-Project-](https://github.com/heisenberg-611/Riftwalker--Paradox-Protocol-CSE423-Final-Project-)
+* Click **"Compare & pull request"**.
+* Confirm base is `main` and compare is your feature branch.
+* If **"Able to merge"** (no conflicts) and tests pass, merge the PR into `main`.
 
 #### 7. Update your local `main` after merging
 ```bash
@@ -149,28 +158,22 @@ git pull origin main
 
 ---
 
-### ⚠️ IMPORTANT NOTICE ABOUT `git push` FOR ALL MEMBERS & AI ASSISTANTS
+### ⚠️ Push Safety Notice for All Members & AI Assistants
 
 > [!WARNING]
-> **CRITICAL PUSH SAFETY NOTICES:**
+> **CRITICAL PUSH SAFETY DIRECTIVES:**
 > 1. **DO NOT run `git push origin main` directly.** Always push to your dedicated feature branch (`git push origin feature/<branch-name>`).
 > 2. **NEVER use `git push --force` or `-f` on `main`.** Force pushing can overwrite and permanently delete your teammates' merged work.
 > 3. **Resolve Conflicts Locally Before Merging:** If your PR has conflicts with `main`, switch to your branch locally, pull/merge latest `main` (`git pull origin main`), resolve conflicting files in your editor, commit the resolution, and push back to your branch.
-> 4. **Run Unit Tests Before Pushing:** Always execute `python3 -m unittest discover -s tests` before pushing to ensure math, physics, and logic invariants remain 100% functional.
-
-### 🤖 Mandatory Git Protocol for AI Assistants
-If a team member instructs an AI assistant (e.g. Antigravity, Claude, Cursor, Copilot, ChatGPT) to handle code changes, commits, or git pushes:
-1. **Active Branch Check:** The AI must run `git branch --show-current` before staging or committing.
-2. **Auto-Branching:** If currently on `main`, the AI **MUST NOT commit to main**. It must immediately create and checkout a feature branch (`git checkout -b feature/mX-<task-name>`).
-3. **Zero Force-Push:** The AI is strictly forbidden from running `git push --force` or `-f`.
-4. **Pre-Push Validation:** The AI must execute `python3 -m unittest discover -s tests` and verify 0 failures before pushing.
-5. **PR Handoff:** The AI must push to `origin feature/mX-...` and direct the user to open and merge the Pull Request on GitHub.
+> 4. **Run Unit Tests Before Pushing:** Always execute `python3 -m unittest discover -s tests` before pushing to ensure all tests pass 100%.
 
 ---
 
 ## 🤖 Team AI Onboarding Prompts (Zero-Context Starters)
 
-When each team member opens an AI assistant session without prior context, they should copy and paste their module's starter prompt below. Every prompt includes binding instructions ensuring the AI adheres to the feature-branching and test verification rules.
+When each team member opens an AI assistant session without prior context, they should copy and paste their module's starter prompt below. Every prompt includes binding instructions ensuring the AI adheres to the feature-branching, testing, and scope rules.
+
+---
 
 ### 👤 Member 1 (M1 — Player & Camera Systems)
 ```markdown
@@ -187,21 +190,22 @@ I am working on **Module M1 (Player & Camera Systems)** for the computer graphic
 4. **Push & PR:** Push exclusively to `origin feature/m1-<feature-name>` and guide the user to open a Pull Request targeting `main`.
 
 ### My Ownership & Deliverables (`src/M1_player_camera/`):
-1. `astronaut_rig.py`: Procedural hierarchical 3D astronaut model using OpenGL matrix stacks (`glPushMatrix`/`glPopMatrix`) with articulated limbs and sinusoidal walking animations.
-2. `first_person_camera.py`: 1st-person FPS camera with pitch/yaw clamping and first-person viewmodel gun positioning.
+1. `astronaut_rig.py`: Procedural hierarchical 3D astronaut model using OpenGL matrix stacks (`glPushMatrix`/`glPopMatrix`) with articulated limbs, backpack thrusters, visor, and sinusoidal walking animations.
+2. `first_person_camera.py`: 1st-person FPS camera with pitch/yaw clamping and viewmodel alignment.
 3. `third_person_camera.py`: 3rd-person follow/orbit camera with smooth tracking and distance offset.
 4. `player_movement.py`: WASD movement kinematics, arena boundary clamping via `src/shared/collision.py`, and orientation synchronization.
-5. `player_weapon.py`: **Weapon Visual Presentation** (astronaut 3D weapon mesh attached to the character's right hand and first-person viewmodel presentation with firing recoil animation).
+5. `player_weapon.py`: **Weapon Visual Presentation & 1P Viewmodel** (astronaut 3D weapon mesh attached to character's right hand and first-person blaster rifle viewmodel with firing recoil animation and cyan energy rails).
 6. `player.py`: Player coordinator tying health, cameras, rig, movement, and viewmodel together.
 7. `blink_teleport.py`: *(Optional Stretch Feature)* Short-range combat dash.
 
 ### Boundaries & Rules:
 - M1 owns weapon *visuals & viewmodel*, while M2 owns *combat logic, hitscan raycasting, and damage*.
+- Pressing `V` (or `C`) toggles between 1st-person and 3rd-person while preserving orientation.
 - Use `src/shared/collision.py` for spatial bounds checks. Do not build a separate collision system.
 - Standard vertical gravity (+Y up, floor at Y=0) is the baseline; do not assume arbitrary gravity.
 - No Inverse Kinematics (IK); use hierarchical forward trigonometry.
 
-Please review `PROJECT_SPEC.md` (Sections 2, 7, 8, 9, 10, 27A) and `src/M1_player_camera/` before implementing or modifying M1 code.
+Please review `PROJECT_SPEC.md` (Sections 2, 7, 8, 9, 10, 27A, 27B) and `src/M1_player_camera/` before implementing or modifying M1 code.
 ```
 
 ---
@@ -222,17 +226,17 @@ I am working on **Module M2 (Enemies & Combat Systems)** for the computer graphi
 
 ### 🔮 Visual Design Direction (Crystalline Void Horrors):
 We avoid generic earthly bugs/cockroaches. The aliens are dimensional "Rift Horrors" composed of floating obsidian shards, glowing cyan/purple rift energy fissures, and sharp geometric silhouettes:
-- **Melee Stalker**: Predatory shadow-hound composed of angular obsidian carapace segments, glowing rift fissure cores, and articulated crystalline bladed limbs.
-- **Ranged Spitter**: Floating dimensional crystal monolith / prism surrounded by orbital rotating shard rings that charges and launches plasma bolts.
-- **Rift Guardian (Boss)**: Colossal hovering dimensional geometric core with independent orbiting defensive obelisks/shield plates and radial shockwave bursts.
+- **Melee Stalker**: Predatory shadow-hound composed of angular obsidian carapace segments, glowing rift fissure cores, and articulated crystalline bladed limbs that swing in pursuit.
+- **Ranged Spitter**: Floating dimensional crystal monolith / prism surrounded by dual orbital rotating shard rings that charges and launches plasma bolts.
+- **Rift Guardian (Boss)**: Colossal hovering dimensional geometric nexus core with 4 independent orbiting defensive shield obelisks (rapid spinning and radial shockwaves in Phase 2).
 
 ### My Ownership & Deliverables (`src/M2_enemies_combat/`):
 1. `alien_generator.py`: Procedural Crystalline Void alien generator with hierarchical transformation matrices, floating geometric shard rings, and glowing rift nodes.
 2. `enemy_base.py`: Abstract enemy base class tracking HP, states (`IDLE`, `CHASE`, `ATTACK`, `DEAD`), bounding spheres, and Chrono Slow time scaling.
 3. `melee_rift_stalker.py`: Fast melee rusher AI that closes distance and performs leaping/lunging attacks.
 4. `ranged_rift_spitter.py`: Long-range projectile spitter AI that strafes and launches plasma balls at the player's position.
-5. `rift_guardian_boss.py`: Multi-stage final boss encounter featuring rotating orbital shield plates, radial shockwaves, and phased combat.
-6. `weapon_system.py`: **Combat Gameplay Logic** (firing rate timers, damage values, projectile pooling, and active projectile updates).
+5. `rift_guardian_boss.py`: Multi-stage final boss encounter featuring 4 rotating orbital shield obelisks, radial projectile bursts, and Phase 2 transition at <= 50% HP.
+6. `weapon_system.py`: **Combat Gameplay Logic** (firing rate timers, damage values, projectile pooling, and active projectile physics).
 7. `raycast.py`: Precision 3D hitscan raycasting against enemy bounding spheres/AABBs using `src/shared/collision.py`.
 
 ### Boundaries & Rules:
@@ -241,7 +245,7 @@ We avoid generic earthly bugs/cockroaches. The aliens are dimensional "Rift Horr
 - Enemy updates and projectile movement must be scaled by `game_dt` (`dt * 0.30` during Chrono Slow).
 - Scope is locked to exactly 2 enemy types and 1 boss. Do not create extra enemy variants or multiple bosses.
 
-Please review `PROJECT_SPEC.md` (Sections 2, 10, 12, 13, 14, 15, 18, 27A) and `src/M2_enemies_combat/` before implementing or modifying M2 code.
+Please review `PROJECT_SPEC.md` (Sections 2, 10, 12, 13, 14, 15, 18, 27A, 27B) and `src/M2_enemies_combat/` before implementing or modifying M2 code.
 ```
 
 ---
@@ -262,12 +266,13 @@ I am working on **Module M3 (World, Arenas & Teleportation)** for the computer g
 
 ### My Ownership & Deliverables (`src/M3_world_teleport/`):
 1. `world.py`: World coordinator managing active arena switching, coordinate mapping, and teleportation triggers.
-2. `arena_base.py`: Abstract arena base class holding boundaries, spawn points, and environment props.
-3. `arena_01_kepler_relay.py`: Arena 1 environment — high-tech metallic relay station with industrial platforms, perimeter barriers, and server towers.
-4. `arena_02_sundered_rift.py`: Arena 2 environment — floating cosmic asteroid wasteland with obsidian ground, floating hazard platforms, and glowing crystal spires.
+2. `arena_base.py`: Abstract arena base class holding boundaries, spawn points, and updating/drawing beacons and pickups.
+3. `arena_01_kepler_relay.py`: Arena 1 environment — high-tech metallic relay station with metallic floor grid, perimeter barriers, pillars, crates, and covered combat areas.
+4. `arena_02_sundered_rift.py`: Arena 2 environment — floating cosmic asteroid wasteland with obsidian ground, neon purple anomaly grid, and glowing crystal spires (open boss arena).
 5. `environment_generator.py`: Modular procedural geometry builder for crates, barricades, pillars, and crystal clusters.
 6. `rift_beacon.py`: **Rift Beacon Platform (REQUIRED)** — interactive beacon platform featuring glowing base, spinning concentric torus rings, and activation radius detection ($R \le 3.5$).
-7. `gravity_zone.py`: *(Optional Stretch Feature)* Predefined low-gravity / jump-pad zone.
+7. `rift_energy_pickup.py`: **Rift Energy Collectibles** — floating, spinning glowing crystal octahedrons with rotating halo rings that restore +25% Chrono Charge on collection (15s respawn timer).
+8. `gravity_zone.py`: *(Optional Stretch Feature)* Predefined low-gravity / jump-pad zone.
 
 ### Boundaries & Rules:
 - **Rift Beacon Teleportation is a REQUIRED core feature**: Linked pair ($\text{Arena 1 Beacon A} \leftrightarrow \text{Arena 2 Beacon B}$).
@@ -275,7 +280,7 @@ I am working on **Module M3 (World, Arenas & Teleportation)** for the computer g
 - Core movement model uses standard vertical gravity (+Y up). Do not implement arbitrary wall/ceiling gravity systems.
 - Use `src/shared/collision.py` for arena boundary limits and obstacle bounding boxes.
 
-Please review `PROJECT_SPEC.md` (Sections 2, 4, 5, 16, 17, 27A) and `src/M3_world_teleport/` before implementing or modifying M3 code.
+Please review `PROJECT_SPEC.md` (Sections 2, 4, 5, 16, 17, 27A, 27B) and `src/M3_world_teleport/` before implementing or modifying M3 code.
 ```
 
 ---
@@ -295,14 +300,14 @@ I am working on **Module M4 (Rendering, Chrono, HUD & Integration)** for the com
 4. **Push & PR:** Push exclusively to `origin feature/m4-<feature-name>` and guide the user to open a Pull Request targeting `main`.
 
 ### My Ownership & Deliverables (`src/M4_rendering_gameplay/` and `src/main.py`):
-1. `renderer.py`: Master OpenGL 3D and 2D render pass orchestrator (clearing buffers, setting projection, rendering world, enemies, player, lighting, particles, and HUD overlay).
-2. `primitives.py`: Optimized procedural 3D drawing routines (cubes, cylinders, spheres, cones, torus rings).
+1. `renderer.py`: Master OpenGL 3D and 2D render pass orchestrator (clearing buffers, setting projection, rendering world, enemies, projectiles, 1P weapon viewmodel, lighting, particles, screen effects, and 2D HUD overlay).
+2. `primitives.py`: Optimized procedural 3D drawing routines (cubes, cylinders, spheres, cones, torus rings, octahedrons).
 3. `lighting.py`: Multi-source dynamic lighting (directional sunlight `GL_LIGHT0`, dynamic beacon/hazard point lights `GL_LIGHT1`).
 4. `materials.py`: Specular, diffuse, and ambient material presets for suits, visors, metals, and alien carapaces.
-5. `particles.py`: Particle systems (teleport vortex swirl, hit sparks, jet thrusters, blood/death bursts).
-6. `effects.py`: Post-render visual filters (teleport cyan screen flash, Chrono Slow cool blue screen tint overlay).
-7. `chrono_slow.py`: **Chrono Slow Manager** (charge meter 0-100%, 100% activation gate via key `Q`, 0% reset, 5-second fixed timer countdown, 30% speed scale `0.30`).
-8. `hud.py`: **2D Orthographic HUD** (Suit Health bar, Chrono Charge/countdown bar, Score, Objective text prompts).
+5. `particles.py`: Particle systems (teleport vortex swirl, hit sparks, collectible sparkle bursts, alien death shatter bursts, Chrono ripples).
+6. `effects.py`: Post-render visual filters (teleport cyan screen flash, Chrono Slow cool-blue screen tint and corner vignette overlay).
+7. `chrono_slow.py`: **Chrono Slow Manager** (charge meter 0-100%, 100% activation gate via key `Q`, 0% reset, 5.0-second fixed timer countdown, 30% speed scale `0.30`).
+8. `hud.py`: **2D Orthographic HUD** (Suit Health bar, Chrono Charge/countdown bar, Boss Health bar with phase indicator, Score, Objective text prompts).
 9. `crosshair.py`: Dynamic interactive center crosshair with hitmarker animation feedback.
 10. `scoring.py`: Score manager tracking kills, combos, and letter rank evaluation ($S/A/B/C/D$).
 11. `game_state.py`: Global game state machine (`PLAYING`, `TELEPORTING`, `GAME_OVER`, `VICTORY`).
@@ -314,6 +319,5 @@ I am working on **Module M4 (Rendering, Chrono, HUD & Integration)** for the com
 - Player, camera, particles, and HUD update with unscaled `real_dt`; enemies, projectiles, and world physics update with scaled `game_dt`.
 - Resolve PyOpenGL GLUT bitmap fonts lazily inside rendering methods to avoid C-pointer reference issues.
 
-Please review `PROJECT_SPEC.md` (Sections 2, 6, 19, 20, 24, 25, 27A, 28) and `src/M4_rendering_gameplay/` before implementing or modifying M4 code.
+Please review `PROJECT_SPEC.md` (Sections 2, 6, 19, 20, 24, 25, 27A, 27B, 28) and `src/M4_rendering_gameplay/` before implementing or modifying M4 code.
 ```
-
