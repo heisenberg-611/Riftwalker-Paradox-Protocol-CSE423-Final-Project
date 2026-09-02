@@ -15,6 +15,7 @@ CSE423_LAB_Project/
 ├── run_game.sh                           # ⚡ macOS / Linux Launcher
 ├── check_requirements.py                 # Dependency verification forwarder
 ├── requirements.txt                      # Python runtime dependencies
+├── RUN_GUIDE.md                          # 📖 Step-by-step setup, Python installation & launch guide
 ├── README.md                             # Project documentation, controls, & workflow guide
 ├── PROJECT_SPEC.md                       # Comprehensive single source of truth specifications
 ├── AGENTS.md                             # Mandatory AI directives & Git branch protection rules

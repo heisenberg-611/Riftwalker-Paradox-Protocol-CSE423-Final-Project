@@ -1,5 +1,7 @@
 # Riftwalker: Paradox Protocol
 
+> 🚀 **Quick Setup & Run Guide:** See **[RUN_GUIDE.md](RUN_GUIDE.md)** for a complete step-by-step beginner guide, Python installation walkthrough, 1-click launchers, and troubleshooting.
+>
 > 📄 **Instructor & Evaluator Project Summary:** See [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) and [docs/Riftwalker-Paradox-protocol.md](docs/Riftwalker-Paradox-protocol.md) for a concise, all-in-one technical brief designed for course evaluators and lab instructors.
 
 **Course Context:** Computer Graphics 423 (CSE423 / CG423)
@@ -99,6 +101,7 @@ CSE423_LAB_Project/
 ├── run_game.sh                           # ⚡ macOS / Linux Launcher
 ├── check_requirements.py                 # Dependency verification forwarder
 ├── requirements.txt                      # Python runtime dependencies
+├── RUN_GUIDE.md                          # 📖 Step-by-step setup, Python installation & launch guide
 ├── README.md                             # Primary project documentation & workflow guide
 ├── PROJECT_SPEC.md                       # Comprehensive single source of truth specifications
 ├── AGENTS.md                             # Mandatory AI directives & Git safety rules
